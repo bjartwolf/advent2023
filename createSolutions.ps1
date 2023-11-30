@@ -5,7 +5,7 @@ $rootDirectory = "C:\code\advent2023"
     New-Item -Path $rootDirectory -Name "${dayFolderName}" -ItemType Directory
     $srcFolderPath = Join-Path -Path $rootDirectory -ChildPath $dayFolderName
     cd $srcFolderPath 
-    dotnet new console -lang F#
+    dotnet new xunit -lang F#
     New-Item -Path $srcFolderPath -Name "input1.txt" -ItemType File
     New-Item -Path $srcFolderPath -Name "input2.txt" -ItemType File
 } 
