@@ -12,4 +12,5 @@ $rootDirectory = "C:\code\advent2023"
     copy ..\Program.fs .
     New-Item -Path $srcFolderPath -Name "input1.txt" -ItemType File
     New-Item -Path $srcFolderPath -Name "input2.txt" -ItemType File
+    copy ..\template.v3.ncrunchsolution $dayFolderName".v3.ncrunchsolution"
 } 
