@@ -17,36 +17,27 @@ module Input =
         findIndexes 0 []
 
     let firstTxtNumber (line: string): (int * int) option =
-        try 
-            let ofoo = textNumbers |> List.mapi (fun i number -> (i, indexOfNumber line number))  |> List.map (fun (x,y) -> if y.IsEmpty then (x,None ) else (x, Some (List.min y)))
-            let (y,i)= ofoo |> List.minBy (fun (_, y) -> match y with | Some x -> x | None -> 999)
-            match i with 
-                | Some i -> Some(i, y)
-                | None -> None
-        with ex ->
-            None
+        let ofoo = textNumbers |> List.mapi (fun i number -> (i, indexOfNumber line number))  |> List.map (fun (x,y) -> if y.IsEmpty then (x,None ) else (x, Some (List.min y)))
+        let (y,i)= ofoo |> List.minBy (fun (_, y) -> match y with | Some x -> x | None -> 999)
+        match i with 
+            | Some i -> Some(i, y)
+            | None -> None
 
     let lastTxtNumber(line: string): (int * int) option =
-        try 
-            let ofoo = textNumbers |> List.mapi (fun i number -> (i, indexOfNumber line number))  |> List.map (fun (x,y) -> if y.IsEmpty then (x,None ) else (x, Some (List.max y)))
-            let (y,i)= ofoo |> List.maxBy (fun (_, y) -> match y with | Some x -> x | None -> -999)
-            match i with 
-                | Some i -> Some(i, y)
-                | None -> None
-        with ex ->
-            None
+        let ofoo = textNumbers |> List.mapi (fun i number -> (i, indexOfNumber line number))  |> List.map (fun (x,y) -> if y.IsEmpty then (x,None ) else (x, Some (List.max y)))
+        let (y,i)= ofoo |> List.maxBy (fun (_, y) -> match y with | Some x -> x | None -> -999)
+        match i with 
+            | Some i -> Some(i, y)
+            | None -> None
 
     let isNumber (char: char) : bool =
         digits |> List.contains (char.ToString())
 
     let findDigitNumberBy (comparer: int list -> int) (line: string): (int * string) option =
-        try 
-            let txtThatAreNumbers = line |> Seq.toList |> List.mapi (fun i x -> ((isNumber x), i)) |> List.filter (fun (isNum, _) -> isNum) |> List.map (fun (_,i) -> i)
-            let position = txtThatAreNumbers |> comparer
-            let lastDigit = line |> Seq.toList |> List.item position
-            Some (position, lastDigit.ToString())
-        with _ ->
-            None
+        let txtThatAreNumbers = line |> Seq.toList |> List.mapi (fun i x -> ((isNumber x), i)) |> List.filter (fun (isNum, _) -> isNum) |> List.map (fun (_,i) -> i)
+        let position = txtThatAreNumbers |> comparer
+        let lastDigit = line |> Seq.toList |> List.item position
+        Some (position, lastDigit.ToString())
 
     let firstDigitNumber (line: string): (int * string) option =
         findDigitNumberBy List.min line
