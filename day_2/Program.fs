@@ -1,7 +1,7 @@
 module Input =
     type Draw = { Red: int; Green: int; Blue: int}
     type Game = { Id: int; Draws: Draw list }
-    let game1 = {Id = 1; Draws = [ { Blue = 3; Red = 4; Green = 0 } ; { Red = 1; Green = 2; Blue =6 }; { Green = 2; Red = 0; Blue = 1} ]}
+    let game1 = {Id = 1; Draws = [ { Blue = 3; Red = 4; Green = 0 } ; { Red = 1; Green = 2; Blue =6 }; { Green = 2; Red = 0; Blue = 0} ]}
     let game2 = {Id = 2; Draws = [ { Blue = 1; Green = 2; Red = 0}; {Green = 3; Blue = 4; Red = 1}; { Green = 1; Blue = 1; Red = 0 }] }
     let game3 = {Id = 3; Draws = [ { Green = 8; Blue = 6; Red = 20}; { Blue = 5; Red = 4; Green = 13}; { Green = 5; Red = 1; Blue = 0} ] }
     let game4 = {Id = 4; Draws = [ { Green = 1; Red = 3; Blue = 6 }; {Green = 3; Red = 6; Blue = 0}; {Green = 3; Blue = 15; Red = 14}] }
@@ -54,14 +54,13 @@ module Input =
     let parseLine (line: string): Game =
         let gamesAndIds = line.Split(":")
         let gameId = int (gamesAndIds[0].Replace("Game ", ""))
-        let draws = gamesAndIds[1].Split(";")
-        { Id = gameId; Draws = []}
-        //let games = gamesAndIds[1]
+        let draws = gamesAndIds[1].Split(";") |> Array.map (fun x -> parseDraw x) |> Array.toList
+        { Id = gameId; Draws = draws}
 
     [<Fact>]
     let game1_parsesCorrectly() = 
         let game = parseLine rawGame1 
-        Assert.Equal(1, game.Id)
+        Assert.Equal(game1, game)
 
     [<Fact>]
     let test2 () = 
