@@ -1,31 +1,11 @@
 module Input =
+    open System
+
     type Draw = { Red: int; Green: int; Blue: int}
     type Game = { Id: int; Draws: Draw list }
-    let game1 = {Id = 1; Draws = [ { Blue = 3; Red = 4; Green = 0 } ; { Red = 1; Green = 2; Blue =6 }; { Green = 2; Red = 0; Blue = 0} ]}
-    let game2 = {Id = 2; Draws = [ { Blue = 1; Green = 2; Red = 0}; {Green = 3; Blue = 4; Red = 1}; { Green = 1; Blue = 1; Red = 0 }] }
-    let game3 = {Id = 3; Draws = [ { Green = 8; Blue = 6; Red = 20}; { Blue = 5; Red = 4; Green = 13}; { Green = 5; Red = 1; Blue = 0} ] }
-    let game4 = {Id = 4; Draws = [ { Green = 1; Red = 3; Blue = 6 }; {Green = 3; Red = 6; Blue = 0}; {Green = 3; Blue = 15; Red = 14}] }
-    let game5 = {Id = 5; Draws = [ { Red = 6; Blue = 1; Green = 3}; {Blue = 2; Red = 1; Green = 2}] }
-
-
-    open System
-    open System.IO
-    open Xunit 
-
-    let readInit (filePath: string): string [] = 
-      let lines = System.IO.File.ReadAllLines filePath 
-      lines
-
-    let rawGame1 = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
-    let rawGame2 = "Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue"
-    let rawGame3 = "Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red" 
-    let rawGame4 = "Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red" 
-    let rawGame5 = "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green" 
-
-    open System.Text.RegularExpressions
-
 
     module AdventParser =  
+        open System.Text.RegularExpressions
         let colors = [|"red"; "green"; "blue"|] 
         let pattern = (colors |> Array.map (fun color -> sprintf "(?<%s>\d+)\s* %s" color color))
         let combinedPattern = String.Join('|', pattern)
@@ -33,13 +13,7 @@ module Input =
         let parseDraw (draw: string): Draw = 
             let matches = regex.Matches(draw)
 
-            (*
-            Used for debugging
-            let groupNames = regex.GetGroupNames() |> Array.where (fun x -> x <> "" && x <> "0")
-            /*)
-
             let res = [for regexMatch in matches do
-                        //for groupName in groupNames do - can be used dynamically
                         for groupName in colors do
                             let group = regexMatch.Groups.[groupName]
                             if group.Success && group.Value <> "" then
@@ -47,29 +21,22 @@ module Input =
 
             let redMatch = res |> List.tryFind(fun (name,value) -> name = "red")
             let red = match redMatch with
-                            | Some (name,value) -> int value 
+                            | Some (_,value) -> int value 
                             | None -> 0
 
-            let greenMatch = res |> List.tryFind(fun (name,value) -> name = "green")
+            let greenMatch = res |> List.tryFind(fun (name,_) -> name = "green")
             let green = match greenMatch with
-                            | Some (name,value) -> int value 
+                            | Some (_,value) -> int value 
                             | None -> 0
 
-            let blueMatch= res |> List.tryFind(fun (name,value) -> name = "blue")
+            let blueMatch= res |> List.tryFind(fun (name,_) -> name = "blue")
             let blue = match blueMatch with
-                            | Some (name,value) -> int value 
+                            | Some (_,value) -> int value 
                             | None -> 0
 
             { Red = red; Green = green; Blue = blue}
 
     open AdventParser
-
-    [<Fact>]
-    let game1_draw1_parsesCorrectly() = 
-        let draw = parseDraw "3 blue, 4 red;"
-        Assert.Equal(4, draw.Red)
-        Assert.Equal(0, draw.Green)
-        Assert.Equal(3, draw.Blue)
 
     let parseLine (line: string): Game =
         let gamesAndIds = line.Split(":")
@@ -82,24 +49,10 @@ module Input =
       let games = lines |> Array.map (fun x -> parseLine x)
       games |> Array.toList
 
-    [<Fact>]
-    let allGamesParsesCorrectly () =
-        let allGames = parseAllGames "testinput.txt"
-        Assert.Equal<Game list>([game1; game2; game3; game4; game5], allGames)
-
-    [<Fact>]
-    let game1_parsesCorrectly() = 
-        let game = parseLine rawGame1 
-        Assert.Equal(game1, game)
-
-    [<Fact>]
-    let test2 () = 
-        let input = readInit "input1.txt" 
-        Assert.Equal(100, input.Length) 
-
 module Advent = 
   open Xunit 
   open Input
+
   type PossibleGame = { Id: int }
   type GameResult = PossibleGame option 
 
@@ -107,19 +60,17 @@ module Advent =
 
 
   let processGame (game: Game): GameResult =
-    let allGamesPass = game.Draws |> List.forall(fun draw -> match draw with
-                                         | draw when draw.Red <= maxCubes.Red && draw.Green <= maxCubes.Green && draw.Blue <= maxCubes.Blue -> true 
-                                         | _ -> false)
+    let allGamesPass = game.Draws |> List.forall(
+        fun draw -> match draw with
+                     | draw when draw.Red <= maxCubes.Red &&
+                                 draw.Green <= maxCubes.Green 
+                                 && draw.Blue <= maxCubes.Blue -> true 
+                     | _ -> false)
     if allGamesPass then 
       Some { Id = game.Id}
     else 
       None
 
-  [<Fact>]
-  let sum_of_all_games() =
-    let sum = [game1; game2; game3; game4; game5] |> List.choose (processGame) |> List.map (fun r -> r.Id) |> List.sum
-    Assert.Equal(8, sum)
-   
   [<Fact>]
   let sum_of_all_games_testdata() =
     let allGames = parseAllGames "testinput.txt"
@@ -132,21 +83,12 @@ module Advent =
     let sum = allGames |> List.choose (processGame) |> List.map (fun r -> r.Id) |> List.sum
     Assert.Equal(2617, sum)
 
-
   let powerOfGame (game: Game): int =
     let minRed = game.Draws |> List.map (fun g -> g.Red) |> List.max
     let minGreen = game.Draws |> List.map (fun g -> g.Green) |> List.max
     let minBlue = game.Draws |> List.map (fun g -> g.Blue) |> List.max
     minRed * minGreen * minBlue
     
-  [<Fact>]
-  let powerGames() = 
-    Assert.Equal(48, powerOfGame game1)
-    Assert.Equal(12, powerOfGame game2)
-    Assert.Equal(1560, powerOfGame game3)
-    Assert.Equal(630, powerOfGame game4)
-    Assert.Equal(36, powerOfGame game5)
-
   [<Fact>]
   let sum_of_power_of_games_test_input() =
     let allGames = parseAllGames "testinput.txt"
@@ -159,33 +101,4 @@ module Advent =
     let sum = allGames |> List.map (powerOfGame)|> List.sum
     Assert.Equal(59795, sum)
 
-  [<Fact>]
-  let game1_is_possible() = 
-    let gamePassed = processGame game1
-    Assert.Equal(game1.Id, gamePassed.Value.Id)
-    
-  [<Fact>]
-  let game2_is_possible() = 
-    let gamePassed = processGame game2
-    Assert.Equal(game2.Id, gamePassed.Value.Id)
- 
-  [<Fact>]
-  let game5_is_possible() = 
-    let gamePassed = processGame game5
-    Assert.Equal(game5.Id, gamePassed.Value.Id)
-
-  [<Fact>]
-  let game3_is_NOT_possible() = 
-    let gamePassed = processGame game3
-    Assert.Equal(None, gamePassed )
-
-  [<Fact>]
-  let game4_is_NOT_possible() = 
-    let gamePassed = processGame game4
-    Assert.Equal(None, gamePassed )
-
-  // sum of ids of games
-//  type Bag = 
-
 module Program = let [<EntryPoint>] main _ = 0
-
