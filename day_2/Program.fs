@@ -42,12 +42,28 @@ module Advent =
 
   [<Fact>]
   let game1_is_possible() = 
-    let game = game1
-    let gamePassed = processGame game
-    Assert.Equal(game.Id, gamePassed.Value.Id)
+    let gamePassed = processGame game1
+    Assert.Equal(game1.Id, gamePassed.Value.Id)
     
+  [<Fact>]
+  let game2_is_possible() = 
+    let gamePassed = processGame game2
+    Assert.Equal(game2.Id, gamePassed.Value.Id)
+ 
+  [<Fact>]
+  let game5_is_possible() = 
+    let gamePassed = processGame game5
+    Assert.Equal(game5.Id, gamePassed.Value.Id)
 
-  // game 1, 2 og 5 er possible
+  [<Fact>]
+  let game3_is_NOT_possible() = 
+    let gamePassed = processGame game3
+    Assert.Equal(None, gamePassed )
+
+  [<Fact>]
+  let game4_is_NOT_possible() = 
+    let gamePassed = processGame game4
+    Assert.Equal(None, gamePassed )
 
   // sum of ids of games
 //  type Bag = 
