@@ -19,7 +19,7 @@ module Input =
                             if group.Success && group.Value <> "" then
                                 yield groupName, group.Value]
 
-            let redMatch = res |> List.tryFind(fun (name,value) -> name = "red")
+            let redMatch = res |> List.tryFind(fun (name,_) -> name = "red")
             let red = match redMatch with
                             | Some (_,value) -> int value 
                             | None -> 0
@@ -41,13 +41,15 @@ module Input =
     let parseLine (line: string): Game =
         let gamesAndIds = line.Split(":")
         let gameId = int (gamesAndIds[0].Replace("Game ", ""))
-        let draws = gamesAndIds[1].Split(";") |> Array.map (fun x -> parseDraw x) |> Array.toList
+        let draws = gamesAndIds[1].Split(";") 
+                        |> Array.map parseDraw 
+                        |> Array.toList
         { Id = gameId; Draws = draws}
 
     let parseAllGames (path: string): Game list =
-      let lines = System.IO.File.ReadAllLines path 
-      let games = lines |> Array.map (fun x -> parseLine x)
-      games |> Array.toList
+      System.IO.File.ReadAllLines path 
+        |> Array.map parseLine 
+        |> Array.toList
 
 module Advent = 
   open Xunit 
@@ -73,32 +75,30 @@ module Advent =
 
   [<Fact>]
   let sum_of_all_games_testdata() =
-    let allGames = parseAllGames "testinput.txt"
-    let sum = allGames |> List.choose (processGame) |> List.map (fun r -> r.Id) |> List.sum
+    let sum = parseAllGames "testinput.txt" |> List.choose processGame |> List.map _.Id |> List.sum
     Assert.Equal(8, sum)
 
   [<Fact>]
   let sum_of_all_games_input() =
-    let allGames = parseAllGames "input1.txt"
-    let sum = allGames |> List.choose (processGame) |> List.map (fun r -> r.Id) |> List.sum
+    let sum = parseAllGames "input1.txt" |> List.choose processGame |> List.map _.Id |> List.sum
     Assert.Equal(2617, sum)
 
   let powerOfGame (game: Game): int =
-    let minRed = game.Draws |> List.map (fun g -> g.Red) |> List.max
-    let minGreen = game.Draws |> List.map (fun g -> g.Green) |> List.max
-    let minBlue = game.Draws |> List.map (fun g -> g.Blue) |> List.max
+    let minRed = game.Draws |> List.map _.Red |> List.max
+    let minGreen = game.Draws |> List.map _.Green |> List.max
+    let minBlue = game.Draws |> List.map _.Blue |> List.max
     minRed * minGreen * minBlue
     
   [<Fact>]
   let sum_of_power_of_games_test_input() =
     let allGames = parseAllGames "testinput.txt"
-    let sum = allGames |> List.map (powerOfGame)|> List.sum
+    let sum = allGames |> List.map powerOfGame |> List.sum
     Assert.Equal(2286, sum)
 
   [<Fact>]
   let sum_of_power_of_games_real_input() =
     let allGames = parseAllGames "input1.txt"
-    let sum = allGames |> List.map (powerOfGame)|> List.sum
+    let sum = allGames |> List.map powerOfGame |> List.sum
     Assert.Equal(59795, sum)
 
 module Program = let [<EntryPoint>] main _ = 0
