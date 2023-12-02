@@ -41,6 +41,11 @@ module Advent =
       None
 
   [<Fact>]
+  let sum_of_all_games() =
+    let sum = [game1; game2; game3; game4; game5] |> List.choose (processGame) |> List.map (fun r -> r.Id) |> List.sum
+    Assert.Equal(8, sum)
+
+  [<Fact>]
   let game1_is_possible() = 
     let gamePassed = processGame game1
     Assert.Equal(game1.Id, gamePassed.Value.Id)
