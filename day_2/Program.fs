@@ -57,6 +57,16 @@ module Input =
         let draws = gamesAndIds[1].Split(";") |> Array.map (fun x -> parseDraw x) |> Array.toList
         { Id = gameId; Draws = draws}
 
+    let parseAllGames (path: string): Game list =
+      let lines = System.IO.File.ReadAllLines path 
+      let games = lines |> Array.map (fun x -> parseLine x)
+      games |> Array.toList
+
+    [<Fact>]
+    let allGamesParsesCorrectly () =
+        let allGames = parseAllGames "testinput.txt"
+        Assert.Equal<Game list>([game1; game2; game3; game4; game5], allGames)
+
     [<Fact>]
     let game1_parsesCorrectly() = 
         let game = parseLine rawGame1 
