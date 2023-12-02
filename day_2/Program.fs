@@ -22,9 +22,25 @@ module Input =
     let rawGame4 = "Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red" 
     let rawGame5 = "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green" 
 
+    open System.Text.RegularExpressions
+    let parseDraw (draw: string): Draw = 
+        let redPattern = "(\d+)\s* red"
+        let redMatch = Regex.Match(draw, redPattern)
+        let red =if redMatch.Success && redMatch.Groups.[1].Success then
+                    int redMatch.Groups.[1].Value
+                 else
+                    0 
+        { Red = red; Green = 0; Blue = 0}
+
+    [<Fact>]
+    let game1_draw1_parsesCorrectly() = 
+        let draw = parseDraw "3 blue, 4 red;"
+        Assert.Equal(4, draw.Red)
+
     let parseLine (line: string): Game =
         let gamesAndIds = line.Split(":")
         let gameId = int (gamesAndIds[0].Replace("Game ", ""))
+        let draws = gamesAndIds[1].Split(";")
         { Id = gameId; Draws = []}
         //let games = gamesAndIds[1]
 
