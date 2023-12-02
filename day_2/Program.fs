@@ -24,24 +24,38 @@ module Input =
 
     open System.Text.RegularExpressions
     let parseDraw (draw: string): Draw = 
-        let redPattern = "(\d+)\s* red"
+        let colors = [|"red"; "green"; "blue"|] 
+        let redPattern = @"(?<red>\d+)\s* red"
         let redMatch = Regex.Match(draw, redPattern)
         let red =if redMatch.Success && redMatch.Groups.[1].Success then
                     int redMatch.Groups.[1].Value
                  else
                     0 
-        let greenPattern = "(\d+)\s* green"
+        let greenPattern = @"(?<green>\d+)\s* green"
         let greenMatch = Regex.Match(draw, greenPattern)
         let green =if greenMatch.Success && greenMatch.Groups.[1].Success then
                     int greenMatch.Groups.[1].Value
                    else
                     0 
-        let bluePattern = "(\d+)\s* blue"
+        let bluePattern = @"(?<blue>\d+)\s* blue"
         let blueMatch = Regex.Match(draw, bluePattern)
         let blue =if blueMatch.Success && blueMatch.Groups.[1].Success then
                     int blueMatch.Groups.[1].Value
                   else
                     0 
+        let pattern = (colors |> Array.map (fun color -> sprintf "(?<%s>\d+)\s* %s" color color))
+        let combinedPattern = String.Join('|', pattern)
+        let regex = new Regex(combinedPattern)
+        let matches = regex.Matches(draw)
+        let groupNames = regex.GetGroupNames() |> Array.where (fun x -> x <> "" && x <> "0")
+        // Check each named group in the pattern
+        let res = [for regexMatch in matches do
+                    for groupName in groupNames do
+                        let group = regexMatch.Groups.[groupName]
+                        if group.Success && group.Value <> "" then
+                            yield groupName, group.Value]
+
+
         { Red = red; Green = green; Blue = blue}
 
     [<Fact>]
