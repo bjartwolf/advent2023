@@ -113,6 +113,16 @@ module Advent =
     Assert.Equal(2617, sum)
 
 
+  let powerOfGame (game: Game): int =
+    let minRed = game.Draws |> List.map (fun g -> g.Red) |> List.max
+    let minGreen = game.Draws |> List.map (fun g -> g.Green) |> List.max
+    let minBlue = game.Draws |> List.map (fun g -> g.Blue) |> List.max
+    minRed * minGreen * minBlue
+    
+  [<Fact>]
+  let game1_Power_48() = 
+    Assert.Equal(48, powerOfGame game1)
+ 
 
   [<Fact>]
   let game1_is_possible() = 
