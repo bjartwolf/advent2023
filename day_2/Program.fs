@@ -1,13 +1,37 @@
 module Input =
+    type Draw = { Red: int; Green: int; Blue: int}
+    type Game = { Id: int; Draws: Draw list }
+    let game1 = {Id = 1; Draws = [ { Blue = 3; Red = 4; Green = 0 } ; { Red = 1; Green = 2; Blue =6 }; { Green = 2; Red = 0; Blue = 1} ]}
+    let game2 = {Id = 2; Draws = [ { Blue = 1; Green = 2; Red = 0}; {Green = 3; Blue = 4; Red = 1}; { Green = 1; Blue = 1; Red = 0 }] }
+    let game3 = {Id = 3; Draws = [ { Green = 8; Blue = 6; Red = 20}; { Blue = 5; Red = 4; Green = 13}; { Green = 5; Red = 1; Blue = 0} ] }
+    let game4 = {Id = 4; Draws = [ { Green = 1; Red = 3; Blue = 6 }; {Green = 3; Red = 6; Blue = 0}; {Green = 3; Blue = 15; Red = 14}] }
+    let game5 = {Id = 5; Draws = [ { Red = 6; Blue = 1; Green = 3}; {Blue = 2; Red = 1; Green = 2}] }
+
+
     open System
     open System.IO
     open Xunit 
 
     let readInit (filePath: string): string [] = 
-      System.IO.File.ReadAllLines filePath 
-        //let numbers = line.Split(",")
-        
-        //numbers |> Array.map(fun f -> Int32.Parse(f)) |> Array.toList
+      let lines = System.IO.File.ReadAllLines filePath 
+      lines
+
+    let rawGame1 = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
+    let rawGame2 = "Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue"
+    let rawGame3 = "Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red" 
+    let rawGame4 = "Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red" 
+    let rawGame5 = "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green" 
+
+    let parseLine (line: string): Game =
+        let gamesAndIds = line.Split(":")
+        let gameId = int (gamesAndIds[0].Replace("Game ", ""))
+        { Id = gameId; Draws = []}
+        //let games = gamesAndIds[1]
+
+    [<Fact>]
+    let game1_parsesCorrectly() = 
+        let game = parseLine rawGame1 
+        Assert.Equal(1, game.Id)
 
     [<Fact>]
     let test2 () = 
@@ -16,19 +40,11 @@ module Input =
 
 module Advent = 
   open Xunit 
-  type Draw = { Red: int; Green: int; Blue: int}
-  type Game = { Id: int; Draws: Draw list }
-
+  open Input
   type PossibleGame = { Id: int }
   type GameResult = PossibleGame option 
 
   let maxCubes = { Red = 12; Green = 13; Blue = 14}
-
-  let game1 = {Id = 1; Draws = [ { Blue = 3; Red = 4; Green = 0 } ; { Red = 1; Green = 2; Blue =6 }; { Green = 2; Red = 0; Blue = 1} ]}
-  let game2 = {Id = 2; Draws = [ { Blue = 1; Green = 2; Red = 0}; {Green = 3; Blue = 4; Red = 1}; { Green = 1; Blue = 1; Red = 0 }] }
-  let game3 = {Id = 3; Draws = [ { Green = 8; Blue = 6; Red = 20}; { Blue = 5; Red = 4; Green = 13}; { Green = 5; Red = 1; Blue = 0} ] }
-  let game4 = {Id = 4; Draws = [ { Green = 1; Red = 3; Blue = 6 }; {Green = 3; Red = 6; Blue = 0}; {Green = 3; Blue = 15; Red = 14}] }
-  let game5 = {Id = 5; Draws = [ { Red = 6; Blue = 1; Green = 3}; {Blue = 2; Red = 1; Green = 2}] }
 
 
   let processGame (game: Game): GameResult =
