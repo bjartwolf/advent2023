@@ -23,40 +23,46 @@ module Input =
     let rawGame5 = "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green" 
 
     open System.Text.RegularExpressions
-    let parseDraw (draw: string): Draw = 
+
+
+    module AdventParser =  
         let colors = [|"red"; "green"; "blue"|] 
-        let redPattern = @"(?<red>\d+)\s* red"
-        let redMatch = Regex.Match(draw, redPattern)
-        let red =if redMatch.Success && redMatch.Groups.[1].Success then
-                    int redMatch.Groups.[1].Value
-                 else
-                    0 
-        let greenPattern = @"(?<green>\d+)\s* green"
-        let greenMatch = Regex.Match(draw, greenPattern)
-        let green =if greenMatch.Success && greenMatch.Groups.[1].Success then
-                    int greenMatch.Groups.[1].Value
-                   else
-                    0 
-        let bluePattern = @"(?<blue>\d+)\s* blue"
-        let blueMatch = Regex.Match(draw, bluePattern)
-        let blue =if blueMatch.Success && blueMatch.Groups.[1].Success then
-                    int blueMatch.Groups.[1].Value
-                  else
-                    0 
         let pattern = (colors |> Array.map (fun color -> sprintf "(?<%s>\d+)\s* %s" color color))
         let combinedPattern = String.Join('|', pattern)
         let regex = new Regex(combinedPattern)
-        let matches = regex.Matches(draw)
-        let groupNames = regex.GetGroupNames() |> Array.where (fun x -> x <> "" && x <> "0")
-        // Check each named group in the pattern
-        let res = [for regexMatch in matches do
-                    for groupName in groupNames do
-                        let group = regexMatch.Groups.[groupName]
-                        if group.Success && group.Value <> "" then
-                            yield groupName, group.Value]
+        let parseDraw (draw: string): Draw = 
+            let matches = regex.Matches(draw)
 
+            (*
+            Used for debugging
+            let groupNames = regex.GetGroupNames() |> Array.where (fun x -> x <> "" && x <> "0")
+            /*)
 
-        { Red = red; Green = green; Blue = blue}
+            let res = [for regexMatch in matches do
+                        //for groupName in groupNames do - can be used dynamically
+                        for groupName in colors do
+                            let group = regexMatch.Groups.[groupName]
+                            if group.Success && group.Value <> "" then
+                                yield groupName, group.Value]
+
+            let redMatch = res |> List.tryFind(fun (name,value) -> name = "red")
+            let red = match redMatch with
+                            | Some (name,value) -> int value 
+                            | None -> 0
+
+            let greenMatch = res |> List.tryFind(fun (name,value) -> name = "green")
+            let green = match greenMatch with
+                            | Some (name,value) -> int value 
+                            | None -> 0
+
+            let blueMatch= res |> List.tryFind(fun (name,value) -> name = "blue")
+            let blue = match blueMatch with
+                            | Some (name,value) -> int value 
+                            | None -> 0
+
+            { Red = red; Green = green; Blue = blue}
+
+    open AdventParser
 
     [<Fact>]
     let game1_draw1_parsesCorrectly() = 
