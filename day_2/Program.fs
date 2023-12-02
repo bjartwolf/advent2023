@@ -99,6 +99,20 @@ module Advent =
   let sum_of_all_games() =
     let sum = [game1; game2; game3; game4; game5] |> List.choose (processGame) |> List.map (fun r -> r.Id) |> List.sum
     Assert.Equal(8, sum)
+   
+  [<Fact>]
+  let sum_of_all_games_testdata() =
+    let allGames = parseAllGames "testinput.txt"
+    let sum = allGames |> List.choose (processGame) |> List.map (fun r -> r.Id) |> List.sum
+    Assert.Equal(8, sum)
+
+  [<Fact>]
+  let sum_of_all_games_input() =
+    let allGames = parseAllGames "input1.txt"
+    let sum = allGames |> List.choose (processGame) |> List.map (fun r -> r.Id) |> List.sum
+    Assert.Equal(2617, sum)
+
+
 
   [<Fact>]
   let game1_is_possible() = 
