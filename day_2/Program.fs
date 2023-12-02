@@ -30,12 +30,19 @@ module Input =
                     int redMatch.Groups.[1].Value
                  else
                     0 
-        { Red = red; Green = 0; Blue = 0}
+        let greenPattern = "(\d+)\s* green"
+        let greenMatch = Regex.Match(draw, greenPattern)
+        let green =if greenMatch.Success && greenMatch.Groups.[1].Success then
+                    int greenMatch.Groups.[1].Value
+                   else
+                        0 
+        { Red = red; Green = green; Blue = 0}
 
     [<Fact>]
     let game1_draw1_parsesCorrectly() = 
         let draw = parseDraw "3 blue, 4 red;"
         Assert.Equal(4, draw.Red)
+        Assert.Equal(0, draw.Green)
 
     let parseLine (line: string): Game =
         let gamesAndIds = line.Split(":")
