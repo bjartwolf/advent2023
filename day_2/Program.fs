@@ -120,9 +120,24 @@ module Advent =
     minRed * minGreen * minBlue
     
   [<Fact>]
-  let game1_Power_48() = 
+  let powerGames() = 
     Assert.Equal(48, powerOfGame game1)
- 
+    Assert.Equal(12, powerOfGame game2)
+    Assert.Equal(1560, powerOfGame game3)
+    Assert.Equal(630, powerOfGame game4)
+    Assert.Equal(36, powerOfGame game5)
+
+  [<Fact>]
+  let sum_of_power_of_games_test_input() =
+    let allGames = parseAllGames "testinput.txt"
+    let sum = allGames |> List.map (powerOfGame)|> List.sum
+    Assert.Equal(2286, sum)
+
+  [<Fact>]
+  let sum_of_power_of_games_real_input() =
+    let allGames = parseAllGames "input1.txt"
+    let sum = allGames |> List.map (powerOfGame)|> List.sum
+    Assert.Equal(59795, sum)
 
   [<Fact>]
   let game1_is_possible() = 
