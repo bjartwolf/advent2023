@@ -141,13 +141,23 @@ module Input =
         let foo = uniqueElements |> Set.map (fun (x,y) -> x) |> Set.toList
         foo
 
-        (* 
+    [<Fact>]
+    let getNumbersWithPositionsTestData () = 
+        let input = readInit "testinput.txt" 
+        let numbers = getNumbersWithPositions input
+        let (_,firstNumber) = List.find (fun (x,y) -> x = 0) numbers
+        Assert.Equal<byte[]>([|52uy;54uy;55uy|], firstNumber)
+        let (_,secondNumber) = List.find (fun (x,y) -> x = 5) numbers
+        Assert.Equal<byte[]>([|49uy;49uy;52uy|], secondNumber)
+
+  
+ (*
     [<Fact>]
     let insane() = 
         let input = readInit "testinput.txt"
         let foo = getNumbers input 
         Assert.True(true)
- *)
+*)
     [<Fact>]
     let checkBitMask() = 
         let input = readInit "testinput.txt"
