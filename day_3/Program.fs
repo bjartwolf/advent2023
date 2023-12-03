@@ -13,21 +13,27 @@ module Input =
 
     let digitCharCodes = [0..9] |> Seq.map (fun x -> byte x + 48uy) |> Seq.toArray
     let dotCharCode = byte '.'
-    let keep = 255uy
-    let delete = 0uy
 
     let readInit (filePath: string) : byte [][] = 
         let lines = System.IO.File.ReadAllLines(filePath)
         lines |> Array.map (fun x -> x |> Seq.toArray |> Seq.map byte |> Seq.toArray)
 
-
     let keepSymbols (char:byte) : byte =
         if Seq.contains char digitCharCodes then 0uy
-        else char
+        else if char = dotCharCode then 0uy
+        else 255uy 
 
     [<Fact>]
     let keepSymbolsDeleteNumbers() =
         Assert.Equal(0uy, keepSymbols digitCharCodes.[3])
+
+    [<Fact>]
+    let keepSymbolsKeepSymbol() =
+        Assert.Equal(255uy, keepSymbols (byte '$'))
+
+    [<Fact>]
+    let keepSymbolsDeleteDots() =
+        Assert.Equal(0uy, keepSymbols (byte '.'))
 
     (* Sets symobls *)
     let setSymbolMask (input: byte[][]): byte[][] =
