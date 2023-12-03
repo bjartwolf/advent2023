@@ -15,62 +15,46 @@ module Input =
         let lines = System.IO.File.ReadAllLines(filePath)
         lines |> Array.map (fun x -> x |> Seq.toArray |> Seq.map byte |> Seq.toArray)
 
-    let keepSymbols (char:byte) : byte =
-        if Seq.contains char digitCharCodes then 0uy
-        else if char = dotCharCode then 0uy
-        else 255uy 
+    let keepSymbols (char:byte) : bool =
+        if Seq.contains char digitCharCodes then false 
+        else if char = dotCharCode then false 
+        else true 
 
     [<Fact>]
     let keepSymbolsDeleteNumbers() =
-        Assert.Equal(0uy, keepSymbols digitCharCodes.[3])
+        Assert.Equal(false, keepSymbols digitCharCodes.[3])
 
     [<Fact>]
     let keepSymbolsKeepSymbol() =
-        Assert.Equal(255uy, keepSymbols (byte '$'))
+        Assert.Equal(true, keepSymbols (byte '$'))
 
     [<Fact>]
     let keepSymbolsDeleteDots() =
-        Assert.Equal(0uy, keepSymbols (byte '.'))
+        Assert.Equal(false, keepSymbols (byte '.'))
 
     (* get symbols in the mask, no neighbourhood *)
-    let getSymbolMask (input: byte[][]): byte[][] =
+    let getSymbolMask (input: byte[][]): bool[][] =
         input |> Array.map (fun x -> x |> Array.map keepSymbols)
 
 
-    let copy (input: byte[][]) =
+    let copy (input: bool[][]) =
         input |> Array.map (fun x -> Array.copy x)
 
     (* expand symbolmask to set all neighbours to 255uy *) 
     // quadratic, so cheating
-    let getSymbolMaskNeighbors (input: byte[][]): byte[][] =
+    let getSymbolMaskNeighbors (input: bool[][]): bool[][] =
          let newMask = copy input
          let iterend = input.Length - 1
          for i in 0..iterend do
             for j in 0.. iterend do
-                if input[i][j] = 255uy then
+                if input[i][j] = true then
                     let x = [-1 .. 1]
                     let y = [-1 .. 1]
                     for deltaX in x do
                         for deltaY in y do
                             if i + deltaX >= 0 && i + deltaX <= iterend && j + deltaY >= 0 && j + deltaY <= iterend then
-                                newMask[i+deltaX][j+deltaY] <- 255uy
+                                newMask[i+deltaX][j+deltaY] <- true 
          newMask 
-
-    (* this does not really work, any part of the number must touch the bitmask*)
-    (* OR if I just keep on pushing what if I can check which numbers where not mutilated by this and then keep those*)
-    let applyBitMask (input: byte[][]) (mask: byte[][]): byte[][] = 
-        let keepCode code =  
-            if code = 0uy then 
-                dotCharCode 
-            else if not (Seq.contains code digitCharCodes) then
-                    dotCharCode 
-            else code
-
-        let maskLine (line: byte[]) (maskLine: byte[]): byte[] = Array.map2 (&&&) line maskLine |> Array.map keepCode
-        let output = copy input
-        for i in 0..input.Length-1 do
-             output[i] <- maskLine input[i] mask[i] 
-        output
 
     (* This could use some refactoring *)
     let groupPredicateWithPosition predicate (input: byte[]) : (int * byte[]) list =
@@ -98,16 +82,6 @@ module Input =
         let groupedNumbers = groupPredicateWithPosition predicate input
         Assert.Equal<(int*byte[]) list>(expected, groupedNumbers )
  
-    [<Fact>]
-    let testBitMask () = 
-        let input = [| [| 49uy; 12uy|]; [| 21uy; 50uy|]  |]
-        let mask = [| [| 255uy; 0uy|]; [| 0uy; 255uy|]  |]
-        let filtered = applyBitMask input mask
-        Assert.Equal(49uy, filtered[0][0])
-        Assert.Equal(dotCharCode, filtered[0][1])
-        Assert.Equal(dotCharCode, filtered[1][0])
-        Assert.Equal(50uy, filtered[1][1])
-
     let matrixToText (input: byte[][]): string[] = 
         input |> Array.map (fun x -> System.String (x |> Seq.map char |> Seq.toArray))
 
@@ -116,7 +90,7 @@ module Input =
         let input = readInit "input.txt" 
         Assert.Equal(140, input.Length) 
 
-    let getBitMask (input: byte[][]): byte[][] =
+    let getBitMask (input: byte[][]): bool[][] =
         let symbols = getSymbolMask input
         let mask = getSymbolMaskNeighbors symbols 
         mask
@@ -151,8 +125,8 @@ module Input =
         let mask = getBitMask(input)
 
         let foo = initialNumbers |> List.where (fun ((x,y),bytes) -> 
-            let coordinates = bytes |> Array.mapi ( fun i _  -> (x,y+1))
-            coordinates |> Array.exists (fun (x',y') -> mask[x'][y'] = 255uy )) 
+            let coordinates = bytes |> Array.mapi ( fun i _  -> (x,y+i))
+            coordinates |> Array.exists (fun (x',y') -> mask[x'][y'] = true)) 
             
         foo |> List.map (fun (x,y) -> toInt y)
 
@@ -168,8 +142,14 @@ module Input =
     [<Fact>]
     let insane() = 
         let input = readInit "testinput.txt"
-        let foo = getNumbers input 
-        Assert.True(true)
+        let sum = getNumbers input |> List.sum
+        Assert.Equal(4361, sum)
+
+    [<Fact>]
+    let insanereal() = 
+        let input = readInit "input.txt"
+        let sum = getNumbers input |> List.sum
+        Assert.Equal(543867, sum)
 
     [<Fact>]
     let checkBitMask() = 
@@ -183,7 +163,7 @@ module Input =
     let checkText() = 
         let txt = matrixToText (readInit "testinput.txt") |> Array.toList
         let rawText = readLinesAsTxt "testinput.txt" |> Array.toList
-        let foo = matrixToText (getSymbolMaskNeighbors(getSymbolMask (readInit "testinput.txt")))
+//        let foo = matrixToText (getSymbolMaskNeighbors(getSymbolMask (readInit "testinput.txt")))
         Assert.Equal<string list>(rawText, txt)
 
 module Program = let [<EntryPoint>] main _ = 0
