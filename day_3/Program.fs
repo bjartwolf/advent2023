@@ -4,7 +4,6 @@ module Input =
     open Xunit 
 
     let digitCharCodes = [0..9] |> Seq.map (fun x -> byte x + 48uy) |> Seq.toArray
-    let dotCharCode = byte '.'
     let gearCharCode = byte '*'
 
     let readInit (filePath: string) : byte [][] = 
@@ -74,7 +73,6 @@ module Input =
                 if x + deltaX >= 0 && x + deltaX <= max_size - 1 && y + deltaY >= 0 && y + deltaY <= max_size - 1 then
                     yield (x+deltaX,y+deltaY) ]
 
-
     let getGears (input: byte[][]): (int*int) list =
         let numbersWithPositions = getNumbersWithPositions input |> List.map getPositionsFromNumber 
         let size = input.Length
@@ -89,7 +87,6 @@ module Input =
                     yield (toInt num1, toInt num2)
         ]
         gears
-                  
 
     [<Fact>]
     let testinput() = 
