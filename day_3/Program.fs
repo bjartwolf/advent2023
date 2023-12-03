@@ -1,4 +1,5 @@
 open System.Collections.Generic
+open System
 
 
 module Input =
@@ -125,6 +126,16 @@ module Input =
         let foo = input |> Array.map (fun a -> a |> groupPredicateWithPosition (fun x -> Seq.contains x digitCharCodes))  |> Array.toList
         foo |> List.mapi (fun i x ->  x |> List.map (fun (j,y) -> (j+i*length,y))) |>List.collect (id) 
 
+    (* should do this but requirs padding and stuff*)
+    let toInt (bytes : byte []) =
+        bytes |> Array.map char |> System.String |> int
+
+    [<Fact>]
+    let makeIntFromBytes() = 
+        let bytes = [| 52uy;54uy;55uy|]
+        let nr = toInt bytes 
+        Assert.Equal(467, nr)
+
     [<Fact>]
     let getNumbersWithPositionsTest () = 
         let input = [| [| 49uy; 12uy|]; [| 21uy; 50uy|]  |]
@@ -139,9 +150,9 @@ module Input =
         let filteredNumbers = getNumbersWithPositions (getFilteredNumbers input) |> Set.ofList
 
         let uniqueElements = Set.intersect initialNumbers filteredNumbers 
-        let foo = uniqueElements |> Set.map (fun (x,y) -> x) |> Set.toList
+        let foo = uniqueElements |> Set.map (fun (x,y) -> toInt y) |> Set.toList
         foo
-
+    
     [<Fact>]
     let getNumbersWithPositionsTestData () = 
         let input = readInit "testinput.txt" 
@@ -160,13 +171,12 @@ module Input =
         let (_,secondNumber) = List.find (fun (x,y) -> x = 22) numbers
         Assert.Equal<byte[]>([|51uy;53uy|], secondNumber)
   
- (*
     [<Fact>]
     let insane() = 
         let input = readInit "testinput.txt"
         let foo = getNumbers input 
         Assert.True(true)
-*)
+
     [<Fact>]
     let checkBitMask() = 
         let input = readInit "testinput.txt"
