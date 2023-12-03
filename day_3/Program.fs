@@ -52,6 +52,29 @@ module Input =
                                 newMask[i+deltaX][j+deltaY] <- 255uy
          newMask 
 
+    let applyBitMask (input: byte[][]) (mask: byte[][]): byte[][] = 
+        let keepCode code =  
+            if code = 0uy then 
+                dotCharCode 
+            else if not (Seq.contains code digitCharCodes) then
+                    dotCharCode 
+            else code
+
+        let maskLine (line: byte[]) (maskLine: byte[]): byte[] = Array.map2 (&&&) line maskLine |> Array.map keepCode
+        let output = copy input
+        for i in 0..input.Length-1 do
+             output[i] <- maskLine input[i] mask[i] 
+        output
+
+    [<Fact>]
+    let testBitMask () = 
+        let input = [| [| 49uy; 12uy|]; [| 21uy; 50uy|]  |]
+        let mask = [| [| 255uy; 0uy|]; [| 0uy; 255uy|]  |]
+        let filtered = applyBitMask input mask
+        Assert.Equal(49uy, filtered[0][0])
+        Assert.Equal(dotCharCode, filtered[0][1])
+        Assert.Equal(dotCharCode, filtered[1][0])
+        Assert.Equal(50uy, filtered[1][1])
 
     let matrixToText (input: byte[][]): string[] = 
         input |> Array.map (fun x -> System.String (x |> Seq.map char |> Seq.toArray))
@@ -60,6 +83,15 @@ module Input =
     let test2 () = 
         let input = readInit "input.txt" 
         Assert.Equal(140, input.Length) 
+
+    [<Fact>]
+    let checkBitMask() = 
+        let input = readInit "testinput.txt"
+        let mask = getSymbolMaskNeighbors(getSymbolMask input) 
+        let filteredInput = applyBitMask input mask
+        let filteredAsTxt = matrixToText filteredInput
+        Assert.True(true)
+
 
     [<Fact>]
     let checkText() = 
