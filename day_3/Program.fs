@@ -1,3 +1,6 @@
+open System.Collections.Generic
+
+
 module Input =
     open Xunit 
 
@@ -68,6 +71,32 @@ module Input =
              output[i] <- maskLine input[i] mask[i] 
         output
 
+    (* This could use some refactoring *)
+    let groupPredicateWithPosition predicate (input: byte[]) : (int * byte[]) list =
+        let groups: Dictionary<int, byte[]> =  Dictionary<int,byte[]>()
+        let mutable currentFoundIndex = -1
+        let mutable foundNr = false
+
+        for i = 0 to Array.length input - 1 do
+            if predicate input.[i] && foundNr then
+                groups.[currentFoundIndex] <- Array.append groups.[currentFoundIndex] [| input.[i] |] 
+            else if (predicate input.[i]) && (not foundNr) then
+                foundNr <- true
+                currentFoundIndex <- i
+                groups.Add(i,[| input.[i] |])
+                ()
+            else
+                foundNr <- false
+        groups |> Seq.map (fun key -> (key.Key, key.Value)) |> Seq.toList
+
+    [<Fact>]
+    let testGrouper() =
+        let predicate x = x >= 3uy && x <=9uy
+        let input = [| 2uy;3uy;9uy;10uy;2uy;4uy;6uy |]
+        let expected = [(1, [|3uy;9uy|]); (5, [|4uy;6uy|])]
+        let groupedNumbers = groupPredicateWithPosition predicate input
+        Assert.Equal<(int*byte[]) list>(expected, groupedNumbers )
+ 
     [<Fact>]
     let testBitMask () = 
         let input = [| [| 49uy; 12uy|]; [| 21uy; 50uy|]  |]
