@@ -1,6 +1,4 @@
 open System.Collections.Generic
-open System
-
 
 module Input =
     open Xunit 
@@ -94,7 +92,6 @@ module Input =
         let symbols = getSymbolMask input
         let mask = getSymbolMaskNeighbors symbols 
         mask
-//        applyBitMask input mask
 
     let getNumbersWithPositions (input: byte[][]): ((int*int)*byte[]) list =
         let length= input.Length
@@ -151,19 +148,5 @@ module Input =
         let sum = getNumbers input |> List.sum
         Assert.Equal(543867, sum)
 
-    [<Fact>]
-    let checkBitMask() = 
-        let input = readInit "testinput.txt"
-        //let filteredInput = getFilteredNumbers input
-        //let filteredAsTxt = matrixToText filteredInput
-        Assert.True(true)
-
-
-    [<Fact>]
-    let checkText() = 
-        let txt = matrixToText (readInit "testinput.txt") |> Array.toList
-        let rawText = readLinesAsTxt "testinput.txt" |> Array.toList
-//        let foo = matrixToText (getSymbolMaskNeighbors(getSymbolMask (readInit "testinput.txt")))
-        Assert.Equal<string list>(rawText, txt)
 
 module Program = let [<EntryPoint>] main _ = 0
