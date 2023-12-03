@@ -115,11 +115,43 @@ module Input =
         let input = readInit "input.txt" 
         Assert.Equal(140, input.Length) 
 
+    let getFilteredNumbers (input: byte[][]): byte[][] =
+        let mask = getSymbolMaskNeighbors(getSymbolMask input) 
+        applyBitMask input mask
+
+    let getNumbersWithPositions (input: byte[][]): (int*byte[]) list =
+        let length= input.Length
+        let foo = input |> Array.map (fun a -> a |> groupPredicateWithPosition (fun x -> Seq.contains x digitCharCodes))  |> Array.toList
+        foo |> List.mapi (fun i x ->  x |> List.map (fun (j,y) -> (j+i*length,y))) |>List.collect (id) 
+
+    [<Fact>]
+    let getNumbersWithPositionsTest () = 
+        let input = [| [| 49uy; 12uy|]; [| 21uy; 50uy|]  |]
+        let numbers = getNumbersWithPositions input
+        let (_,firstNumber) = List.find (fun (x,y) -> x = 0) numbers
+        Assert.Equal<byte[]>([|49uy|], firstNumber)
+        let (_,secondNumber) = List.find (fun (x,y) -> x = 3) numbers
+        Assert.Equal<byte[]>([|50uy|], secondNumber)
+
+    let getNumbers (input: byte[][]): int list =
+        let initialNumbers = getNumbersWithPositions input |> Set.ofList
+        let filteredNumbers = getNumbersWithPositions (getFilteredNumbers input) |> Set.ofList
+
+        let uniqueElements = Set.intersect initialNumbers filteredNumbers 
+        let foo = uniqueElements |> Set.map (fun (x,y) -> x) |> Set.toList
+        foo
+
+        (* 
+    [<Fact>]
+    let insane() = 
+        let input = readInit "testinput.txt"
+        let foo = getNumbers input 
+        Assert.True(true)
+ *)
     [<Fact>]
     let checkBitMask() = 
         let input = readInit "testinput.txt"
-        let mask = getSymbolMaskNeighbors(getSymbolMask input) 
-        let filteredInput = applyBitMask input mask
+        let filteredInput = getFilteredNumbers input
         let filteredAsTxt = matrixToText filteredInput
         Assert.True(true)
 
