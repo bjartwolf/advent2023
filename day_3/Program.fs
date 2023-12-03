@@ -53,6 +53,7 @@ module Input =
          newMask 
 
     (* this does not really work, any part of the number must touch the bitmask*)
+    (* OR if I just keep on pushing what if I can check which numbers where not mutilated by this and then keep those*)
     let applyBitMask (input: byte[][]) (mask: byte[][]): byte[][] = 
         let keepCode code =  
             if code = 0uy then 
