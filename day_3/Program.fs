@@ -5,6 +5,7 @@ module Input =
 
     let digitCharCodes = [0..9] |> Seq.map (fun x -> byte x + 48uy) |> Seq.toArray
     let dotCharCode = byte '.'
+    let gearCharCode = byte '*'
 
     let readLinesAsTxt (filePath: string) : string[] = 
         System.IO.File.ReadAllLines(filePath)
@@ -14,9 +15,7 @@ module Input =
         lines |> Array.map (fun x -> x |> Seq.toArray |> Seq.map byte |> Seq.toArray)
 
     let keepSymbols (char:byte) : bool =
-        if Seq.contains char digitCharCodes then false 
-        else if char = dotCharCode then false 
-        else true 
+        char = gearCharCode
 
     [<Fact>]
     let keepSymbolsDeleteNumbers() =
@@ -35,24 +34,26 @@ module Input =
         input |> Array.map (fun x -> x |> Array.map keepSymbols)
 
 
+
     let copy (input: bool[][]) =
         input |> Array.map (fun x -> Array.copy x)
 
-    (* expand symbolmask to set all neighbours to 255uy *) 
-    // quadratic, so cheating
-    let getSymbolMaskNeighbors (input: bool[][]): bool[][] =
-         let newMask = copy input
-         let iterend = input.Length - 1
-         for i in 0..iterend do
-            for j in 0.. iterend do
-                if input[i][j] = true then
-                    let x = [-1 .. 1]
-                    let y = [-1 .. 1]
-                    for deltaX in x do
-                        for deltaY in y do
-                            if i + deltaX >= 0 && i + deltaX <= iterend && j + deltaY >= 0 && j + deltaY <= iterend then
-                                newMask[i+deltaX][j+deltaY] <- true 
-         newMask 
+    //(* expand symbolmask to set all neighbours to 255uy *) 
+    //// quadratic, so cheating
+    //let getSymbolMaskNeighbors (input: bool[][]): bool[][] =
+    //     let newMask = copy input
+    //     let iterend = input.Length - 1
+    //     for i in 0..iterend do
+    //        for j in 0.. iterend do
+    //            if input[i][j] = true then
+    //                let x = [-1 .. 1]
+    //                let y = [-1 .. 1]
+    //                for deltaX in x do
+    //                    for deltaY in y do
+    //                        if i + deltaX >= 0 && i + deltaX <= iterend && j + deltaY >= 0 && j + deltaY <= iterend then
+    //                            newMask[i+deltaX][j+deltaY] <- true 
+    //     newMask 
+
 
     (* This could use some refactoring *)
     let groupPredicateWithPosition predicate (input: byte[]) : (int * byte[]) list =
@@ -87,11 +88,6 @@ module Input =
     let test2 () = 
         let input = readInit "input.txt" 
         Assert.Equal(140, input.Length) 
-
-    let getBitMask (input: byte[][]): bool[][] =
-        let symbols = getSymbolMask input
-        let mask = getSymbolMaskNeighbors symbols 
-        mask
 
     let getNumbersWithPositions (input: byte[][]): ((int*int)*byte[]) list =
         let length= input.Length
@@ -140,15 +136,43 @@ module Input =
         let intersection = Set.intersect s1 s2 
         intersection |> Set.isEmpty |> not
         
-    let getNumbers (input: byte[][]): int list =
-        let initialNumbers = getNumbersWithPositions input 
-        let mask = getBitMask(input)
-        let maskPositions = getPositionsFromMask mask
-        let numbersWithPositions = initialNumbers |> List.map getPositionsFromNumber 
+    //let getNumbers (input: byte[][]): int list =
+    //    let initialNumbers = getNumbersWithPositions input 
+    //    let mask = getBitMask(input)
+    //    let maskPositions = getPositionsFromMask mask
+    //    let numbersWithPositions = initialNumbers |> List.map getPositionsFromNumber 
+    //    let foo = numbersWithPositions |> List.where (fun (postions, _) -> overlap postions maskPositions)
+    //    foo |> List.map (fun (_,y) -> toInt y)
 
-        let foo = numbersWithPositions |> List.where (fun (postions, _) -> overlap postions maskPositions)
+    let getStars mask = getPositionsFromMask mask 
 
-        foo |> List.map (fun (_,y) -> toInt y)
+    let getNeighbors (max_size: int) ((x,y): Position): Positions = 
+        let xs = [-1 .. 1]
+        let ys = [-1 .. 1]
+        [ for deltaX in xs do
+            for deltaY in ys do
+                if x + deltaX >= 0 && x + deltaX <= max_size - 1 && y + deltaY >= 0 && y + deltaY <= max_size - 1 then
+                    yield (x+deltaX,y+deltaY) ]
+
+
+    let getGears (input: byte[][]): (int*int) list =
+        let numbersWithPositions = getNumbersWithPositions input |> List.map getPositionsFromNumber 
+        let size = input.Length
+        let stars = getSymbolMask(input) |> getStars
+        //let gearNeighborhood = getBitMask(input) |> getPositionsFromMask
+        // gears are the gears with two numbers in their hood
+        let gears = [ 
+            for star in stars do
+                let neighbors = getNeighbors size star
+                // number of overlaps = 2
+                let numbersInHood = numbersWithPositions |> List.where (fun (p,_) -> overlap neighbors p)
+                if (numbersInHood.Length = 2) then
+                    let _, num1 = numbersInHood[0]
+                    let _,num2 = numbersInHood[1]
+                    yield (toInt num1, toInt num2)
+        ]
+        gears
+                  
 
     [<Fact>]
     let getNumbersWithPositionsTestData () = 
@@ -162,14 +186,16 @@ module Input =
     [<Fact>]
     let insane() = 
         let input = readInit "testinput.txt"
-        let sum = getNumbers input |> List.sum
-        Assert.Equal(4361, sum)
+        let gears = getGears input 
+        let sum = gears |> List.map (fun (x,y) -> x*y) |> List.sum 
+        Assert.Equal(467835, sum)
 
     [<Fact>]
     let insanereal() = 
         let input = readInit "input.txt"
-        let sum = getNumbers input |> List.sum
-        Assert.Equal(543867, sum)
+        let gears = getGears input 
+        let sum = gears |> List.map (fun (x,y) -> x*y) |> List.sum 
+        Assert.Equal(79613331, sum)
 
 
 module Program = let [<EntryPoint>] main _ = 0
