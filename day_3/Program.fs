@@ -51,7 +51,7 @@ module Input =
                     let y = [-1 .. 1]
                     for deltaX in x do
                         for deltaY in y do
-                            if i + deltaX > 0 && i + deltaX < iterend && j + deltaY > 0 && j + deltaY < iterend then
+                            if i + deltaX >= 0 && i + deltaX <= iterend && j + deltaY >= 0 && j + deltaY <= iterend then
                                 newMask[i+deltaX][j+deltaY] <- 255uy
          newMask 
 
@@ -116,7 +116,8 @@ module Input =
         Assert.Equal(140, input.Length) 
 
     let getFilteredNumbers (input: byte[][]): byte[][] =
-        let mask = getSymbolMaskNeighbors(getSymbolMask input) 
+        let symbols = getSymbolMask input
+        let mask = getSymbolMaskNeighbors symbols 
         applyBitMask input mask
 
     let getNumbersWithPositions (input: byte[][]): (int*byte[]) list =
@@ -150,6 +151,14 @@ module Input =
         let (_,secondNumber) = List.find (fun (x,y) -> x = 5) numbers
         Assert.Equal<byte[]>([|49uy;49uy;52uy|], secondNumber)
 
+    [<Fact>]
+    let getNumbersWithPositionsPostFilterTestData () = 
+        let input = readInit "testinput.txt" 
+        let numbers = getNumbersWithPositions (getFilteredNumbers input)
+        let (_,firstNumber) = List.find (fun (x,y) -> x = 2) numbers
+        Assert.Equal<byte[]>([|55uy|], firstNumber)
+        let (_,secondNumber) = List.find (fun (x,y) -> x = 22) numbers
+        Assert.Equal<byte[]>([|51uy;53uy|], secondNumber)
   
  (*
     [<Fact>]
