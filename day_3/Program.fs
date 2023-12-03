@@ -52,6 +52,7 @@ module Input =
                                 newMask[i+deltaX][j+deltaY] <- 255uy
          newMask 
 
+    (* this does not really work, any part of the number must touch the bitmask*)
     let applyBitMask (input: byte[][]) (mask: byte[][]): byte[][] = 
         let keepCode code =  
             if code = 0uy then 
