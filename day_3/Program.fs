@@ -117,15 +117,38 @@ module Input =
         let (_,secondNumber) = List.find (fun (x,y) -> x = (1,1)) numbers
         Assert.Equal<byte[]>([|50uy|], secondNumber)
 
+    type Position = int * int
+    type Positions = Position list
+    type Number = Positions * byte[]
+
+    let getPositionsFromNumber (((x,y),bytes): Position * byte[]): Positions*byte[] = 
+        let coordinates: Positions = bytes |> Array.mapi ( fun i _  -> (x,y+i)) |> Array.toList
+        (coordinates, bytes)
+    
+    let getPositionsFromMask (mask: bool[][]): Positions =
+        let size = mask.Length
+        let positions = [ for i in 0 .. size - 1 do
+                            for j in 0 .. size - 1 do
+                                if mask[i][j] then yield (i,j)
+        ]
+        positions
+    
+
+    let overlap (p1s: Positions) (p2s: Positions) : bool =
+        let s1 = p1s |> Set.ofList
+        let s2 = p2s |> Set.ofList
+        let intersection = Set.intersect s1 s2 
+        intersection |> Set.isEmpty |> not
+        
     let getNumbers (input: byte[][]): int list =
         let initialNumbers = getNumbersWithPositions input 
         let mask = getBitMask(input)
+        let maskPositions = getPositionsFromMask mask
+        let numbersWithPositions = initialNumbers |> List.map getPositionsFromNumber 
 
-        let foo = initialNumbers |> List.where (fun ((x,y),bytes) -> 
-            let coordinates = bytes |> Array.mapi ( fun i _  -> (x,y+i))
-            coordinates |> Array.exists (fun (x',y') -> mask[x'][y'] = true)) 
-            
-        foo |> List.map (fun (x,y) -> toInt y)
+        let foo = numbersWithPositions |> List.where (fun (postions, _) -> overlap postions maskPositions)
+
+        foo |> List.map (fun (_,y) -> toInt y)
 
     [<Fact>]
     let getNumbersWithPositionsTestData () = 
