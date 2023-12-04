@@ -27,49 +27,33 @@ module Input =
     let parseCards (s: string[]): Card list = 
         s |> Array.map parseCard |> Array.toList
 
-    let memoize f =
-        let dict = Dictionary<_, _>();
-        fun c ->
-            match dict.TryGetValue c with
-            | true,v-> v 
-            | false,_ -> 
-                let value = f c
-                dict.Add(c, value)
-                value
+    let countWinning (card: Card): int =
+        Set.intersect (Set.ofList card.Winning) (Set.ofList card.Scratched) |> Seq.length
 
-    let countWinningById (cards: Card list) (cardId: CardId): CardId list =
-        let card = cards[cardId - 1 ]
-        let nrWins = Set.intersect (Set.ofList card.Winning) (Set.ofList card.Scratched) |> Seq.toList |> Seq.length
-        let nextIds = [(card.Id + 1) .. (card.Id + nrWins )] |> List.take nrWins
-        nextIds
-
-    let memoedWinning (cards: Card list) =
-        memoize (countWinningById cards)
-
-    let countCards (cards: Card list) (hand: CardId list): int =
-        let memoCounter = memoedWinning cards
-        let rec innerCounter  (hand: CardId list) (score: int): int =
-            let newScore = score + hand.Length 
-            let nextWins = hand |> List.map (fun x -> memoCounter x) |> List.collect id
-            if nextWins |> List.isEmpty then 
-                newScore 
-            else 
-                newScore + (innerCounter nextWins score)
-        innerCounter hand 0
-
+        
     let countScore (cardList: Card list): int =
-        countCards cardList (cardList |> List.map (fun x -> x.Id))
+        let dict = Dictionary<int,int>()
+        cardList.Length +
+            ([ for i in [(cardList.Length - 1) .. -1 .. 0] do
+                   let mutable wins = countWinning cardList[i]
+                   [ for j in [(i + 1) .. i + wins] do
+                            wins <- wins + dict[j]
+                   ] |> ignore
+                   dict.Add(i, wins)
+                   yield wins 
+            ] |> List.sum )
+         
 
     [<Fact>]
     let countWinningTest() =
         let input = readInit "testinput.txt" |> parseCards
-        let winningCount = countScore input 
+        let winningCount = countScore input
         Assert.Equal(30, winningCount)
 
     [<Fact>]
     let countWinningTest2() =
         let input = readInit "input.txt" |> parseCards
-        let winningCount = countScore input 
+        let winningCount = countScore input
         Assert.Equal(8467762, winningCount)
 
 
