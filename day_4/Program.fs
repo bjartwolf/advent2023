@@ -61,6 +61,14 @@ module Input =
         Assert.Equal(13, scores)
 
     [<Fact>]
+    let countWinningsScoresReal() =
+        let input = readInit "input.txt" |> parseCards
+        let winningCount = countWinnings input
+        let scores = scoreWinnings winningCount 
+        Assert.Equal(26346, scores)
+
+
+    [<Fact>]
     let countWinningTest() =
         let input = readInit "testinput.txt" |> parseCards
         let winningCount = countWinnings input
