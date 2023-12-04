@@ -30,10 +30,9 @@ module Input =
     let memoize f =
         let dict = Dictionary<_, _>();
         fun c ->
-            let exist, value = dict.TryGetValue c
-            match exist with
-            | true -> value
-            | _ -> 
+            match dict.TryGetValue c with
+            | true,v-> v 
+            | false,_ -> 
                 let value = f c
                 dict.Add(c, value)
                 value
