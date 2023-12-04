@@ -13,6 +13,8 @@ module Input =
     type Card = { Id: CardId ; Winning: int list; Scratched : int list}
     let example_card = { Id = CardId 1; Winning = [41;48;83;86;17]; Scratched = [83;86;6;31;17;9;48;53] } 
 
+    let getCardValue (card: Card): int = match card.Id with | CardId value -> value
+
     let parseCard (s:string): Card = 
         let card_numbers = s.Split(":")
         let nr = int (card_numbers[0].Replace("Card ",""))
@@ -26,18 +28,39 @@ module Input =
             Scratched = scracthed 
         }
 
+    let parseCards (s: string[]): Card list = 
+        s |> Array.map parseCard |> Array.toList
+
     [<Fact>]
     let parseLine_card1() = 
         Assert.Equal(example_card, parseCard example_line)
 
     let countWinning (card: Card): CardId list =
-        Set.intersect (Set.ofList card.Winning) (Set.ofList card.Scratched) |> Seq.toList |> List.map CardId 
+        let nrWins = Set.intersect (Set.ofList card.Winning) (Set.ofList card.Scratched) |> Seq.toList |> Seq.length
+        let nextIds = [(getCardValue card + 1) .. (getCardValue card + nrWins )] |> List.take nrWins
+        nextIds |> List.map CardId 
 
-    let countWinnings (card: Card list): CardId list list =
-        card |> List.map countWinning 
+    [<Fact>]
+    let testCountWinning1() =
+        let cards = readInit "testinput.txt" |> parseCards 
+        let wins1 = countWinning cards[0]
+        let wins2 = countWinning cards[1]
+        let wins3 = countWinning cards[2]
+        let wins4 = countWinning cards[3]
+        let wins5 = countWinning cards[4]
+        let wins6 = countWinning cards[5]
+        Assert.Equal<CardId list>([2;3;4;5] |> List.map CardId, wins1)
+        Assert.Equal<CardId list>([3;4] |> List.map CardId, wins2)
+        Assert.Equal<CardId list>([4;5] |> List.map CardId, wins3)
+        Assert.Equal<CardId list>([5] |> List.map CardId, wins4)
+        Assert.Equal<CardId list>([] |> List.map CardId, wins5)
+        Assert.Equal<CardId list>([] |> List.map CardId, wins6)
 
-    let parseCards (s: string[]): Card list = 
-        s |> Array.map parseCard |> Array.toList
+    let countWinnings (cards: Card list) (hand: CardId list): CardId list list =
+        cards |> List.map countWinning 
+
+    let playRound (cards: Card list) (start: CardId list): CardId list =
+        start |> countWinnings cards |> List.collect id 
 
 (* 
     [<Fact>]
