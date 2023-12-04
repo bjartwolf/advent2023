@@ -14,7 +14,7 @@ module Input =
     [<Fact>]
     let test3 () = 
         let input = readInit "input.txt" 
-        Assert.Equal(120, input.Length) 
+        Assert.Equal(220, input.Length) 
 
 
 module Program = let [<EntryPoint>] main _ = 0
