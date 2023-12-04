@@ -13,7 +13,7 @@ module Input =
     let example_card = { Id = 1; Winning = [41;48;83;86;17]; Scratched = [83;86;6;31;17;9;48;53] } 
 
     let parseCard (s:string): Card = 
-        let card_numbers = example_line.Split(":")
+        let card_numbers = s.Split(":")
         let nr = int (card_numbers[0].Replace("Card ",""))
         let numbers = card_numbers[1].Split("|")
         let parseNrs (numTxt:string[]) = numTxt |> Array.map (fun s -> s.Replace(" ", "")) |> Array.where (fun s -> not (String.IsNullOrEmpty(s))) |> Array.map int |> Array.toList
@@ -29,6 +29,20 @@ module Input =
     let parseLine_card1() = 
         Assert.Equal(example_card, parseCard example_line)
 
+    let countWinning (card: Card): int =
+        Set.intersect (Set.ofList card.Winning) (Set.ofList card.Scratched) |> Seq.toList |> List.length
+
+    let countWinnings (card: Card list): int list =
+        card |> List.map countWinning 
+
+    let parseCards (s: string[]): Card list = 
+        s |> Array.map parseCard |> Array.toList
+
+    [<Fact>]
+    let countWinningTest() =
+        let input = readInit "testinput.txt" |> parseCards
+        let winningCount = countWinnings input
+        Assert.Equal<int list>([4;2;2;1;0;0], winningCount)
 
     [<Fact>]
     let test2 () = 
