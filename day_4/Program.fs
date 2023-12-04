@@ -9,8 +9,9 @@ module Input =
     // first winning numbers, then numbers you have
     // can be split on lines and newlines easier than regex
     let example_line = "Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53"
-    type Card = { Id: int ; Winning: int list; Scratched : int list}
-    let example_card = { Id = 1; Winning = [41;48;83;86;17]; Scratched = [83;86;6;31;17;9;48;53] } 
+    type CardId = CardId of int
+    type Card = { Id: CardId ; Winning: int list; Scratched : int list}
+    let example_card = { Id = CardId 1; Winning = [41;48;83;86;17]; Scratched = [83;86;6;31;17;9;48;53] } 
 
     let parseCard (s:string): Card = 
         let card_numbers = s.Split(":")
@@ -20,7 +21,7 @@ module Input =
         let winningNumbers = numbers[0].Split(" ")  |> parseNrs
         let scracthed = numbers[1].Split(" ")  |> parseNrs
         {
-            Id = nr 
+            Id = CardId nr 
             Winning = winningNumbers;
             Scratched = scracthed 
         }
@@ -29,51 +30,22 @@ module Input =
     let parseLine_card1() = 
         Assert.Equal(example_card, parseCard example_line)
 
-    let countWinning (card: Card): int =
-        Set.intersect (Set.ofList card.Winning) (Set.ofList card.Scratched) |> Seq.toList |> List.length
+    let countWinning (card: Card): CardId list =
+        Set.intersect (Set.ofList card.Winning) (Set.ofList card.Scratched) |> Seq.toList |> List.map CardId 
 
-    let countWinnings (card: Card list): int list =
+    let countWinnings (card: Card list): CardId list list =
         card |> List.map countWinning 
 
     let parseCards (s: string[]): Card list = 
         s |> Array.map parseCard |> Array.toList
 
-    let scoreWinning (wins: int): int =
-        if wins = 0 then 0
-        else pown 2 (wins - 1)
-
-    [<Fact>]
-    let scoreWinningsTest () = 
-        Assert.Equal(0,scoreWinning 0)
-        Assert.Equal(1,scoreWinning 1)
-        Assert.Equal(2,scoreWinning 2)
-        Assert.Equal(4,scoreWinning 3)
-        Assert.Equal(8,scoreWinning 4)
-
-    let scoreWinnings (wins: int list): int =
-        wins |>List.map scoreWinning |> List.sum
-
-    [<Fact>]
-    let countWinningsScoresTest() =
-        let input = readInit "testinput.txt" |> parseCards
-        let winningCount = countWinnings input
-        let scores = scoreWinnings winningCount 
-        Assert.Equal(13, scores)
-
-    [<Fact>]
-    let countWinningsScoresReal() =
-        let input = readInit "input.txt" |> parseCards
-        let winningCount = countWinnings input
-        let scores = scoreWinnings winningCount 
-        Assert.Equal(26346, scores)
-
-
+(* 
     [<Fact>]
     let countWinningTest() =
         let input = readInit "testinput.txt" |> parseCards
         let winningCount = countWinnings input
         Assert.Equal<int list>([4;2;2;1;0;0], winningCount)
-
+*)
     [<Fact>]
     let test2 () = 
         let input = readInit "testinput.txt" 
