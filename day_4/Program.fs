@@ -14,6 +14,7 @@ module Input =
     let example_card = { Id = CardId 1; Winning = [41;48;83;86;17]; Scratched = [83;86;6;31;17;9;48;53] } 
 
     let getCardValue (card: Card): int = match card.Id with | CardId value -> value
+    let getCardIdValue (id: CardId): int = match id with | CardId value -> value
 
     let parseCard (s:string): Card = 
         let card_numbers = s.Split(":")
@@ -56,28 +57,36 @@ module Input =
         Assert.Equal<CardId list>([] |> List.map CardId, wins5)
         Assert.Equal<CardId list>([] |> List.map CardId, wins6)
 
-    let countWinnings (cards: Card list) (hand: CardId list): CardId list list =
-        cards |> List.map countWinning 
+    let getNextRound (cards: Card list) : CardId list =
+        cards |> List.map countWinning  |> List.collect id
 
-    let playRound (cards: Card list) (start: CardId list): CardId list =
-        start |> countWinnings cards |> List.collect id 
+    let rec countCards (cards: Card list) (hand: CardId list) (score: int): int =
+        let newScore = score + hand.Length 
+        let cardsOnHand = hand |> List.map getCardIdValue |> List.map (fun x -> cards[x - 1])
+        let nextWins = getNextRound cardsOnHand 
+        if nextWins |> List.isEmpty then 
+            newScore 
+        else 
+            newScore + (countCards cards nextWins score)
 
-(* 
+    let countScore (cardList: Card list): int =
+        countCards cardList (cardList |> List.map (fun x -> x.Id)) 0
+
     [<Fact>]
     let countWinningTest() =
         let input = readInit "testinput.txt" |> parseCards
-        let winningCount = countWinnings input
-        Assert.Equal<int list>([4;2;2;1;0;0], winningCount)
-*)
-    [<Fact>]
-    let test2 () = 
-        let input = readInit "testinput.txt" 
-        Assert.Equal(6, input.Length) 
+        let winningCount = countScore input 
+        Assert.Equal(30, winningCount)
 
     [<Fact>]
-    let test3 () = 
-        let input = readInit "input.txt" 
-        Assert.Equal(220, input.Length) 
+    let countWinningReal() =
+        let input = readInit "input.txt" |> parseCards
+        let winningCount = countScore input 
+        Assert.Equal(8467762, winningCount)
 
 
 module Program = let [<EntryPoint>] main _ = 0
+        let input = readInit "input.txt" |> parseCards
+        let winningCount = countScore input 
+        Assert.Equal(30, winningCount)
+
