@@ -10,10 +10,6 @@ module Input =
 
     type CardId = int
     type Card = { Id: CardId ; Winning: int list; Scratched : int list}
-    let example_card = { Id = 1; Winning = [41;48;83;86;17]; Scratched = [83;86;6;31;17;9;48;53] } 
-
-    let getCardValue (card: Card): int = card.Id 
-    let getCardIdValue (id: CardId): int = id 
 
     let parseCard (s:string): Card = 
         let card_numbers = s.Split(":")
@@ -42,22 +38,14 @@ module Input =
                 dict.Add(c, value)
                 value
 
-    let countWinning (card: Card): CardId list =
-        let nrWins = Set.intersect (Set.ofList card.Winning) (Set.ofList card.Scratched) |> Seq.toList |> Seq.length
-        let nextIds = [(getCardValue card + 1) .. (getCardValue card + nrWins )] |> List.take nrWins
-        nextIds 
-
     let countWinningById (cards: Card list) (cardId: CardId): CardId list =
         let card = cards[cardId - 1 ]
         let nrWins = Set.intersect (Set.ofList card.Winning) (Set.ofList card.Scratched) |> Seq.toList |> Seq.length
-        let nextIds = [(getCardValue card + 1) .. (getCardValue card + nrWins )] |> List.take nrWins
+        let nextIds = [(card.Id + 1) .. (card.Id + nrWins )] |> List.take nrWins
         nextIds
 
     let memoedWinning (cards: Card list) =
         memoize (countWinningById cards)
-
-    let getNextRound (cards: Card list) : CardId list =
-        cards |> List.map countWinning  |> List.collect id
 
     let rec countCards (cards: Card list) (hand: CardId list) (score: int): int =
         let memoCounter = memoedWinning cards
