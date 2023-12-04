@@ -38,6 +38,28 @@ module Input =
     let parseCards (s: string[]): Card list = 
         s |> Array.map parseCard |> Array.toList
 
+    let scoreWinning (wins: int): int =
+        if wins = 0 then 0
+        else pown 2 (wins - 1)
+
+    [<Fact>]
+    let scoreWinningsTest () = 
+        Assert.Equal(0,scoreWinning 0)
+        Assert.Equal(1,scoreWinning 1)
+        Assert.Equal(2,scoreWinning 2)
+        Assert.Equal(4,scoreWinning 3)
+        Assert.Equal(8,scoreWinning 4)
+
+    let scoreWinnings (wins: int list): int =
+        wins |>List.map scoreWinning |> List.sum
+
+    [<Fact>]
+    let countWinningsScoresTest() =
+        let input = readInit "testinput.txt" |> parseCards
+        let winningCount = countWinnings input
+        let scores = scoreWinnings winningCount 
+        Assert.Equal(13, scores)
+
     [<Fact>]
     let countWinningTest() =
         let input = readInit "testinput.txt" |> parseCards
