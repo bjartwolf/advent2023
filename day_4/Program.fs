@@ -1,41 +1,36 @@
 open System.Collections.Generic
-
+open System.Text.RegularExpressions
 
 module Input =
-    open System
     open Xunit 
 
     let readInit (filePath: string) = 
         System.IO.File.ReadAllLines filePath
 
     type CardId = int
-    type Card = { Id: CardId ; Winning: int list; Scratched : int list}
+    type Card = int 
 
-    let parseCard (s:string): Card = 
-        let card_numbers = s.Split(":")
-        let nr = int (card_numbers[0].Replace("Card ",""))
-        let numbers = card_numbers[1].Split("|")
-        let parseNrs (numTxt:string[]) = numTxt |> Array.map (fun s -> s.Replace(" ", "")) |> Array.where (fun s -> not (String.IsNullOrEmpty(s))) |> Array.map int |> Array.toList
-        let winningNumbers = numbers[0].Split(" ")  |> parseNrs
-        let scracthed = numbers[1].Split(" ")  |> parseNrs
-        {
-            Id = nr 
-            Winning = winningNumbers;
-            Scratched = scracthed 
-        }
+    // Borrowed this from Einar after I had solved it, cute parser
+    let parseCard (line : string) : int = 
+        let folder (seen, dups) x = 
+            if List.contains x seen then (seen, x :: dups) else (x :: seen, dups)
+        let findDuplicates lst = 
+            lst |> List.fold folder ([], []) |> snd
+        Regex.Matches(line, "\d+") 
+        |> Seq.map (fun m -> m.Value)
+        |> Seq.tail 
+        |> Seq.toList
+        |> findDuplicates
+        |> List.length 
 
-    let parseCards (s: string[]): Card list = 
-        s |> Array.map parseCard |> Array.toList
-
-    let countWinning (card: Card): int =
-        Set.intersect (Set.ofList card.Winning) (Set.ofList card.Scratched) |> Seq.length
-
+    let parseCards (s: string[]): Card list = s |> Array.map parseCard |> Array.toList
         
+    // not original, tried a faster way
     let countScore (cardList: Card list): int =
         let dict = Dictionary<int,int>()
         cardList.Length +
             ([ for i in [(cardList.Length - 1) .. -1 .. 0] do
-                   let mutable wins = countWinning cardList[i]
+                   let mutable wins = cardList[i] 
                    [ for j in [(i + 1) .. i + wins] do
                             wins <- wins + dict[j]
                    ] |> ignore
@@ -43,7 +38,6 @@ module Input =
                    yield wins 
             ] |> List.sum )
          
-
     [<Fact>]
     let countWinningTest() =
         let input = readInit "testinput.txt" |> parseCards
@@ -55,6 +49,5 @@ module Input =
         let input = readInit "input.txt" |> parseCards
         let winningCount = countScore input
         Assert.Equal(8467762, winningCount)
-
 
 module Program = let [<EntryPoint>] main _ = 0
