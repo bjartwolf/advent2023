@@ -46,17 +46,19 @@ module Input =
     let memoedWinning (cards: Card list) =
         memoize (countWinningById cards)
 
-    let rec countCards (cards: Card list) (hand: CardId list) (score: int): int =
+    let countCards (cards: Card list) (hand: CardId list): int =
         let memoCounter = memoedWinning cards
-        let newScore = score + hand.Length 
-        let nextWins = hand |> List.map (fun x -> memoCounter x) |> List.collect id
-        if nextWins |> List.isEmpty then 
-            newScore 
-        else 
-            newScore + (countCards cards nextWins score)
+        let rec innerCounter  (hand: CardId list) (score: int): int =
+            let newScore = score + hand.Length 
+            let nextWins = hand |> List.map (fun x -> memoCounter x) |> List.collect id
+            if nextWins |> List.isEmpty then 
+                newScore 
+            else 
+                newScore + (innerCounter nextWins score)
+        innerCounter hand 0
 
     let countScore (cardList: Card list): int =
-        countCards cardList (cardList |> List.map (fun x -> x.Id)) 0
+        countCards cardList (cardList |> List.map (fun x -> x.Id))
 
     [<Fact>]
     let countWinningTest() =
