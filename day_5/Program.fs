@@ -38,7 +38,7 @@ module Input =
         seeds, maps 
 
     let isInRange (seed: int64) (map: line) : bool = 
-        [map.src .. map.src + map.rng - 1L] |> List.contains seed
+        seed >= map.src && seed <= map.src+map.rng - 1L 
 
     [<Fact>]
     let testRanges () =
@@ -105,7 +105,6 @@ module Input =
         let input = readInit "input.txt" 
         let seeds,maps = input
         let locations  = seeds |> List.map (fun s -> mapSeedThroughMaps maps s)
-        Assert.Equal(35L, locations |> List.min)
-
+        Assert.Equal(2149227330L, locations |> List.min)
 
 module Program = let [<EntryPoint>] main _ = 0
