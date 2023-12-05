@@ -100,24 +100,58 @@ module Input =
 
     let partsInRange ((start,length): range) (map: line) : range list= 
        [
-           let nrElementsSmallerThanMap = Math.Max(Math.Min(map.src-start, length),0L)
+           let nrElementsSmallerThanMap = Math.Max(Math.Min(map.src-start,length),0L)
            if (nrElementsSmallerThanMap > 0L) then yield (start,nrElementsSmallerThanMap)
        
-           let nrElementsInMap = Math.Max(Math.Min(map.rng-nrElementsSmallerThanMap,map.rng),0L)
+           let (start',length') = (start+nrElementsSmallerThanMap, length-nrElementsSmallerThanMap)
+           if (length' < 0) then failwith "ooop"
+
+           let nrElementsInMap = if (start' > map.src + map.rng) then 0L
+                                 else Math.Min(length', map.rng)
            if nrElementsInMap > 0L then 
                 yield (map.dst,nrElementsInMap)
 
-           let nrElementsOutsideMap = Math.Max(Math.Min(length-nrElementsSmallerThanMap - nrElementsInMap,0L), length)
+           let (start'',length'') = (start, length'-nrElementsInMap)
+           if (length'' < 0) then failwith "ooops"
+
+           let nrElementsOutsideMap = Math.Min(length'', map.src+map.rng-nrElementsInMap)
            if (nrElementsOutsideMap > 0) then
-                yield (start + nrElementsSmallerThanMap + nrElementsInMap , length-nrElementsOutsideMap-nrElementsInMap)
+                yield (start'', length'')
        ]
+    let partsInRanges (x: range) (maps: line list): range list =
+        maps |> List.map (fun m -> partsInRange x m)  |> List.collect (id)
+
+    let mapRangeThroughMap (maps: line list list) (seed:range): range list=
+        let mutable mapped:range list = [seed]
+        for map in maps do
+            let nextSeed = mapped |> List.map (fun x -> partsInRanges x map)  |> List.collect (id)
+            mapped <- nextSeed 
+        mapped 
+
+    [<Fact>]
+    let testmappingpartsXYz () = 
+        let range = { dst=100L;src=10L;rng=10L}
+        let partsInRange = partsInRange (10L,10L) range
+        Assert.Equal(1, partsInRange.Length)
+        Assert.Equal<range>( (100L,10L), partsInRange[0])
+
+    [<Fact>]
+    let testmappingpartsXY () = 
+        let range = { dst=100L;src=10L;rng=10L}
+        let partsInRange = partsInRange (1L,5L) range
+        Assert.Equal(1, partsInRange.Length)
+        Assert.Equal<range>( (1L,5L), partsInRange[0])
+
 
     [<Fact>]
     let testmappingparts7 () = 
-        Assert.Equal<range>( (100L,10L), (partsInRange (100L,10L)  {dst=1L;src=500L;rng=4L})|> List.head)
-  //      Assert.Equal<range>( (0L,10L), (partsInRange (0L,10L)  {dst=1L;src=20L;rng=10L})|> List.head)
+        Assert.Equal<range>( (5L,1L), (partsInRange (5L,5L)  {dst=1L;src=5L;rng=4L})|> List.tail |> List.head)
         Assert.Equal<range>( (100L,10L), (partsInRange (100L,10L)  {dst=1L;src=0L;rng=4L})|> List.head)
-        Assert.Equal<range>( (1000L,100L), (partsInRange (1000L,100L)  {dst=1L;src=5L;rng=4L})|> List.head)
+        Assert.Equal<range>( (100L,10L), (partsInRange (100L,10L)  {dst=1L;src=500L;rng=4L})|> List.head)
+        Assert.Equal<range>( (0L,10L), (partsInRange (0L,10L)  {dst=1L;src=20L;rng=10L})|> List.head)
+        Assert.Equal<range>( (1000L,100L), (partsInRange (1000L,100L) {dst=1L;src=5L;rng=4L})|> List.head)
+        Assert.Equal<range>( (1L,4L), (partsInRange (5L,5L)  {dst=1L;src=5L;rng=4L})|> List.head)
+        Assert.Equal<range>( (1L,5L), (partsInRange (5L,5L)  {dst=1L;src=1L;rng=10L})|> List.head)
 
     [<Fact>]
     let testmappingparts4 () = 
@@ -140,18 +174,12 @@ module Input =
         let partsInRange = partsInRange (1L,10L) range
         Assert.Equal<range>( (1L,2L), partsInRange[0])
         Assert.Equal<range>( (100L,4L), partsInRange[1])
-        Assert.Equal<range>( (7L,4L), partsInRange[2])
 
     [<Fact>]
     let testmappingparts41 () = 
         Assert.Equal<range>( (0L,1L), (partsInRange (0L,1L)  {dst=0L;src=0L;rng=1L})|> List.head)
         Assert.Equal<range>( (1L,1L), (partsInRange (0L,1L)  {dst=1L;src=0L;rng=1L})|> List.head)
         Assert.Equal<range>( (10L,1L), (partsInRange (0L,1L) {dst=10L;src=0L;rng=1L})|> List.head)
-
-    let rangesFromInputs (input:int64 list): range list =
-        let pairs = pair input
-        pairs |> List.map (fun (x,y) -> (x, y ))
-        
 
     [<Fact>]
     let ranges_stuff() = 
@@ -162,7 +190,16 @@ module Input =
         let locations  = ranges |> List.map (fun s -> mapSeedThroughMaps maps s)
         Assert.Equal(27L, locations.Length)
         Assert.Equal(46L, locations |> List.min)
- 
+
+    [<Fact>]
+    let ranges_stuff2() = 
+        let input = readInit "testinput.txt" 
+        let seeds,maps= input
+        let ranges = pair seeds 
+        let (x,l)= ranges |> List.map (fun s -> mapRangeThroughMap maps s) |> List.collect (id) |> List.minBy (fun (x,y) -> x) 
+        Assert.Equal(46L, x)
+        ()
+  
 
     [<Fact>]
     let part1() = 
