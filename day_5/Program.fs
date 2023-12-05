@@ -5,7 +5,7 @@ module Input =
     open System
     open System.IO
     open Xunit 
-    type line = { src: int; dst: int; rng: int}
+    type line = { dst: int; src: int; rng: int}
     let groupByWhiteSpace (input: string[]) : string list list =
         let mutable tmpGroup: string list = []
         let mutable readingGroup = false
@@ -27,7 +27,7 @@ module Input =
         let groups = groupByWhiteSpace input 
         groups |> List.map (fun map -> map |> List.map (fun l -> 
             let nums =  l.Split(" ") |> Array.map (fun n -> int n)
-            { src=nums[0]; dst=nums[1]; rng = nums[2]} ))
+            { dst=nums[0]; src=nums[1]; rng = nums[2]} ))
 
     let test_seeds = [79;14;55;13]
     let readInit (filePath: string): (int list* line list list) = 
@@ -36,6 +36,19 @@ module Input =
         let maps = readGroups input[2..] 
         seeds, [[{src=1;dst=1;rng=1}]]
 
+    let isInRange (seed: int) (map: line) : bool = 
+        [map.src .. map.src + map.rng - 1] |> List.contains seed
+
+    [<Fact>]
+    let testRanges () =
+        let testMap = {dst=50;src=98;rng=2}
+        Assert.False(isInRange 97 testMap)
+        Assert.True(isInRange 98 testMap)
+        Assert.True(isInRange 99 testMap)
+        Assert.False(isInRange 100 testMap)
+        
+//    let mapSeedToNextMap (map: line list) (num:int): int =
+        
 
     [<Fact>]
     let test2 () = 
