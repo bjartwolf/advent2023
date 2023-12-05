@@ -100,17 +100,24 @@ module Input =
 
     let partsInRange ((start,length): range) (map: line) : range list= 
        [
-           let nrElementsSmallerThanMap = Math.Max(Math.Min(map.src - start, length),0L)
+           let nrElementsSmallerThanMap = Math.Max(Math.Min(map.src-start, length),0L)
            if (nrElementsSmallerThanMap > 0L) then yield (start,nrElementsSmallerThanMap)
        
-           let nrElementsInMap = Math.Max(Math.Min(map.rng, length - nrElementsSmallerThanMap),0L)
+           let nrElementsInMap = Math.Max(Math.Min(map.rng-nrElementsSmallerThanMap,map.rng),0L)
            if nrElementsInMap > 0L then 
                 yield (map.dst,nrElementsInMap)
 
-           let nrElementsOutsideMap = Math.Max(Math.Min(length-nrElementsSmallerThanMap - nrElementsInMap, length),0L)
+           let nrElementsOutsideMap = Math.Max(Math.Min(length-nrElementsSmallerThanMap - nrElementsInMap,0L), length)
            if (nrElementsOutsideMap > 0) then
-                yield (map.src + nrElementsOutsideMap, nrElementsOutsideMap)
+                yield (start + nrElementsSmallerThanMap + nrElementsInMap , length-nrElementsOutsideMap-nrElementsInMap)
        ]
+
+    [<Fact>]
+    let testmappingparts7 () = 
+        Assert.Equal<range>( (100L,10L), (partsInRange (100L,10L)  {dst=1L;src=500L;rng=4L})|> List.head)
+  //      Assert.Equal<range>( (0L,10L), (partsInRange (0L,10L)  {dst=1L;src=20L;rng=10L})|> List.head)
+        Assert.Equal<range>( (100L,10L), (partsInRange (100L,10L)  {dst=1L;src=0L;rng=4L})|> List.head)
+        Assert.Equal<range>( (1000L,100L), (partsInRange (1000L,100L)  {dst=1L;src=5L;rng=4L})|> List.head)
 
     [<Fact>]
     let testmappingparts4 () = 
