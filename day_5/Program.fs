@@ -119,12 +119,12 @@ module Input =
                 yield (start'', length'')
        ]
     let partsInRanges (x: range) (maps: line list): range list =
-        maps |> List.map (fun m -> partsInRange x m)  |> List.collect (id)
+        maps |> List.collect (fun m -> partsInRange x m)
 
     let mapRangeThroughMap (maps: line list list) (seed:range): range list=
         let mutable mapped:range list = [seed]
         for map in maps do
-            let nextSeed = mapped |> List.map (fun x -> partsInRanges x map)  |> List.collect (id)
+            let nextSeed = mapped |> List.collect (fun x -> partsInRanges x map)  
             mapped <- nextSeed 
         mapped 
 
@@ -197,7 +197,8 @@ module Input =
         let seeds,maps= input
         let ranges = pair seeds 
         let (x,l)= ranges |> List.map (fun s -> mapRangeThroughMap maps s) |> List.collect (id) |> List.minBy (fun (x,y) -> x) 
-        Assert.Equal(46L, x)
+        Assert.Equal(46L, x) 
+        //Console.WriteLine(x)
         ()
   
 
