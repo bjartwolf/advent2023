@@ -59,8 +59,11 @@ module Input =
 
     let partsInRange ((start,length): range) (map: line) : range list= 
        [
+           let mutable total = 0L
            let nrElementsSmallerThanMap = Math.Max(Math.Min(map.src-start,length),0L)
-           if (nrElementsSmallerThanMap > 0L) then yield (start,nrElementsSmallerThanMap)
+           if (nrElementsSmallerThanMap > 0L) then 
+                total <- total + nrElementsSmallerThanMap
+                yield (start,nrElementsSmallerThanMap)
        
            let (start',length') = (start+nrElementsSmallerThanMap, length-nrElementsSmallerThanMap)
            if (length' < 0) then failwith "ooop"
@@ -68,16 +71,27 @@ module Input =
            let nrElementsInMap = if (start' > map.src + map.rng) then 0L
                                  else Math.Min(length', map.rng)
            if nrElementsInMap > 0L then 
+                total <- total + nrElementsInMap 
                 yield (start'-map.src+map.dst,nrElementsInMap)
 
            let (start'',length'') = (start+nrElementsSmallerThanMap + nrElementsInMap, length'-nrElementsInMap)
            if (length'' < 0) then failwith "ooops"
 
-           let nrElementsOutsideMap = Math.Min(length'', map.src+map.rng-nrElementsInMap)
-           if (nrElementsOutsideMap > 0) then
+           let a = start''
+           let b = length''
+           //let nrElementsOutsideMap = Math.Min(length'', map.src+map.rng-nrElementsInMap)
+           let nrElementsOutsideMap = length'' 
+           if (nrElementsOutsideMap > 0L) then
+                total <- total + length'' 
                 yield (start'', length'')
+           if (nrElementsInMap + nrElementsOutsideMap + nrElementsSmallerThanMap <> length) then failwith "boom"
+           if (total <> length) then failwith "too long"
        ]
 
+    [<Fact>]
+    let testmappingpartsBoom () = 
+        Assert.Equal<range>( (100L,10L), (partsInRange (100L,10L)  {dst=1L;src=0L;rng=4L})|> List.head)
+ 
     [<Fact>]
     let testmappingpartsTouchingRight() = 
         let range = { dst=100L;src=10L;rng=10L}
@@ -93,7 +107,8 @@ module Input =
         let mutable mapped:range list = [seed]
         for map in maps do
             let nextSeed = mapped |> List.collect (fun x -> partsInRanges x map)  
-            mapped <- nextSeed 
+            let deduped = nextSeed |> List.distinct
+            mapped <- deduped 
         mapped 
 
     [<Fact>]
@@ -107,9 +122,9 @@ module Input =
     [<Fact>]
     let testmappingpartsBug () = 
         let testMap = {dst=50L;src=98L;rng=2L}
-        Assert.Equal<range>( (50L,1L), (partsInRange (98L,1L) testMap )[0])
-        Assert.Equal<range>( (51L,1L), (partsInRange (99L,1L) testMap )[0])
-        Assert.Equal<range>((10L,1L),  (partsInRange (10L,1L) testMap )[0])
+        Assert.Equal<range>( [(50L,1L)], (partsInRange (98L,1L) testMap ))
+        Assert.Equal<range>( [(51L,1L)], (partsInRange (99L,1L) testMap ))
+        Assert.Equal<range>( [(10L,1L)],  (partsInRange (10L,1L) testMap ))
  
     [<Fact>]
     let testmappingpartsXA () = 
@@ -130,6 +145,16 @@ module Input =
         let partsInRange = partsInRange (50L,10L) range
         Assert.Equal(1, partsInRange.Length)
         Assert.Equal<range>( (50L,10L), partsInRange[0])
+
+    [<Fact>]
+    let testmappingsubsetmapped() = 
+        let range = { dst=100L;src=10L;rng=10L}
+        let partsInRange = partsInRange (8L,22L) range
+        Assert.Equal(3, partsInRange.Length)
+        Assert.Equal<range>( (8L,2L), partsInRange[0])
+        Assert.Equal<range>( (100L,10L), partsInRange[1])
+        Assert.Equal<range>( (20L,10L), partsInRange[2])
+
  
     [<Fact>]
     let testmappingpartsInTheMiddle() = 
@@ -187,21 +212,21 @@ module Input =
         let input = readInit "testinput.txt" 
         let seeds,maps= input
         let pairs = pair seeds 
+        let threemaps = [maps[0]]
         let ranges = pairs |> List.map (fun (first,number) -> [first .. first + number - 1L]) |> List.collect (id) 
-        let locations  = ranges |> List.map (fun s -> mapSeedThroughMaps maps s)
-        Assert.Equal(27L, locations.Length)
-        Assert.Equal(46L, locations |> List.min)
-
-
+        //let locations  = ranges |> List.map (fun s -> mapSeedThroughMaps maps s)
+        let locations  = ranges |> List.map (fun s -> mapSeedThroughMaps threemaps s)
+        //Assert.Equal(27L, locations.Length)
+        //Assert.Equal(46L, locations |> List.min)
+        Assert.Equal(57L, locations |> List.min)
 
     [<Fact>]
     let ranges_stuff2() = 
         let input = readInit "testinput.txt" 
         let seeds,maps= input
         let ranges = pair seeds 
-        let foo= ranges |> List.map (fun s -> mapRangeThroughMap maps s) 
         let (x,l)= ranges |> List.map (fun s -> mapRangeThroughMap maps s) |> List.collect (id) |> List.minBy (fun (x,y) -> x) 
-        //Assert.Equal(46L, x) 
+        Assert.Equal(46L, x) 
         //Console.WriteLine(x)
         ()
   
@@ -210,16 +235,16 @@ module Input =
     let part1() = 
         let input = readInit "input.txt" 
         let seeds,maps = input
-        ()
-//        let locations  = seeds |> List.map (fun s -> mapSeedThroughMaps maps s)
-//        Assert.Equal(214922730L, locations |> List.min)
+        let locations  = seeds |> List.map (fun s -> mapSeedThroughMaps maps s)
+        Assert.Equal(214922730L, locations |> List.min)
 
 module Program = 
     open Input
     let [<EntryPoint>] main _ = 
         let input = readInit "input.txt" 
         let seeds,maps = input
-        let locations  = seeds |> List.map (fun s -> mapSeedThroughMaps maps s)
-        Console.WriteLine(locations)
+        let ranges = pair seeds 
+        let (x,l)= ranges |> List.map (fun s -> mapRangeThroughMap maps s) |> List.collect (id) |> List.minBy (fun (x,y) -> x) 
+        Console.WriteLine(x)
         Console.ReadLine() |> ignore
         0
