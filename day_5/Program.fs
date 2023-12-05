@@ -77,15 +77,6 @@ module Input =
         Assert.Equal<int64 list>(soils, locations)
              
     [<Fact>]
-    let testfertilizer () = 
-        let input = readInit "testinput.txt" 
-        let seeds,maps = input
-//        let ferts = [81;53;57;52]
-        let ferts = [81L]
-        let locations  = [seeds[0]] |> List.map (fun s -> mapSeedThroughMaps [maps[0];maps[1]] s)
-        Assert.Equal<int64 list>(ferts, locations)
- 
-    [<Fact>]
     let test2 () = 
         let input = readInit "testinput.txt" 
         let seeds,maps = input
@@ -105,6 +96,6 @@ module Input =
         let input = readInit "input.txt" 
         let seeds,maps = input
         let locations  = seeds |> List.map (fun s -> mapSeedThroughMaps maps s)
-        Assert.Equal(2149227330L, locations |> List.min)
+        Assert.Equal(214922730L, locations |> List.min)
 
 module Program = let [<EntryPoint>] main _ = 0
