@@ -15,7 +15,7 @@ module Input =
               if (not readingGroup && crntLine.Contains(":")) then
                 tmpGroup <- [] 
                 readingGroup <- true
-              if readingGroup && crntLine <> "" then
+              elif readingGroup && crntLine <> "" then
                 tmpGroup <- tmpGroup @ [crntLine]
               else
                 if crntLine = "" then
@@ -23,12 +23,17 @@ module Input =
                     yield tmpGroup
         ] 
 
+    let readGroups (input: string[]): line list list =
+        let groups = groupByWhiteSpace input 
+        groups |> List.map (fun map -> map |> List.map (fun l -> 
+            let nums =  l.Split(" ") |> Array.map (fun n -> int n)
+            { src=nums[0]; dst=nums[1]; rng = nums[2]} ))
+
     let test_seeds = [79;14;55;13]
     let readInit (filePath: string): (int list* line list list) = 
         let input = System.IO.File.ReadAllLines filePath
         let seeds = input[0].Replace("seeds: ","").Split(" ") |> Array.map (fun x -> int x) |> Array.toList
-        let maps = input[2..] 
-        let bar = groupByWhiteSpace maps 
+        let maps = readGroups input[2..] 
         seeds, [[{src=1;dst=1;rng=1}]]
 
 
