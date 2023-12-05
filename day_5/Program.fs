@@ -91,6 +91,23 @@ module Input =
         let locations  = seeds |> List.map (fun s -> mapSeedThroughMaps maps s)
         Assert.Equal(35L, locations |> List.min)
 
+    let rec pair list =
+        match list with
+        | x :: y :: rest -> (x, y) :: pair rest
+        | _ -> []
+
+
+    [<Fact>]
+    let ranges_stuff() = 
+        let input = readInit "testinput.txt" 
+        let seeds,maps= input
+        let pairs = pair seeds 
+        let ranges = pairs |> List.map (fun (first,number) -> [first .. first + number - 1L]) |> List.collect (id) 
+        let locations  = ranges |> List.map (fun s -> mapSeedThroughMaps maps s)
+        Assert.Equal(27L, locations.Length)
+        Assert.Equal(46L, locations |> List.min)
+ 
+
     [<Fact>]
     let part1() = 
         let input = readInit "input.txt" 
