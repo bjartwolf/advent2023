@@ -111,8 +111,10 @@ module Input =
            if nrElementsInMap > 0L then 
                 yield (map.dst,nrElementsInMap)
 
-           let (start'',length'') = (start, length'-nrElementsInMap)
+           let (start'',length'') = (start+nrElementsSmallerThanMap + nrElementsInMap, length'-nrElementsInMap)
            if (length'' < 0) then failwith "ooops"
+           let a = start''
+           let b = length''
 
            let nrElementsOutsideMap = Math.Min(length'', map.src+map.rng-nrElementsInMap)
            if (nrElementsOutsideMap > 0) then
@@ -129,14 +131,42 @@ module Input =
         mapped 
 
     [<Fact>]
-    let testmappingpartsXYz () = 
+    let testmappingpartsXA () = 
+        Assert.Equal<range>( (1L,4L), (partsInRange (5L,5L)  {dst=1L;src=5L;rng=4L})[0])
+        Assert.Equal<range>( (9L,1L), (partsInRange (5L,5L)  {dst=1L;src=5L;rng=4L})[1])
+ 
+    [<Fact>]
+    let testmappingpartsTouchingRight() = 
+        let range = { dst=100L;src=10L;rng=10L}
+        let partsInRange = partsInRange (15L,15L) range
+        Assert.Equal(2, partsInRange.Length)
+        Assert.Equal<range>( (100L,10L), partsInRange[0])
+        Assert.Equal<range>( (25L,5L), partsInRange[1])
+
+    [<Fact>]
+    let testmappingpartsTouchingLeft() = 
+        let range = { dst=100L;src=10L;rng=10L}
+        let partsInRange = partsInRange (5L,15L) range
+        Assert.Equal(2, partsInRange.Length)
+        Assert.Equal<range>( (5L,5L), partsInRange[0])
+        Assert.Equal<range>( (100L,10L), partsInRange[1])
+
+    [<Fact>]
+    let testmappingpartsLarger() = 
+        let range = { dst=100L;src=10L;rng=10L}
+        let partsInRange = partsInRange (50L,10L) range
+        Assert.Equal(1, partsInRange.Length)
+        Assert.Equal<range>( (50L,10L), partsInRange[0])
+ 
+    [<Fact>]
+    let testmappingpartsInTheMiddle() = 
         let range = { dst=100L;src=10L;rng=10L}
         let partsInRange = partsInRange (10L,10L) range
         Assert.Equal(1, partsInRange.Length)
         Assert.Equal<range>( (100L,10L), partsInRange[0])
 
     [<Fact>]
-    let testmappingpartsXY () = 
+    let testmappingpartsBefore () = 
         let range = { dst=100L;src=10L;rng=10L}
         let partsInRange = partsInRange (1L,5L) range
         Assert.Equal(1, partsInRange.Length)
@@ -145,7 +175,7 @@ module Input =
 
     [<Fact>]
     let testmappingparts7 () = 
-        Assert.Equal<range>( (5L,1L), (partsInRange (5L,5L)  {dst=1L;src=5L;rng=4L})|> List.tail |> List.head)
+        Assert.Equal<range>( (9L,1L), (partsInRange (5L,5L)  {dst=1L;src=5L;rng=4L})|> List.tail |> List.head)
         Assert.Equal<range>( (100L,10L), (partsInRange (100L,10L)  {dst=1L;src=0L;rng=4L})|> List.head)
         Assert.Equal<range>( (100L,10L), (partsInRange (100L,10L)  {dst=1L;src=500L;rng=4L})|> List.head)
         Assert.Equal<range>( (0L,10L), (partsInRange (0L,10L)  {dst=1L;src=20L;rng=10L})|> List.head)
