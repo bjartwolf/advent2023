@@ -47,8 +47,19 @@ module Input =
         Assert.True(isInRange 99 testMap)
         Assert.False(isInRange 100 testMap)
         
-//    let mapSeedToNextMap (map: line list) (num:int): int =
-        
+    let mapSeedToNextMap (maps: line list) (seed:int): int =
+        [ for map in maps do
+                if isInRange seed map then
+                    yield (map.dst + seed - map.src)
+          yield seed
+        ] |> List.head
+
+    [<Fact>]
+    let testMapToNext () =
+        let testMap = {dst=50;src=98;rng=2}
+        Assert.Equal(50, mapSeedToNextMap [testMap] 98)
+        Assert.Equal(51, mapSeedToNextMap [testMap] 99)
+             
 
     [<Fact>]
     let test2 () = 
