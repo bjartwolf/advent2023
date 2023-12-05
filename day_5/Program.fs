@@ -5,7 +5,7 @@ module Input =
     open System
     open System.IO
     open Xunit 
-    type line = { dst: int; src: int; rng: int}
+    type line = { dst: int64; src: int64; rng: int64}
     let groupByWhiteSpace (input: string[]) : string list list =
         let mutable tmpGroup: string list = []
         let mutable readingGroup = false
@@ -26,46 +26,86 @@ module Input =
     let readGroups (input: string[]): line list list =
         let groups = groupByWhiteSpace input 
         groups |> List.map (fun map -> map |> List.map (fun l -> 
-            let nums =  l.Split(" ") |> Array.map (fun n -> int n)
+            let nums =  l.Split(" ") |> Array.map (fun n -> int64 n)
             { dst=nums[0]; src=nums[1]; rng = nums[2]} ))
 
-    let test_seeds = [79;14;55;13]
-    let readInit (filePath: string): (int list* line list list) = 
+    let test_seeds = [79L;14L;55L;13L]
+    let readInit (filePath: string): (int64 list* line list list) = 
         let input = System.IO.File.ReadAllLines filePath
-        let seeds = input[0].Replace("seeds: ","").Split(" ") |> Array.map (fun x -> int x) |> Array.toList
+        let seedsArray = input[0].Replace("seeds: ","").Split(" ") |> Array.map (fun x -> int64 x) 
+        let seeds = seedsArray|> Array.toList
         let maps = readGroups input[2..] 
-        seeds, [[{src=1;dst=1;rng=1}]]
+        seeds, maps 
 
-    let isInRange (seed: int) (map: line) : bool = 
-        [map.src .. map.src + map.rng - 1] |> List.contains seed
+    let isInRange (seed: int64) (map: line) : bool = 
+        [map.src .. map.src + map.rng - 1L] |> List.contains seed
 
     [<Fact>]
     let testRanges () =
-        let testMap = {dst=50;src=98;rng=2}
+        let testMap = {dst=50L;src=98L;rng=2L}
         Assert.False(isInRange 97 testMap)
         Assert.True(isInRange 98 testMap)
         Assert.True(isInRange 99 testMap)
         Assert.False(isInRange 100 testMap)
         
-    let mapSeedToNextMap (maps: line list) (seed:int): int =
+    let mapSeedToNextMap (maps: line list) (seed:int64): int64 =
         [ for map in maps do
                 if isInRange seed map then
                     yield (map.dst + seed - map.src)
           yield seed
         ] |> List.head
+            
+    let mapSeedThroughMaps (maps: line list list) (seed:int64): int64 =
+        let mutable mapped = seed 
+        for map in maps do
+            mapped <- mapSeedToNextMap map mapped 
+        mapped 
 
     [<Fact>]
     let testMapToNext () =
-        let testMap = {dst=50;src=98;rng=2}
-        Assert.Equal(50, mapSeedToNextMap [testMap] 98)
-        Assert.Equal(51, mapSeedToNextMap [testMap] 99)
-        Assert.Equal(10, mapSeedToNextMap [testMap] 10)
-             
+        let testMap = {dst=50L;src=98L;rng=2L}
+        Assert.Equal(50L, mapSeedToNextMap [testMap] 98L)
+        Assert.Equal(51L, mapSeedToNextMap [testMap] 99L)
+        Assert.Equal(10L, mapSeedToNextMap [testMap] 10L)
 
+    [<Fact>]
+    let testsoil () = 
+        let input = readInit "testinput.txt" 
+        let seeds,maps = input
+        let soils = [81L;14L;57L;13L]
+        let locations  = seeds |> List.map (fun s -> mapSeedThroughMaps [maps[0]] s)
+        Assert.Equal<int64 list>(soils, locations)
+             
+    [<Fact>]
+    let testfertilizer () = 
+        let input = readInit "testinput.txt" 
+        let seeds,maps = input
+//        let ferts = [81;53;57;52]
+        let ferts = [81L]
+        let locations  = [seeds[0]] |> List.map (fun s -> mapSeedThroughMaps [maps[0];maps[1]] s)
+        Assert.Equal<int64 list>(ferts, locations)
+ 
     [<Fact>]
     let test2 () = 
         let input = readInit "testinput.txt" 
-        let seeds,_= input
-        Assert.Equal<int list>(test_seeds, seeds) 
+        let seeds,maps = input
+        let locations  = seeds |> List.map (fun s -> mapSeedThroughMaps maps s)
+        Assert.Equal<int64 list>(test_seeds, seeds) 
+        Assert.Equal<int64 list>([82L;43L;86L;35L], locations) 
+
+    [<Fact>]
+    let test_testdata() = 
+        let input = readInit "testinput.txt" 
+        let seeds,maps = input
+        let locations  = seeds |> List.map (fun s -> mapSeedThroughMaps maps s)
+        Assert.Equal(35L, locations |> List.min)
+
+    [<Fact>]
+    let part1() = 
+        let input = readInit "input.txt" 
+        let seeds,maps = input
+        let locations  = seeds |> List.map (fun s -> mapSeedThroughMaps maps s)
+        Assert.Equal(35L, locations |> List.min)
+
 
 module Program = let [<EntryPoint>] main _ = 0
