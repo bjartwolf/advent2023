@@ -59,6 +59,7 @@ module Input =
         let testMap = {dst=50;src=98;rng=2}
         Assert.Equal(50, mapSeedToNextMap [testMap] 98)
         Assert.Equal(51, mapSeedToNextMap [testMap] 99)
+        Assert.Equal(10, mapSeedToNextMap [testMap] 10)
              
 
     [<Fact>]
