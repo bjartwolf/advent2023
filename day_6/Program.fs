@@ -10,21 +10,11 @@ module Input =
     let race_large_test = { tt= 71530L; dist = 940200L}
     let race_large_real = { tt= 48938466L; dist = 261119210191063L}
 
-    let tts (races: race list) = races |> List.map (fun r -> r.tt)
-    let ds (races: race list) = races |> List.map (fun r -> r.dist)
-
     let dist time_total time_pressed = { tp = time_pressed;
                                          dist_raced = time_pressed * (time_total - time_pressed)  }
 
-    let distances time_total times_pressed =
-        times_pressed |> List.map (fun time -> dist time_total time)
-
-    let filter_win_times (attempts: attempt list) (record:int64) : attempt list =
-        attempts |> List.filter (fun a -> a.dist_raced > record )
-
     let findMin (r: race): int64 =
        let max_guess = r.tt
-       
        let rec innerGuess (guess:int64): int64 = 
            let guess_dist = (dist r.tt guess).dist_raced 
            let prev_attempt_dist = (dist r.tt (guess - 1L)).dist_raced 
