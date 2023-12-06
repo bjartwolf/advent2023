@@ -38,8 +38,15 @@ module Input =
     let findMax (r: race): int =
        let min_guess = 0
        let max_guess = r.dist
-       let guess = max_guess / 2
-       guess
+       let guess = max_guess / 2 - 1
+       let isGuessWin = (dist r.tt guess).dist_raced 
+       let isPrevGuessWin = (dist r.tt (guess - 1)).dist_raced 
+       if (isGuessWin > r.dist && not (isPrevGuessWin > r.dist)) then
+           guess
+       else if (isGuessWin > r.dist) then
+           isGuessWin - 1
+       else 
+           isGuessWin + 1
 
     let find_all_wintimes_binary (r: race)  : int =
         let wins = find_all_wintimes r 
