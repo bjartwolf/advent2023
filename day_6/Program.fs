@@ -36,7 +36,6 @@ module Input =
 
     // search min is 0, search max is max, searching for smallest number that will win
     let findMin (r: race): int =
-       let min_guess = 0
        let max_guess = r.tt
        
        let rec innerGuess (guess:int): int = 
@@ -52,6 +51,29 @@ module Input =
                innerGuess newGuess
        innerGuess (max_guess / 2 - 1)
 
+    let findMax (r: race): int =
+       let max_guess = r.tt
+       
+       let rec innerGuess (guess:int): int = 
+           let guess_dist = (dist r.tt guess).dist_raced 
+           let next_attempt_dist = (dist r.tt (guess + 1)).dist_raced 
+           if (guess_dist > r.dist && not (next_attempt_dist > r.dist)) then
+               guess
+           else if (guess_dist > r.dist) then
+               let newGuess = guess + 1
+               innerGuess newGuess
+           else 
+               let newGuess = guess - 1
+               innerGuess newGuess
+       innerGuess (max_guess / 2 - 1)
+
+    [<Fact>]
+    let find_largest_binary() =
+         Assert.Equal(11, findMax races_test[1])
+         Assert.Equal(5, findMax races_test[0])
+         Assert.Equal(19, findMax races_test[2])
+
+
     [<Fact>]
     let find_smallest_binary() =
         Assert.Equal(4, findMin races_test[1])
@@ -61,7 +83,7 @@ module Input =
     let find_all_wintimes_binary (r: race)  : int =
         let wins = find_all_wintimes r 
         let find_max_wintime = wins |> List.max 
-        let find_max_wintime_binary = find_max_wintime 
+        let find_max_wintime_binary = findMax r 
         if find_max_wintime <> find_max_wintime_binary then failwith (sprintf "max is wrong real %A guess %A" find_max_wintime find_max_wintime_binary)
         let find_min_wintime = wins |> List.min
 
