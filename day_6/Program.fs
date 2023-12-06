@@ -37,7 +37,7 @@ module Input =
     // search min is 0, search max is max, searching for smallest number that will win
     let findMin (r: race): int =
        let min_guess = 0
-       let max_guess = r.dist
+       let max_guess = r.tt
        
        let rec innerGuess (guess:int): int = 
            let guess_dist = (dist r.tt guess).dist_raced 
@@ -54,8 +54,9 @@ module Input =
 
     [<Fact>]
     let find_smallest_binary() =
-        Assert.Equal(2, findMin races_test[0])
         Assert.Equal(4, findMin races_test[1])
+        Assert.Equal(2, findMin races_test[0])
+        Assert.Equal(11, findMin races_test[2])
 
         (*
     let find_all_wintimes_binary (r: race)  : int =
@@ -68,15 +69,16 @@ module Input =
         let find_min_wintime_binary = findMin r 
         if find_min_wintime <> find_min_wintime_binary then failwith (sprintf "min is wrong real %A guess %A" find_min_wintime find_max_wintime_binary)
         find_max_wintime - find_min_wintime + 1
-*)
-    let find_all_wintimes_count (r:race): int = 
-        find_all_wintimes r |> List.length 
 
     [<Fact>]
     let binary_is_equal() =
         Assert.Equal(4, find_all_wintimes_binary races_test[0] )
         Assert.Equal(8, find_all_wintimes_binary races_test[1] )
         Assert.Equal(9, find_all_wintimes_binary races_test[2] )
+
+*)
+    let find_all_wintimes_count (r:race): int = 
+        find_all_wintimes r |> List.length 
 
     [<Fact>]
     let test_time_pressed_list() =
