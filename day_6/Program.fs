@@ -34,9 +34,18 @@ module Input =
     // find binary search, make work for long, make equal for testdata
     // should calculate the same results
 
+    // search min is 0, search max is max, searching for smallest number that will win
+    let findMax (r: race): int =
+       let min_guess = 0
+       let max_guess = r.dist
+       let guess = max_guess / 2
+       guess
+
     let find_all_wintimes_binary (r: race)  : int =
         let wins = find_all_wintimes r 
         let find_max_wintime = wins |> List.max 
+        let find_max_wintime_binary = findMax r 
+        if find_max_wintime <> find_max_wintime_binary then failwith "max is wrong"
         let find_min_wintime = wins |> List.min
         find_max_wintime - find_min_wintime + 1
 
