@@ -1,3 +1,6 @@
+open System
+
+
 module Input =
     open Xunit 
 
@@ -13,41 +16,19 @@ module Input =
     let dist time_total time_pressed = { tp = time_pressed;
                                          dist_raced = time_pressed * (time_total - time_pressed)  }
 
-    let findMin (r: race): int64 =
-       let max_guess = r.tt
-       let rec innerGuess (guess:int64): int64 = 
-           let guess_dist = (dist r.tt guess).dist_raced 
-           let prev_attempt_dist = (dist r.tt (guess - 1L)).dist_raced 
-           if (guess_dist > r.dist && not (prev_attempt_dist> r.dist)) then
-               guess
-           else if (guess_dist> r.dist) then
-               let newGuess = guess - 1L
-               innerGuess newGuess
-           else 
-               let newGuess = guess + 1L
-               innerGuess newGuess
-       innerGuess (max_guess / 2L - 1L)
+    let solve_smaller (a':int64) (b':int64) (c':int64) =
+        let (a,b,c) = float a', float b', float c'
+        (-b-Math.Sqrt(b*b-4.0*a*c))/(2.0*a)
 
-    let findMax (r: race): int64 =
-       let max_guess = r.tt
-       
-       let rec innerGuess (guess:int64): int64 = 
-           let guess_dist = (dist r.tt guess).dist_raced 
-           let next_attempt_dist = (dist r.tt (guess + 1L)).dist_raced 
-           if (guess_dist > r.dist && not (next_attempt_dist > r.dist)) then
-               guess
-           else if (guess_dist > r.dist) then
-               let newGuess = guess + 1L
-               innerGuess newGuess
-           else 
-               let newGuess = guess - 1L
-               innerGuess newGuess
-       innerGuess (max_guess / 2L - 1L)
+    let solve_larger(a':int64) (b':int64) (c':int64) =
+        let (a,b,c) = float a', float b', float c'
+        (-b+Math.Sqrt(b*b-4.0*a*c))/(2.0*a)
+
 
     let find_all_wintimes_binary (r: race)  : int64 =
-        let find_max_wintime_binary = findMax r 
-        let find_min_wintime_binary = findMin r 
-        find_max_wintime_binary - find_min_wintime_binary + 1L
+        let small = int64 (Math.Floor(solve_smaller 1 -r.tt r.dist)) + 1L
+        let large = int64 (Math.Ceiling(solve_larger 1 -r.tt r.dist)) - 1L
+        large - small + 1L
 
     [<Fact>]
     let binary_is_equal() =
