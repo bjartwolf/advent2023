@@ -23,8 +23,8 @@ module Input =
 
     let find_all_wintimes_binary (r: race)  : int64 =
         let small = int64 (Math.Floor(solve_smaller -r.tt r.dist)) + 1L
-        let large = int64 (Math.Ceiling(solve_larger -r.tt r.dist)) - 1L
-        large - small + 1L
+        let large = int64 (Math.Ceiling(solve_larger -r.tt r.dist)) 
+        large - small
 
     [<Fact>]
     let binary_is_equal() =
