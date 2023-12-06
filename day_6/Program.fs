@@ -13,9 +13,6 @@ module Input =
     let race_large_test = { tt= 71530L; dist = 940200L}
     let race_large_real = { tt= 48938466L; dist = 261119210191063L}
 
-    let dist time_total time_pressed = { tp = time_pressed;
-                                         dist_raced = time_pressed * (time_total - time_pressed)  }
-
     let solve_smaller (a':int64) (b':int64) (c':int64) =
         let (a,b,c) = float a', float b', float c'
         (-b-Math.Sqrt(b*b-4.0*a*c))/(2.0*a)
