@@ -6,6 +6,11 @@ module Input =
     let races_test = [ {tt=7;dist=9};
                        {tt=15;dist=40};
                        {tt=30;dist=200} ]
+    let races_real = [ 
+                       { tt=48; dist=261};
+                       { tt=93; dist=1192};
+                       { tt=84; dist=1019};
+                       { tt=66; dist=1063} ]
 
     let tts (races: race list) = races |> List.map (fun r -> r.tt)
     let ds (races: race list) = races |> List.map (fun r -> r.dist)
@@ -26,7 +31,21 @@ module Input =
         let attempts = distances r.tt times
         let filtered_distances = filter_win_times attempts  r.dist 
         filtered_distances |> List.map (fun a -> a.tp)
-        
+
+    let productWintimes (races: race list): int =
+        races 
+            |> List.map find_all_wintimes 
+            |> List.map (List.length) 
+            |> List.reduce (fun x y -> x * y)
+
+    [<Fact>]
+    let product_test() =
+        Assert.Equal(288, productWintimes races_test)
+
+    [<Fact>]
+    let product_real() =
+        Assert.Equal(1312850, productWintimes races_real)
+          
     [<Fact>]
     let test_time_pressed_list() =
         Assert.Equal<int list>([2;3;4;5;], find_all_wintimes races_test[0] )
@@ -50,4 +69,4 @@ module Input =
         Assert.Equal<int list>([9;40;200], ds races_test)
         Assert.Equal<int list>([0;1;2;3;4;5;6;7], tp_possible 7)
 
-module Program = let [<EntryPoint>] main _ = 0
+ module Program = let [<EntryPoint>] main _ = 0
