@@ -34,21 +34,27 @@ module Input =
     // find binary search, make work for long, make equal for testdata
     // should calculate the same results
 
-    let find_all_wintimes_binary (r: race)  : int list =
-        find_all_wintimes r  //|> List.tail
-             
+    let find_all_wintimes_binary (r: race)  : int =
+        let wins = find_all_wintimes r 
+        let find_max_wintime = wins |> List.max 
+        let find_min_wintime = wins |> List.min
+        find_max_wintime - find_min_wintime + 1
+
+    let find_all_wintimes_count (r:race): int = 
+        find_all_wintimes r |> List.length 
+
     [<Fact>]
     let binary_is_equal() =
-        Assert.Equal<int list>(find_all_wintimes races_test[0], find_all_wintimes_binary races_test[0] )
-        Assert.Equal<int list>(find_all_wintimes races_test[1], find_all_wintimes_binary races_test[1] )
-        Assert.Equal<int list>(find_all_wintimes races_test[2], find_all_wintimes_binary races_test[2] )
+        Assert.Equal(4, find_all_wintimes_binary races_test[0] )
+        Assert.Equal(8, find_all_wintimes_binary races_test[1] )
+        Assert.Equal(9, find_all_wintimes_binary races_test[2] )
 
     [<Fact>]
     let test_time_pressed_list() =
-        Assert.Equal<int list>([2;3;4;5;], find_all_wintimes races_test[0] )
-        Assert.Equal<int>(8, find_all_wintimes races_test[1] |> List.length) 
-        Assert.Equal<int>(9, find_all_wintimes races_test[2] |> List.length) 
-        ()
+        Assert.Equal(4, find_all_wintimes_count races_test[0] )
+        Assert.Equal(8, find_all_wintimes_count races_test[1] )
+        Assert.Equal(9, find_all_wintimes_count races_test[2] )
+
 
     [<Fact>]
     let test_time_pressed() =
