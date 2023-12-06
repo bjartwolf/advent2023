@@ -58,7 +58,6 @@ module Input =
         Assert.Equal(2, findMin races_test[0])
         Assert.Equal(11, findMin races_test[2])
 
-        (*
     let find_all_wintimes_binary (r: race)  : int =
         let wins = find_all_wintimes r 
         let find_max_wintime = wins |> List.max 
@@ -76,7 +75,6 @@ module Input =
         Assert.Equal(8, find_all_wintimes_binary races_test[1] )
         Assert.Equal(9, find_all_wintimes_binary races_test[2] )
 
-*)
     let find_all_wintimes_count (r:race): int = 
         find_all_wintimes r |> List.length 
 
