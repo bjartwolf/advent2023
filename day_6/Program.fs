@@ -45,7 +45,7 @@ module Input =
         let wins = find_all_wintimes r 
         let find_max_wintime = wins |> List.max 
         let find_max_wintime_binary = findMax r 
-        if find_max_wintime <> find_max_wintime_binary then failwith "max is wrong"
+        if find_max_wintime <> find_max_wintime_binary then failwith (sprintf "max is wrong real %A guess %A" find_max_wintime find_max_wintime_binary)
         let find_min_wintime = wins |> List.min
         find_max_wintime - find_min_wintime + 1
 
