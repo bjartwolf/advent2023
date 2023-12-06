@@ -13,18 +13,17 @@ module Input =
     let race_large_test = { tt= 71530L; dist = 940200L}
     let race_large_real = { tt= 48938466L; dist = 261119210191063L}
 
-    let solve_smaller (a':int64) (b':int64) (c':int64) =
-        let (a,b,c) = float a', float b', float c'
-        (-b-Math.Sqrt(b*b-4.0*a*c))/(2.0*a)
+    let solve_smaller (b':int64) (c':int64) =
+        let (b,c) = float b', float c'
+        (-b-Math.Sqrt(b*b-4.0*c))/(2.0)
 
-    let solve_larger(a':int64) (b':int64) (c':int64) =
-        let (a,b,c) = float a', float b', float c'
-        (-b+Math.Sqrt(b*b-4.0*a*c))/(2.0*a)
-
+    let solve_larger (b':int64) (c':int64) =
+        let (b,c) = float b', float c'
+        (-b+Math.Sqrt(b*b-4.0*c))/(2.0)
 
     let find_all_wintimes_binary (r: race)  : int64 =
-        let small = int64 (Math.Floor(solve_smaller 1 -r.tt r.dist)) + 1L
-        let large = int64 (Math.Ceiling(solve_larger 1 -r.tt r.dist)) - 1L
+        let small = int64 (Math.Floor(solve_smaller -r.tt r.dist)) + 1L
+        let large = int64 (Math.Ceiling(solve_larger -r.tt r.dist)) - 1L
         large - small + 1L
 
     [<Fact>]
