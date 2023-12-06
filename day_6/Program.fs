@@ -3,15 +3,16 @@ module Input =
     open System.IO
     open Xunit 
 
-    let readInit (filePath: string): int list = 
-        use sr = new StreamReader (filePath) 
-        let line = sr.ReadLine()
-        let numbers = line.Split(",")
-        numbers |> Array.map(fun f -> Int32.Parse(f)) |> Array.toList
+    type race = { tt: int;dist: int}
+    let races_test = [ {tt=7;dist=9};{tt=15;dist=40};{tt=30;dist=200} ]
+
+    let tts (races: race list) = races |> List.map (fun r -> r.tt)
+    let ds (races: race list) = races |> List.map (fun r -> r.dist)
 
     [<Fact>]
-    let test2 () = 
-        let input = readInit "input1.txt" 
-        Assert.Equal(1, input.Length) 
+    let test2 () =
+        Assert.Equal(3,races_test.Length)
+        Assert.Equal<int list>([7;15;40], tts races_test)
+        Assert.Equal<int list>([9;40;200], ds races_test)
 
 module Program = let [<EntryPoint>] main _ = 0
