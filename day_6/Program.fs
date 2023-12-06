@@ -35,27 +35,40 @@ module Input =
     // should calculate the same results
 
     // search min is 0, search max is max, searching for smallest number that will win
-    let findMax (r: race): int =
+    let findMin (r: race): int =
        let min_guess = 0
        let max_guess = r.dist
-       let guess = max_guess / 2 - 1
-       let isGuessWin = (dist r.tt guess).dist_raced 
-       let isPrevGuessWin = (dist r.tt (guess - 1)).dist_raced 
-       if (isGuessWin > r.dist && not (isPrevGuessWin > r.dist)) then
-           guess
-       else if (isGuessWin > r.dist) then
-           isGuessWin - 1
-       else 
-           isGuessWin + 1
+       
+       let rec innerGuess (guess:int): int = 
+           let guess_dist = (dist r.tt guess).dist_raced 
+           let prev_attempt_dist = (dist r.tt (guess - 1)).dist_raced 
+           if (guess_dist > r.dist && not (prev_attempt_dist> r.dist)) then
+               guess
+           else if (guess_dist> r.dist) then
+               let newGuess = guess - 1
+               innerGuess newGuess
+           else 
+               let newGuess = guess + 1
+               innerGuess newGuess
+       innerGuess (max_guess / 2 - 1)
 
+    [<Fact>]
+    let find_smallest_binary() =
+        Assert.Equal(2, findMin races_test[0])
+        Assert.Equal(4, findMin races_test[1])
+
+        (*
     let find_all_wintimes_binary (r: race)  : int =
         let wins = find_all_wintimes r 
         let find_max_wintime = wins |> List.max 
-        let find_max_wintime_binary = findMax r 
+        let find_max_wintime_binary = find_max_wintime 
         if find_max_wintime <> find_max_wintime_binary then failwith (sprintf "max is wrong real %A guess %A" find_max_wintime find_max_wintime_binary)
         let find_min_wintime = wins |> List.min
-        find_max_wintime - find_min_wintime + 1
 
+        let find_min_wintime_binary = findMin r 
+        if find_min_wintime <> find_min_wintime_binary then failwith (sprintf "min is wrong real %A guess %A" find_min_wintime find_max_wintime_binary)
+        find_max_wintime - find_min_wintime + 1
+*)
     let find_all_wintimes_count (r:race): int = 
         find_all_wintimes r |> List.length 
 
