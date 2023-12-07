@@ -31,6 +31,13 @@ module Program =
     let compareRule2 ((hand1,_):string*int) ((hand2,_):string*int): int =
         hand1.CompareTo(hand2) 
 
+    let compareRule1 ((hand1,_):string*int) ((hand2,_):string*int): int =
+        0
+
+    [<Fact>]
+    let testRule1 () = 
+        Assert.Equal(0, compareRule2 testinput[0] testinput[0]) 
+
     [<Fact>]
     let testRule2 () = 
         Assert.Equal(0, compareRule2 testinput[0] testinput[0]) 
