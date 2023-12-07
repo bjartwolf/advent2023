@@ -35,12 +35,8 @@ module Program =
                 | 2::_ -> 1
                 | _ -> 0
 
-    let findWinner (group1: int list) (group2: int list) (hand1: string) (hand2: string) j1 j2 =
-        let group1WithJokers = if group1.IsEmpty then [j1] 
-                               else group1[0] + j1 :: group1.Tail
-        let group2WithJokers = if group2.IsEmpty then [j2] 
-                               else group2[0] + j2 :: group2.Tail
-        let score1, score2 = scoreHand group1WithJokers, scoreHand group2WithJokers  
+    let findWinner cards1 cards2 hand1 hand2 =  
+        let score1, score2 = scoreHand cards1, scoreHand cards2 
         if score1 > score2 then 1
         else if score1 < score2 then -1
         else compareRule2 hand1 hand2 
@@ -61,13 +57,14 @@ module Program =
     let countJokers hand = countChar '1' hand 
     let filterOutJokers hand = hand |> Seq.filter (fun x -> x <> '1') |> String.Concat 
     let compareRule1 ((hand1,_):string*int) ((hand2,_):string*int): int =
-        let jokersIn1 = countJokers hand1 
-        let jokersIn2 = countJokers hand2 
-        let hand1WithoutJokers = filterOutJokers hand1 
-        let hand2WithoutJokers = filterOutJokers hand2 
-        let grouped1 = groupHand hand1WithoutJokers 
-        let grouped2 = groupHand hand2WithoutJokers 
-        findWinner grouped1 grouped2 hand1 hand2 jokersIn1 jokersIn2
+        let j1, j2 = countJokers hand1, countJokers hand2 
+        let handNoJokers1, handNoJokers2 = filterOutJokers hand1, filterOutJokers hand2 
+        let group1, group2 = groupHand handNoJokers1, groupHand handNoJokers2 
+        let groupWithJokers1 = if group1.IsEmpty then [j1] 
+                               else group1[0] + j1 :: group1.Tail
+        let groupWithJokers2 = if group2.IsEmpty then [j2] 
+                               else group2[0] + j2 :: group2.Tail
+        findWinner groupWithJokers1 groupWithJokers2 hand1 hand2
 
     let rankCards cards =
         cards |> Array.toList 
