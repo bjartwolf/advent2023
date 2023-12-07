@@ -36,11 +36,6 @@ module Program =
                 | 2::_ -> 1
                 | _ -> 0
 
-    let findWinner cards1 cards2 hand1 hand2 =  
-        let score1, score2 = scoreHand cards1, scoreHand cards2 
-        if score1 > score2 then 1
-        else if score1 < score2 then -1
-        else compareRule2 hand1 hand2 
        
     let groupHand (hand:string) = 
         hand.ToCharArray() 
@@ -63,18 +58,23 @@ module Program =
             | h::tail -> h+jokers::tail
             | [] -> [jokers]
 
+    let compareRule1 (score1:int,hand1:string,_) (score2:int, hand2:string,_): int =
+       if score1 > score2 then 1
+       else if score1 < score2 then -1
+       else compareRule2 hand1 hand2
 
-    let compareRule1 ((hand1,_):string*int) ((hand2,_):string*int): int =
-        let j1, j2 = countJokers hand1, countJokers hand2 
-        let handNoJokers1, handNoJokers2 = filterOutJokers hand1, filterOutJokers hand2 
-        let group1, group2 = groupHand handNoJokers1, groupHand handNoJokers2 
-        let groupWithJokers1, groupWithJokers2 = addJokers group1 j1, addJokers group2 j2
-        findWinner groupWithJokers1 groupWithJokers2 hand1 hand2
+    let calculateScore hand1 : int = 
+        let jokers = countJokers hand1
+        let filteredJokers = filterOutJokers hand1
+        let groupedCards = groupHand filteredJokers 
+        let addedJokers = addJokers groupedCards jokers 
+        scoreHand addedJokers
 
     let rankCards cards =
         cards |> Array.toList 
+              |> List.map (fun (hand,bet) -> (calculateScore hand,hand,bet) )
               |> List.sortWith compareRule1 
-              |> List.mapi (fun i (_,bet) -> (i+1, bet))
+              |> List.mapi (fun i (_,_,bet) -> (i+1, bet))
 
     let productSum cards = cards |> List.map (fun (x,y) -> x * y) |> List.sum 
 
