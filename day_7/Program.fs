@@ -35,7 +35,6 @@ module Program =
                 | [2;2;1] -> 2
                 | 2::_ -> 1
                 | _ -> 0
-
        
     let groupHand (hand:string) = 
         hand.ToCharArray() 
@@ -46,14 +45,12 @@ module Program =
             |> Array.toList
 
     let countJokers hand = 
-        hand |> Seq.filter (fun x -> x = joker)
-             |> Seq.length
+        hand |> Seq.filter (fun x -> x = joker) |> Seq.length
 
     let filterOutJokers hand = 
-        hand |> Seq.filter (fun x -> x <> joker) 
-             |> String.Concat 
+        hand |> Seq.filter (fun x -> x <> joker) |> String.Concat 
 
-    let addJokers cards jokers = 
+    let addJokers jokers cards = 
         match cards with
             | h::tail -> h+jokers::tail
             | [] -> [jokers]
@@ -63,12 +60,11 @@ module Program =
        else if score1 < score2 then -1
        else compareRule2 hand1 hand2
 
-    let calculateScore hand1 : int = 
-        let jokers = countJokers hand1
-        let filteredJokers = filterOutJokers hand1
-        let groupedCards = groupHand filteredJokers 
-        let addedJokers = addJokers groupedCards jokers 
-        scoreHand addedJokers
+    let calculateScore hand : int = 
+        hand |> filterOutJokers 
+             |> groupHand 
+             |> addJokers (countJokers hand)
+             |> scoreHand 
 
     let rankCards cards =
         cards |> Array.toList 
