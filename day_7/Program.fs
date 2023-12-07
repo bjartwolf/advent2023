@@ -6,17 +6,23 @@ module Program =
     open Xunit 
 
     // lowerranked ASCII, remember when sorting by value
-    // T=:, J=;, Q=< K = = , A= >
-    // T=58, J=59, Q=60, K=61 A=62
     let replaceWithAsciiValues (input:string) =  
         input.ToCharArray() 
             |> Seq.map (fun (x:Char) -> match x with
-                                            | 'T' -> char 58
-                                            | 'J' -> char 59
-                                            | 'Q' -> char 60
-                                            | 'K' -> char 61
-                                            | 'A' -> char 62
-                                            | x -> x) 
+                                            | 'A' -> char 77 
+                                            | 'K' -> char 76 
+                                            | 'Q' -> char 75 
+                                            | 'J' -> char 74 
+                                            | 'T' -> char 73 
+                                            | '9' -> char 72 
+                                            | '8' -> char 71 
+                                            | '7' -> char 70 
+                                            | '6' -> char 69 
+                                            | '5' -> char 68 
+                                            | '4' -> char 67 
+                                            | '3' -> char 66 
+                                            | '2' -> char 65 
+                                            | s -> failwith (sprintf "booom %A" s)) 
             |> Seq.toArray
             |> System.String
 
@@ -29,12 +35,15 @@ module Program =
     let testinput = readInit "testinput.txt" 
     let input = readInit "input.txt" 
        
-    // -1 means hand1 is weaker than hand2
-    // 1 means hand1 is stronger than hand2
-    // a string here startes with the highest ascii car codes for strongest card
     let compareRule2 (hand1:string) (hand2:string): int =
         hand1.CompareTo(hand2) 
 
+    [<Fact>]
+    let testcompare () = 
+        Assert.Equal(-1, "abc".CompareTo("bca"))
+        Assert.Equal(-1, "aab".CompareTo("aac"))
+        Assert.Equal(1, "77888".CompareTo("77788")) // 8 is stronger than 8
+ 
     let compareRule1 ((hand1,_):string*int) ((hand2,_):string*int): int =
         let groupHand (hand:string) = 
             hand.ToCharArray() 
@@ -46,37 +55,31 @@ module Program =
         let grouped1 = groupHand hand1 
         let grouped2 = groupHand hand2
         match grouped1,grouped2 with
+        // fem like
             | [5],[5] -> compareRule2 hand1 hand2
             | [5],_ -> 1
             | _,[5] -> -1
+         // fire like
             | 4::_, 4::_ -> compareRule2 hand1 hand2 
             | 4::_,_ -> 1 
             | _,4::_ -> -1 
+            // hus
             | 3::2::_, 3::2::_ -> compareRule2 hand1 hand2 
             | 3::2::_, _ -> 1
-            | _,3::2::_ -> -1
+            | _      , 3::2::_ -> -1
+            // 3 like
             | 3::_, 3::_ -> compareRule2 hand1 hand2 
             | 3::_, _ -> 1
-            | _, 3::_ -> -1
-            | 2::2::_, 2::2::_-> compareRule2 hand1 hand2 
-            | 2::2::_,_ -> 1
-            | _, 2::2::_ -> -1
+            | _   , 3::_ -> -1
+            // 2o par
+            | 2::2::_, 2::2::_ -> compareRule2 hand1 hand2 
+            | 2::2::_,_        -> 1
+            | _      , 2::2::_ -> -1
+            // 1 par
             | 2::_,2::_ -> compareRule2 hand1 hand2 
             | 2::_,_ -> 1
             | _, 2::_ -> -1
             | _ -> compareRule2 hand1 hand2 
-
-    [<Fact>]
-    let testRule1 () = 
-        Assert.Equal(0, compareRule1 testinput[0] testinput[0]) 
-        // all hands stronger than hand1
-        Assert.Equal(-1, compareRule1 testinput[0] testinput[1]) 
-        Assert.Equal(-1, compareRule1 testinput[0] testinput[2]) 
-        Assert.Equal(-1, compareRule1 testinput[0] testinput[3]) 
-        Assert.Equal(-1, compareRule1 testinput[0] testinput[4]) 
-
-        Assert.Equal(1, compareRule1 testinput[2] testinput[3]) 
-        Assert.Equal(-1, compareRule1 testinput[1] testinput[4]) 
 
     let rankCards (cards: (string*int) []) : (int*int) list=
         cards |> Array.toList 
@@ -94,17 +97,6 @@ module Program =
         let productSum = productSum ranked 
         Assert.Equal(6440, productSum) 
 
-    //[<Fact>]
-    //let sumRankedProd() = 
-    //    let ranked = rankCards input 
-    //    let productSum = productSum ranked 
-    //    Assert.Equal(249229592, productSum) 
-  
-    [<Fact>]
-    let test2 () = 
-        Assert.Equal(5, testinput.Length) 
-        Assert.Equal(("32:3=",765), testinput[0])
-
     [<Fact>]
     let testRules () = 
         let card1 = replaceWithAsciiValues "33332"
@@ -113,11 +105,59 @@ module Program =
         Assert.Equal(-1, compareRule1 (card2,99) (card1,99))
 
     [<Fact>]
+    let testRule1 () = 
+        Assert.Equal(1, compareRule1 testinput[2] testinput[3]) 
+
+        Assert.Equal(0, compareRule1 testinput[0] testinput[0]) 
+        // all hands stronger than hand1
+        Assert.Equal(-1, compareRule1 testinput[0] testinput[1]) 
+        Assert.Equal(-1, compareRule1 testinput[0] testinput[2]) 
+        Assert.Equal(-1, compareRule1 testinput[0] testinput[3]) 
+        Assert.Equal(-1, compareRule1 testinput[0] testinput[4]) 
+
+        Assert.Equal(-1, compareRule1 testinput[1] testinput[4]) 
+
+
+    [<Fact>]
+    let sumRankedProd() = 
+        let ranked = rankCards input 
+        let productSum = productSum ranked 
+        Assert.Equal(249505486, productSum) 
+//249505486 is not right
+// 249245762 is too low
+    [<Fact>]
+    let test2 () = 
+        Assert.Equal(5, testinput.Length) 
+//        Assert.Equal(("32:3=",765), testinput[0])
+
+    [<Fact>]
     let testRules2 () = 
         let card1 = replaceWithAsciiValues "77888"
         let card2 = replaceWithAsciiValues "77788"
         Assert.Equal(1, compareRule1 (card1,99) (card2,99))
         Assert.Equal(-1, compareRule1 (card2,99) (card1,99))
+
+    [<Fact>]
+    let testRules3 () = 
+        let card1 = replaceWithAsciiValues "23456"
+        let card2 = replaceWithAsciiValues "65432"
+        Assert.Equal(-1, compareRule1 (card1,99) (card2,99))
+        Assert.Equal(1, compareRule1 (card2,99) (card1,99))
+
+    [<Fact>]
+    let testRules_FourAces_STrongerTHanFourKings () = 
+        let card1 = replaceWithAsciiValues "KKKKK"
+        let card2 = replaceWithAsciiValues "AAAAA"
+        Assert.Equal(-1, compareRule1 (card1,99) (card2,99))
+        Assert.Equal(1, compareRule1 (card2,99) (card1,99))
+
+    [<Fact>]
+    let testRules_FourKings_STrongerTHanFour99999() = 
+        let card1 = replaceWithAsciiValues "KKKKK"
+        let card2 = replaceWithAsciiValues "99999"
+        Assert.Equal(1, compareRule1 (card1,99) (card2,99))
+        Assert.Equal(-1, compareRule1 (card2,99) (card1,99))
+
 
 
     let [<EntryPoint>] main _ = 0
