@@ -2,6 +2,7 @@ module Program =
     open System
     open Xunit 
 
+    let joker = '1'
     let replaceWithAsciiValues (input:string) =  
         input.ToCharArray() 
             |> Seq.map (fun (x:Char) -> match x with
@@ -9,7 +10,7 @@ module Program =
                                             | 'K' -> '<' 
                                             | 'Q' -> ';' 
                                             | 'T' -> ':' 
-                                            | 'J' -> '1' 
+                                            | 'J' -> joker 
                                             | x -> x)
             |> Seq.toArray
             |> System.String
@@ -55,7 +56,7 @@ module Program =
             |> Array.toList
 
     let countJokers hand = countChar '1' hand 
-    let filterOutJokers hand = hand |> Seq.filter (fun x -> x <> '1') |> String.Concat 
+    let filterOutJokers hand = hand |> Seq.filter (fun x -> x <> joker) |> String.Concat 
     let compareRule1 ((hand1,_):string*int) ((hand2,_):string*int): int =
         let j1, j2 = countJokers hand1, countJokers hand2 
         let handNoJokers1, handNoJokers2 = filterOutJokers hand1, filterOutJokers hand2 
