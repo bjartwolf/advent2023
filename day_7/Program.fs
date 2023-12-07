@@ -32,11 +32,22 @@ module Program =
         hand1.CompareTo(hand2) 
 
     let compareRule1 ((hand1,_):string*int) ((hand2,_):string*int): int =
-        0
+        let groupHand hand = 
+            hand1.ToCharArray() 
+                |> Array.groupBy (fun x -> x) 
+                |> Array.map (fun (x,cards) -> cards.Length )
+                |> Array.sort 
+                |> Array.rev
+                |> Array.toList
+        let grouped1 = groupHand hand1 
+        let grouped2 = groupHand hand2
+        match grouped1,grouped2 with
+            | [5],_ -> 1
+            | _ -> 0
 
     [<Fact>]
     let testRule1 () = 
-        Assert.Equal(0, compareRule2 testinput[0] testinput[0]) 
+        Assert.Equal(0, compareRule1 testinput[0] testinput[0]) 
 
     [<Fact>]
     let testRule2 () = 
