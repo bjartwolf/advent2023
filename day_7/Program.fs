@@ -20,9 +20,6 @@ module Program =
             |> Array.map (fun x -> let a = x.Split(" ")
                                    (replaceWithAsciiValues a[0]),int a[1])
 
-    let testinput = readInit "testinput.txt" 
-    let input = readInit "input.txt" 
-
     let compareRule2 (hand1:string) (hand2:string): int =
          String.Compare(hand1, hand2, StringComparison.Ordinal)
 
@@ -76,14 +73,16 @@ module Program =
 
     [<Fact>]
     let sumRanked() = 
-        let ranked = rankCards testinput 
-        let productSum = productSum ranked 
-        Assert.Equal(5905, productSum) 
+        let sum = readInit "testinput.txt" 
+                    |> rankCards 
+                    |> productSum 
+        Assert.Equal(5905, sum) 
 
     [<Fact>]
     let sumRankedprod() = 
-        let ranked = rankCards input 
-        let productSum = productSum ranked 
-        Assert.Equal(248750248, productSum) 
+        let sum = readInit "input.txt" 
+                    |> rankCards 
+                    |> productSum 
+        Assert.Equal(248750248, sum) 
 
     let [<EntryPoint>] main _ = 0
