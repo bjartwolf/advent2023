@@ -16,11 +16,11 @@ module Program =
                                                 | x -> x)
                 |> Seq.toArray
                 |> System.String
+
         IO.File.ReadAllLines filePath
             |> Array.map (fun x -> let a = x.Split(" ")
                                    (replaceWithAsciiValues a[0]),int a[1])
 
-      
     let calculateScore hand : int = 
         let filterOutJokers hand = 
             hand |> Seq.filter (fun x -> x <> joker) |> String.Concat 
