@@ -42,7 +42,20 @@ module Program =
         let grouped1 = groupHand hand1 
         let grouped2 = groupHand hand2
         match grouped1,grouped2 with
+            | [5],[5] -> compareRule2 hand1 hand2
             | [5],_ -> 1
+            | _,[5] -> -1
+            | 4::_, 4::_, -> compareRule2 hand1 hand2 
+            | 4::_,_ -> 1 
+            | _,4::_ -> -1 
+            | 3::2::_, _ -> 1
+            | _,3::2::_ -> -1
+            | 3::_, _ -> 1
+            | _, 3::_ -> -1
+            | 2::2::_,_ -> 1
+            | _, 2::2::_ -> -1
+            | 2::_,_ -> 1
+            | _, 2::_ -> -1
             | _ -> 0
 
     [<Fact>]
