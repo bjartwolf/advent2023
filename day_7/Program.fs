@@ -2,7 +2,6 @@ module Program =
     open System
     open Xunit 
 
-    // lowerranked ASCII, remember when sorting by value
     let replaceWithAsciiValues (input:string) =  
         input.ToCharArray() 
             |> Seq.map (fun (x:Char) -> match x with
@@ -29,7 +28,7 @@ module Program =
     let scoreHand (hand: int list) = 
        match hand with 
                 | [5] -> 6
-                | [4;1] -> 5
+                | 4::_ -> 5
                 | [3;2] -> 4
                 | 3::_ -> 3
                 | [2;2;1] -> 2
@@ -51,16 +50,15 @@ module Program =
         |> Seq.filter (fun x -> x = c)
         |> Seq.length
 
-
     let groupHand (hand:string) = 
         hand.ToCharArray() 
-            |> Array.groupBy (fun x -> x) 
-            |> Array.map (fun (x,cards) -> cards.Length )
+            |> Array.groupBy id
+            |> Array.map (fun (_,cards) -> cards.Length )
             |> Array.sort 
             |> Array.rev
             |> Array.toList
 
-    let countJokers hand =  countChar '1' hand 
+    let countJokers hand = countChar '1' hand 
     let filterOutJokers hand = hand |> Seq.filter (fun x -> x <> '1') |> String.Concat 
     let compareRule1 ((hand1,_):string*int) ((hand2,_):string*int): int =
         let jokersIn1 = countJokers hand1 
@@ -71,13 +69,13 @@ module Program =
         let grouped2 = groupHand hand2WithoutJokers 
         findWinner grouped1 grouped2 hand1 hand2 jokersIn1 jokersIn2
 
-    let rankCards (cards: (string*int) []) : (int*int) list=
+    let rankCards cards =
         cards |> Array.toList 
               |> List.sortWith compareRule1 
               |> List.mapi (fun i (_,bet) -> (i+1, bet))
 
-    let productSum (valuedCards: (int*int) list): int =
-        valuedCards 
+    let productSum cards = 
+        cards 
             |> List.map (fun (x,y) -> x * y) 
             |> List.sum
 
