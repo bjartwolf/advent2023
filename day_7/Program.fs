@@ -42,10 +42,12 @@ module Program =
             |> Array.toList
 
     let countJokers hand = 
-        hand |> Seq.filter (fun x -> x = joker) |> Seq.length
+        hand |> Seq.filter (fun x -> x = joker) 
+             |> Seq.length
 
     let filterOutJokers hand = 
-        hand |> Seq.filter (fun x -> x <> joker) |> String.Concat 
+        hand |> Seq.filter (fun x -> x <> joker) 
+             |> String.Concat 
 
     let addJokers jokers cards = 
         match cards with
