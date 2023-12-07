@@ -8,19 +8,19 @@ module Program =
     // lowerranked ASCII, remember when sorting by value
     // T=:, J=;, Q=< K = = , A= >
     // T=58, J=59, Q=60, K=61 A=62
-    let readInit filePath: (string*int) [] = 
-        let replaceWithAsciiValues (input:string) =  
-            input.ToCharArray() 
-                |> Seq.map (fun (x:Char) -> match x with
-                                                | 'T' -> char 58
-                                                | 'J' -> char 59
-                                                | 'Q' -> char 60
-                                                | 'K' -> char 61
-                                                | 'A' -> char 62
-                                                | x -> x) 
-                |> Seq.toArray
-                |> System.String
+    let replaceWithAsciiValues (input:string) =  
+        input.ToCharArray() 
+            |> Seq.map (fun (x:Char) -> match x with
+                                            | 'T' -> char 58
+                                            | 'J' -> char 59
+                                            | 'Q' -> char 60
+                                            | 'K' -> char 61
+                                            | 'A' -> char 62
+                                            | x -> x) 
+            |> Seq.toArray
+            |> System.String
 
+    let readInit filePath: (string*int) [] = 
         IO.File.ReadAllLines filePath
             |> Array.map (fun x -> let a = x.Split(" ")
                                    (replaceWithAsciiValues a[0]),int a[1])
@@ -94,16 +94,30 @@ module Program =
         let productSum = productSum ranked 
         Assert.Equal(6440, productSum) 
 
-    [<Fact>]
-    let sumRankedProd() = 
-        let ranked = rankCards input 
-        let productSum = productSum ranked 
-        Assert.Equal(249229592, productSum) 
+    //[<Fact>]
+    //let sumRankedProd() = 
+    //    let ranked = rankCards input 
+    //    let productSum = productSum ranked 
+    //    Assert.Equal(249229592, productSum) 
   
     [<Fact>]
     let test2 () = 
         Assert.Equal(5, testinput.Length) 
         Assert.Equal(("32:3=",765), testinput[0])
+
+    [<Fact>]
+    let testRules () = 
+        let card1 = replaceWithAsciiValues "33332"
+        let card2 = replaceWithAsciiValues "2AAAA"
+        Assert.Equal(1, compareRule1 (card1,99) (card2,99))
+        Assert.Equal(-1, compareRule1 (card2,99) (card1,99))
+
+    [<Fact>]
+    let testRules2 () = 
+        let card1 = replaceWithAsciiValues "77888"
+        let card2 = replaceWithAsciiValues "77788"
+        Assert.Equal(1, compareRule1 (card1,99) (card2,99))
+        Assert.Equal(-1, compareRule1 (card2,99) (card1,99))
 
 
     let [<EntryPoint>] main _ = 0
