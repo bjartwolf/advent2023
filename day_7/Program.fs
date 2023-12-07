@@ -36,9 +36,9 @@ module Program =
          - String.Compare(hand1, hand2, StringComparison.Ordinal)
 
     let findWinner (group1: int list) (group2: int list) (hand1: string) (hand2: string) j1 j2 =
-        let group1WithJokers = if group1.IsEmpty || group1 = [0] then [j1] 
+        let group1WithJokers = if group1.IsEmpty then [j1] 
                                else group1[0] + j1 :: group1.Tail
-        let group2WithJokers = if group2.IsEmpty || group2 = [0] then [j2] 
+        let group2WithJokers = if group2.IsEmpty then [j2] 
                                else group2[0] + j2 :: group2.Tail
         if hand1 = hand2 then 0
         else match group1WithJokers, group2WithJokers with
