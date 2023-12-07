@@ -99,6 +99,11 @@ module Program =
             printfn "joker"
         if hand1 = hand2 then 0
         else match group1, group2 with
+                | [],[] -> 0  // all jokers
+                | [],b::_ when isFive 0 j1 && isFive b j2-> compareRule2 hand1 hand2
+                | a::_,[] when isFive a j1 -> compareRule2 hand1 hand2
+                | [],_ -> 1 // all jokers
+                | _ ,[] -> -1 //all jokers
                 | a::_,b::_ when isFive a j1 && isFive b j2-> compareRule2 hand1 hand2
                 | a::_,_ when isFive a j1 -> 1
                 | _,b::_ when isFive b j2 -> -1
@@ -149,6 +154,13 @@ module Program =
         cards |> Array.toList 
               |> List.sortWith compareRule1 
               |> List.mapi (fun i (_,bet) -> (i+1, bet))
+
+    [<Fact>]
+    let jokertest() =
+        let card1 = replaceWithAsciiValues "JJJJJ" // fem like
+        let card2 = replaceWithAsciiValues "K4KKK" // fire like
+        let card1vscard2 = compareRule1 (card1,99) (card2,99)
+        Assert.Equal(1, card1vscard2)
 
               
     //[<Fact>]
@@ -205,6 +217,7 @@ module Program =
         Assert.Equal(-1, card1vscard3)
         Assert.Equal(1, card2vscard3)
 
+
     [<Fact>]
     let issues_74477() =
         let eight9 = input[125]
@@ -239,8 +252,7 @@ module Program =
     let sumRankedprod() = 
         let ranked = rankCards input 
         let productSum = productSum ranked 
-        Assert.Equal(248642943, productSum) 
-
+        Assert.Equal(248750248, productSum) 
         //248642943
         // 248345247 wrong too
         //246597125
