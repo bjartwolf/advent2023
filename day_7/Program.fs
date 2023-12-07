@@ -71,12 +71,10 @@ module Program =
         Assert.Equal(-1, compareRule1 testinput[0] testinput[3]) 
         Assert.Equal(-1, compareRule1 testinput[0] testinput[4]) 
 
-    //[<Fact>]
-    //let testRule2 () = 
-    //    Assert.Equal(0, compareRule2 testinput[0] testinput[0]) 
-    //    Assert.Equal(1, compareRule2 testinput[2] testinput[3]) // Card 2 is stronger than card 3 because KK > KT 
-    //    Assert.Equal(-1, compareRule2 testinput[1] testinput[4]) // Card 4 is stronger than 1 
- 
+        Assert.Equal(1, compareRule1 testinput[2] testinput[3]) 
+        Assert.Equal(-1, compareRule1 testinput[1] testinput[4]) 
+
+
     [<Fact>]
     let test2 () = 
         Assert.Equal(5, testinput.Length) 
