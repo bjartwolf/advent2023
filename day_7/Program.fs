@@ -58,14 +58,17 @@ module Program =
         hand |> Seq.filter (fun x -> x <> joker) 
              |> String.Concat 
 
+    let addJokers cards jokers = 
+        match cards with
+            | h::tail -> h+jokers::tail
+            | [] -> [jokers]
+
+
     let compareRule1 ((hand1,_):string*int) ((hand2,_):string*int): int =
         let j1, j2 = countJokers hand1, countJokers hand2 
         let handNoJokers1, handNoJokers2 = filterOutJokers hand1, filterOutJokers hand2 
         let group1, group2 = groupHand handNoJokers1, groupHand handNoJokers2 
-        let groupWithJokers1 = if group1.IsEmpty then [j1] 
-                               else group1[0] + j1 :: group1.Tail
-        let groupWithJokers2 = if group2.IsEmpty then [j2] 
-                               else group2[0] + j2 :: group2.Tail
+        let groupWithJokers1, groupWithJokers2 = addJokers group1 j1, addJokers group2 j2
         findWinner groupWithJokers1 groupWithJokers2 hand1 hand2
 
     let rankCards cards =
@@ -73,10 +76,7 @@ module Program =
               |> List.sortWith compareRule1 
               |> List.mapi (fun i (_,bet) -> (i+1, bet))
 
-    let productSum cards = 
-        cards 
-            |> List.map (fun (x,y) -> x * y) 
-            |> List.sum
+    let productSum cards = cards |> List.map (fun (x,y) -> x * y) |> List.sum 
 
     [<Fact>]
     let sumRanked() = 
