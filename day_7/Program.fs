@@ -35,49 +35,31 @@ module Program =
     let compareRule2 (hand1:string) (hand2:string): int =
          - String.Compare(hand1, hand2, StringComparison.Ordinal)
 
-    let isHouse a b j : bool =
-        if (j = 0) then
-            a = 3 && b = 2
-        else if (j = 1) then
-            (a = 2 && b = 2) || (a = 3 && b = 1)
-        else 
-            (a = 2 && b = 1)  || a = 3 
-
-    let isFive a j : bool = a + j >= 5
-    let isFour a j : bool = a + j >= 4
-    let isThree a j : bool = a + j >= 3
-    let isTwoPairs a b j : bool = a = 2 && b = 2 || a =2 && b = 1 && j = 1
-        
-    let isOnePair a j : bool = 
-        a = 2 || a = 1 && j = 1 
-
- 
     let findWinner (group1: int list) (group2: int list) (hand1: string) (hand2: string) j1 j2 =
+        let group1WithJokers = if group1.IsEmpty || group1 = [0] then [j1] 
+                               else group1[0] + j1 :: group1.Tail
+        let group2WithJokers = if group2.IsEmpty || group2 = [0] then [j2] 
+                               else group2[0] + j2 :: group2.Tail
         if hand1 = hand2 then 0
-        else match group1, group2 with
-                | [],[] -> 0  // all jokers
-                | [],b::_ when isFive 0 j1 && isFive b j2-> compareRule2 hand1 hand2
-                | a::_,[] when isFive a j1 -> compareRule2 hand1 hand2
-                | [],_ -> 1 // all jokers
-                | _ ,[] -> -1 //all jokers
-                | a::_,b::_ when isFive a j1 && isFive b j2-> compareRule2 hand1 hand2
-                | a::_,_ when isFive a j1 -> 1
-                | _,b::_ when isFive b j2 -> -1
-                | a::_, b::_ when isFour a j1 && isFour b j2 -> compareRule2 hand1 hand2 
-                | a::_,_ when isFour a j1 -> 1 
-                | _,b::_ when isFour b j2 -> -1 
-                | a::c::_,b::d::_ when isHouse a c j1 && isHouse b d j2 -> compareRule2 hand1 hand2 
-                | a::c::_,_       when isHouse a c j1  -> 1 
-                | _      ,b::d::_ when isHouse b d j2  -> -1 
-                | a::_, b::_ when isThree a j1 && isThree b j2 -> compareRule2 hand1 hand2 
-                | a::_, _ when isThree a j1 -> 1
-                | _   , b::_ when isThree b j2 -> -1
-                | 2::a::_, 2::b::_ when isTwoPairs 2 a j1 && isTwoPairs 2 b j2 -> compareRule2 hand1 hand2 
-                | 2::a::_,_        when isTwoPairs 2 a j1 -> 1 
-                | _      , 2::b::_ when isTwoPairs 2 b j2 -> -1
-                | a::_,b::_ when isOnePair a j1 && isOnePair b j2 -> compareRule2 hand1 hand2 
-                | a::_,_  when isOnePair a j1  -> 1
-                | _, b::_ when isOnePair b j2 -> -1
+        else match group1WithJokers, group2WithJokers with
+                | [5],[5] -> compareRule2 hand1 hand2 
+                | [5],_   -> 1 
+                | _  ,[5] -> -1 
+                | [4;1],[4;1] -> compareRule2 hand1 hand2 
+                | [4;1],_    -> 1 
+                | _   ,[4;1] -> -1 
+                | [3;2],[3;2] -> compareRule2 hand1 hand2
+                | [3;2],_ -> 1 
+                | _      ,[3;2] -> -1 
+                | 3::_,3::_ -> compareRule2 hand1 hand2
+                | 3::_,_    -> 1 
+                | _   ,3::_ -> -1 
+                | [2;2;1],[2;2;1]-> compareRule2 hand1 hand2
+                | [2;2;1],_ -> 1 
+                | _   , [2;2;1] -> -1 
+                | 2::_,2::_ -> compareRule2 hand1 hand2
+                | 2::_,_ -> 1 
+                | _   ,2::_ -> -1 
                 | _ -> compareRule2 hand1 hand2 
        
     let countChar (c: char) (str: string) =
