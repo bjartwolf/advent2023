@@ -1,3 +1,6 @@
+open System.Collections
+
+
 module Program =
     open System
     open Xunit 
@@ -74,10 +77,26 @@ module Program =
         Assert.Equal(1, compareRule1 testinput[2] testinput[3]) 
         Assert.Equal(-1, compareRule1 testinput[1] testinput[4]) 
 
+    let rankCards (cards: (string*int) []) : (int*int) list=
+        cards |> Array.toList 
+              |> List.sortWith compareRule1 
+              |> List.mapi (fun i (_,bet) -> (i+1, bet))
+    
+    let productSum (valuedCards: (int*int) list): int =
+        valuedCards 
+            |> List.map (fun (x,y) -> x * y) 
+            |> List.sum
 
+    [<Fact>]
+    let sumRanked() = 
+        let ranked = rankCards testinput 
+        let productSum = productSum ranked 
+        Assert.Equal(6440, productSum) 
+ 
     [<Fact>]
     let test2 () = 
         Assert.Equal(5, testinput.Length) 
         Assert.Equal(("32:3=",765), testinput[0])
+
 
     let [<EntryPoint>] main _ = 0
