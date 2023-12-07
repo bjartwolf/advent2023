@@ -3,15 +3,15 @@ module Input =
     open System.IO
     open Xunit 
 
-    let readInit (filePath: string): int list = 
-        use sr = new StreamReader (filePath) 
-        let line = sr.ReadLine()
-        let numbers = line.Split(",")
-        numbers |> Array.map(fun f -> Int32.Parse(f)) |> Array.toList
+    let readInit filePath: (string*int) [] = 
+        IO.File.ReadAllLines filePath
+            |> Array.map (fun x -> let a = x.Split(" ")
+                                   a[0],int a[1])
 
     [<Fact>]
     let test2 () = 
-        let input = readInit "input1.txt" 
-        Assert.Equal(1, input.Length) 
+        let input = readInit "testinput.txt" 
+        Assert.Equal(5, input.Length) 
+        Assert.Equal(("32T3K",765), input[0])
 
 module Program = let [<EntryPoint>] main _ = 0
