@@ -22,15 +22,9 @@ module Program =
 
       
     let calculateScore hand : int = 
-        let scoreHand (hand: int list) = 
-           match hand with 
-                    | [5] -> 6
-                    | 4::_ -> 5
-                    | [3;2] -> 4
-                    | 3::_ -> 3
-                    | [2;2;1] -> 2
-                    | 2::_ -> 1
-                    | _ -> 0
+        let filterOutJokers hand = 
+            hand |> Seq.filter (fun x -> x <> joker) |> String.Concat 
+
         let groupHand (hand:string) = 
             hand.ToCharArray() 
                 |> Array.groupBy id
@@ -43,20 +37,27 @@ module Program =
             hand |> Seq.filter (fun x -> x = joker) 
                  |> Seq.length
 
-        let filterOutJokers hand = 
-            hand |> Seq.filter (fun x -> x <> joker) |> String.Concat 
-
         let addJokers jokers cards = 
             match cards with
                 | h::tail -> h+jokers::tail
                 | [] -> [jokers]
+
+        let scoreHand (hand: int list) = 
+           match hand with 
+                    | [5] -> 6
+                    | 4::_ -> 5
+                    | [3;2] -> 4
+                    | 3::_ -> 3
+                    | [2;2;1] -> 2
+                    | 2::_ -> 1
+                    | _ -> 0
 
         hand |> filterOutJokers 
              |> groupHand 
              |> addJokers (countJokers hand)
              |> scoreHand 
 
-    let compareRule1 (score1:int,hand1:string,_) (score2:int, hand2:string,_): int =
+    let compareRule (score1:int,hand1:string,_) (score2:int, hand2:string,_): int =
         let compareCards (hand1:string) (hand2:string): int =
             String.Compare(hand1, hand2, StringComparison.Ordinal)
         if score1 > score2 then 1
