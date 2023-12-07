@@ -42,11 +42,6 @@ module Program =
         else if score1 < score2 then -1
         else compareRule2 hand1 hand2 
        
-    let countChar (c: char) (str: string) =
-        str
-        |> Seq.filter (fun x -> x = c)
-        |> Seq.length
-
     let groupHand (hand:string) = 
         hand.ToCharArray() 
             |> Array.groupBy id
@@ -55,8 +50,14 @@ module Program =
             |> Array.rev
             |> Array.toList
 
-    let countJokers hand = countChar '1' hand 
-    let filterOutJokers hand = hand |> Seq.filter (fun x -> x <> joker) |> String.Concat 
+    let countJokers hand = 
+        hand |> Seq.filter (fun x -> x = joker)
+             |> Seq.length
+
+    let filterOutJokers hand = 
+        hand |> Seq.filter (fun x -> x <> joker) 
+             |> String.Concat 
+
     let compareRule1 ((hand1,_):string*int) ((hand2,_):string*int): int =
         let j1, j2 = countJokers hand1, countJokers hand2 
         let handNoJokers1, handNoJokers2 = filterOutJokers hand1, filterOutJokers hand2 
