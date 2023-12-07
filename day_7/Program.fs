@@ -27,6 +27,7 @@ module Program =
 
     //let countEqual (hand: string) -> 
     let testinput = readInit "testinput.txt" 
+    let input = readInit "input.txt" 
        
     // -1 means hand1 is weaker than hand2
     // 1 means hand1 is stronger than hand2
@@ -92,7 +93,13 @@ module Program =
         let ranked = rankCards testinput 
         let productSum = productSum ranked 
         Assert.Equal(6440, productSum) 
- 
+
+    [<Fact>]
+    let sumRankedProd() = 
+        let ranked = rankCards input 
+        let productSum = productSum ranked 
+        Assert.Equal(249229592, productSum) 
+  
     [<Fact>]
     let test2 () = 
         Assert.Equal(5, testinput.Length) 
