@@ -6,20 +6,12 @@ module Program =
     let replaceWithAsciiValues (input:string) =  
         input.ToCharArray() 
             |> Seq.map (fun (x:Char) -> match x with
-                                            | 'A' -> 'a' 
-                                            | 'K' -> 'b' 
-                                            | 'Q' -> 'c' 
-                                            | 'T' -> 'e' 
-                                            | '9' -> 'f' 
-                                            | '8' -> 'g' 
-                                            | '7' -> 'h' 
-                                            | '6' -> 'i' 
-                                            | '5' -> 'j' 
-                                            | '4' -> 'k' 
-                                            | '3' -> 'l' 
-                                            | '2' -> 'm' 
-                                            | 'J' -> 'n' 
-                                            | s -> failwith (sprintf "booom %A" s)) 
+                                            | 'A' -> '=' 
+                                            | 'K' -> '<' 
+                                            | 'Q' -> ';' 
+                                            | 'T' -> ':' 
+                                            | 'J' -> '1' 
+                                            | x -> x)
             |> Seq.toArray
             |> System.String
 
@@ -32,7 +24,7 @@ module Program =
     let input = readInit "input.txt" 
 
     let compareRule2 (hand1:string) (hand2:string): int =
-         - String.Compare(hand1, hand2, StringComparison.Ordinal)
+         String.Compare(hand1, hand2, StringComparison.Ordinal)
 
     let scoreHand (hand: int list) = 
        match hand with 
@@ -68,8 +60,8 @@ module Program =
             |> Array.rev
             |> Array.toList
 
-    let countJokers hand =  countChar 'n' hand 
-    let filterOutJokers hand = hand |> Seq.filter (fun x -> x <> 'n') |> String.Concat 
+    let countJokers hand =  countChar '1' hand 
+    let filterOutJokers hand = hand |> Seq.filter (fun x -> x <> '1') |> String.Concat 
     let compareRule1 ((hand1,_):string*int) ((hand2,_):string*int): int =
         let jokersIn1 = countJokers hand1 
         let jokersIn2 = countJokers hand2 
