@@ -33,31 +33,20 @@ module Program =
     let input = readInit "input.txt" 
 
     let compareRule2 (hand1:string) (hand2:string): int =
-        let foo = [hand1;hand2] |> List.sort
-        if hand1 = hand2 then 
-            0 
-        else if foo[0] = hand1 then
-            1
-        else
-            -1
+         - String.Compare(hand1, hand2, StringComparison.Ordinal)
 
     let isHouse a b j : bool =
-        if b > a then failwith "should not be this way"
         if (j = 0) then
             a = 3 && b = 2
         else if (j = 1) then
             (a = 2 && b = 2) || (a = 3 && b = 1)
-        else if (j = 2) then
-            (a = 2 && b = 1)  || a = 3 
         else 
-            failwith "booomjoker"
+            (a = 2 && b = 1)  || a = 3 
 
     let isFive a j : bool = a + j >= 5
     let isFour a j : bool = a + j >= 4
     let isThree a j : bool = a + j >= 3
-    let isTwoPairs a b j : bool = 
-        if j >= 2 then  failwith "Should have been three equal or something"
-        a = 2 && b = 2 || a =2 && b = 1 && j = 1
+    let isTwoPairs a b j : bool = a = 2 && b = 2 || a =2 && b = 1 && j = 1
         
     let isOnePair a j : bool = 
         a = 2 || a = 1 && j = 1 
