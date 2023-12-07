@@ -1,6 +1,3 @@
-open System.Collections
-
-
 module Program =
     open System
     open Xunit 
@@ -32,7 +29,6 @@ module Program =
             |> Array.map (fun x -> let a = x.Split(" ")
                                    (replaceWithAsciiValues a[0]),int a[1])
 
-    //let countEqual (hand: string) -> 
     let testinput = readInit "testinput.txt" 
     let input = readInit "input.txt" 
 
@@ -56,22 +52,6 @@ module Program =
         else 
             failwith "booomjoker"
 
-    [<Fact>]
-    let houses () =
-        Assert.Equal(true , isHouse 3 2 0)
-        Assert.Equal(true,  isHouse 3 0 2)
-        Assert.Equal(true, isHouse 3 1 2)
-        Assert.Equal(true, isHouse 3 1 1)
-        Assert.Equal(false , isHouse 3 0 0)
-        Assert.Equal(false , isHouse 3 0 1)
-        Assert.Equal(true , isHouse 2 2 1)
-        Assert.Equal(true , isHouse 2 1 2)
-        Assert.Equal(false, isHouse 2 1 1)
-        Assert.Equal(false, isHouse 2 1 0)
-        Assert.Equal(false, isHouse 2 2 0)
-        Assert.Equal(false, isHouse 1 1 2)
-        Assert.Equal(false, isHouse 0 0 2)
-  
     let isFive a j : bool = a + j >= 5
     let isFour a j : bool = a + j >= 4
     let isThree a j : bool = a + j >= 3
@@ -79,24 +59,11 @@ module Program =
         if j >= 2 then  failwith "Should have been three equal or something"
         a = 2 && b = 2 || a =2 && b = 1 && j = 1
         
-    [<Fact>]
-    let twoPairsTest () =
-        Assert.Equal(true , isTwoPairs 2 2 0)
-        Assert.Equal(true , isTwoPairs 2 1 1)
-
     let isOnePair a j : bool = 
         a = 2 || a = 1 && j = 1 
 
-    [<Fact>]
-    let onePairTest() =
-        Assert.Equal(true , isOnePair 2 0)
-        Assert.Equal(true , isOnePair 2 1)
-        Assert.Equal(true , isOnePair 1 1)
-        Assert.Equal(false, isOnePair 1 0)
-  
+ 
     let findWinner (group1: int list) (group2: int list) (hand1: string) (hand2: string) j1 j2 =
-        if (j1 > 0 || j2 > 0) then
-            printfn "joker"
         if hand1 = hand2 then 0
         else match group1, group2 with
                 | [],[] -> 0  // all jokers
@@ -124,7 +91,6 @@ module Program =
                 | _, b::_ when isOnePair b j2 -> -1
                 | _ -> compareRule2 hand1 hand2 
        
-       //a
     let countChar (c: char) (str: string) =
         str
         |> Seq.filter (fun x -> x = c)
@@ -155,92 +121,10 @@ module Program =
               |> List.sortWith compareRule1 
               |> List.mapi (fun i (_,bet) -> (i+1, bet))
 
-    [<Fact>]
-    let jokertest() =
-        let card1 = replaceWithAsciiValues "JJJJJ" // fem like
-        let card2 = replaceWithAsciiValues "K4KKK" // fire like
-        let card1vscard2 = compareRule1 (card1,99) (card2,99)
-        Assert.Equal(1, card1vscard2)
-
-              
-    //[<Fact>]
-    //let issues_JQ98Q() =
-    //    let eight9 = input[88]
-    //    let str,_ = eight9
-    //    Assert.Equal("ncfgc", str)
-    //    let foo = compareRule1 eight9 eight9
-    //    Assert.Equal(-1, foo)
-    [<Fact>]
-    let issues_22545() =
-        let eight9 = input[123]
-        let str,_ = eight9
-        Assert.Equal("mmjkj", str)
-        let foo = compareRule1 eight9 eight9
-        Assert.Equal(0, foo)
-
-    [<Fact>]
-    let fourOfAKind() =
-        let card1 = replaceWithAsciiValues "QJJQ2"
-        let card1vscard1= compareRule1 (card1,99) (card1,99)
-        Assert.Equal(0, card1vscard1)
-
-        let card2 = replaceWithAsciiValues "QQJQ2"
-        let card1vscard2 = compareRule1 (card1,99) (card2,99)
-        Assert.Equal(-1, card1vscard2)
-        let jokersIn1 = countJokers card1 
-        let jokersIn2 = countJokers card2 
-        let hand1WithoutJokers = filterOutJokers card1 
-        let hand2WithoutJokers = filterOutJokers card2 
-        let groupedHand1 = groupHand hand1WithoutJokers 
-        let groupedHand2 = groupHand hand2WithoutJokers 
-        Assert.Equal(true, isFour groupedHand1[0] jokersIn1)
-        Assert.Equal(true, isFour groupedHand2[0] jokersIn2)
-
-    [<Fact>]
-    let house() =
-        let card1 = replaceWithAsciiValues "QQJKK" // KKK QQ -> Hus
-        let card2 = replaceWithAsciiValues "QKJKK" // KKK QQ -> Hus 
-
-        let card1vscard2 = compareRule1 (card1,99) (card2,99)
-        Assert.Equal(-1, card1vscard2)
-  
-    [<Fact>]
-    let fourOfAKindTest() =
-        let card1 = replaceWithAsciiValues "T55J5" 
-        let card2 = replaceWithAsciiValues "KTJJT" // størst
-        let card3 = replaceWithAsciiValues "QQQJA"
-
-        let card1vscard2 = compareRule1 (card1,99) (card2,99)
-        let card1vscard3 = compareRule1 (card1,99) (card3,99)
-        let card2vscard3 = compareRule1 (card2,99) (card3,99)
-        Assert.Equal(-1, card1vscard2)
-        Assert.Equal(-1, card1vscard3)
-        Assert.Equal(1, card2vscard3)
-
-
-    [<Fact>]
-    let issues_74477() =
-        let eight9 = input[125]
-        let str,_ = eight9
-        Assert.Equal("hkkhh", str)
-        let foo = compareRule1 eight9 eight9
-        Assert.Equal(0, foo)
-
-    [<Fact>]
-    let issues_74477compare() =
-        let card1 = input[123]
-        let str1,_ = card1 
-        let card2 = input[125]
-        let str2,_ = card2
-        let foo = compareRule1 card1 card2 
-        Assert.Equal(-1, foo)
-
-
     let productSum (valuedCards: (int*int) list): int =
         valuedCards 
             |> List.map (fun (x,y) -> x * y) 
             |> List.sum
-
 
     [<Fact>]
     let sumRanked() = 
@@ -253,10 +137,5 @@ module Program =
         let ranked = rankCards input 
         let productSum = productSum ranked 
         Assert.Equal(248750248, productSum) 
-        //248642943
-        // 248345247 wrong too
-        //246597125
-//247996782lso wrong
-        // 247798131 is rong too
-    //247762323 is too low
+
     let [<EntryPoint>] main _ = 0
