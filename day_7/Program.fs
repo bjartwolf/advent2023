@@ -9,7 +9,6 @@ module Program =
                                             | 'A' -> 'a' 
                                             | 'K' -> 'b' 
                                             | 'Q' -> 'c' 
-//                                            | 'J' -> 'd'  // move J after the logic works
                                             | 'T' -> 'e' 
                                             | '9' -> 'f' 
                                             | '8' -> 'g' 
@@ -35,32 +34,25 @@ module Program =
     let compareRule2 (hand1:string) (hand2:string): int =
          - String.Compare(hand1, hand2, StringComparison.Ordinal)
 
+    let scoreHand (hand: int list) = 
+       match hand with 
+                | [5] -> 6
+                | [4;1] -> 5
+                | [3;2] -> 4
+                | 3::_ -> 3
+                | [2;2;1] -> 2
+                | 2::_ -> 1
+                | _ -> 0
+
     let findWinner (group1: int list) (group2: int list) (hand1: string) (hand2: string) j1 j2 =
         let group1WithJokers = if group1.IsEmpty then [j1] 
                                else group1[0] + j1 :: group1.Tail
         let group2WithJokers = if group2.IsEmpty then [j2] 
                                else group2[0] + j2 :: group2.Tail
-        if hand1 = hand2 then 0
-        else match group1WithJokers, group2WithJokers with
-                | [5],[5] -> compareRule2 hand1 hand2 
-                | [5],_   -> 1 
-                | _  ,[5] -> -1 
-                | [4;1],[4;1] -> compareRule2 hand1 hand2 
-                | [4;1],_    -> 1 
-                | _   ,[4;1] -> -1 
-                | [3;2],[3;2] -> compareRule2 hand1 hand2
-                | [3;2],_ -> 1 
-                | _      ,[3;2] -> -1 
-                | 3::_,3::_ -> compareRule2 hand1 hand2
-                | 3::_,_    -> 1 
-                | _   ,3::_ -> -1 
-                | [2;2;1],[2;2;1]-> compareRule2 hand1 hand2
-                | [2;2;1],_ -> 1 
-                | _   , [2;2;1] -> -1 
-                | 2::_,2::_ -> compareRule2 hand1 hand2
-                | 2::_,_ -> 1 
-                | _   ,2::_ -> -1 
-                | _ -> compareRule2 hand1 hand2 
+        let score1, score2 = scoreHand group1WithJokers, scoreHand group2WithJokers  
+        if score1 > score2 then 1
+        else if score1 < score2 then -1
+        else compareRule2 hand1 hand2 
        
     let countChar (c: char) (str: string) =
         str
