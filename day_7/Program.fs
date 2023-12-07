@@ -12,7 +12,7 @@ module Program =
                                             | 'A' -> 'a' 
                                             | 'K' -> 'b' 
                                             | 'Q' -> 'c' 
-                                            | 'J' -> 'd' 
+//                                            | 'J' -> 'd'  // move J after the logic works
                                             | 'T' -> 'e' 
                                             | '9' -> 'f' 
                                             | '8' -> 'g' 
@@ -22,7 +22,7 @@ module Program =
                                             | '4' -> 'k' 
                                             | '3' -> 'l' 
                                             | '2' -> 'm' 
-                                           // | 'J' -> 'n' 
+                                            | 'J' -> 'n' 
                                             | s -> failwith (sprintf "booom %A" s)) 
             |> Seq.toArray
             |> System.String
@@ -40,37 +40,45 @@ module Program =
         let a = String.Compare(hand1, hand2)
         let b = hand1.CompareTo(hand2)
         let foo = [hand1;hand2] |> List.sort
+        if hand1 = hand2 then 
+            failwith (sprintf "booom %s %s" hand1 hand2)
         if foo[0] = hand1 then
             1
         else
             -1
  
-    let findWinner (group1: int list) (group2: int list) (hand1: string) (hand2: string) =
+    let findWinner (group1: int list) (group2: int list) (hand1: string) (hand2: string) j1 j2 =
+        if (j1 > 0 || j2 > 0) then
+            printfn "joker"
         match group1, group2 with
-        // fem like
-            | [5],[5] -> compareRule2 hand1 hand2
-            | [5],_ -> 1
-            | _,[5] -> -1
-         // fire like
-            | 4::_, 4::_ -> compareRule2 hand1 hand2 
-            | 4::_,_ -> 1 
-            | _,4::_ -> -1 
-            // hus
-            | 3::2::_, 3::2::_ -> compareRule2 hand1 hand2 
-            | 3::2::_, _ -> 1
-            | _      , 3::2::_ -> -1
-            // 3 like
-            | 3::_, 3::_ -> compareRule2 hand1 hand2 
-            | 3::_, _ -> 1
-            | _   , 3::_ -> -1
+        // fem like, har du masse jokere går du hit
+            | a::_,b::_ when a+j1 >= 5 && b + j2 >= 5 -> compareRule2 hand1 hand2
+            | a::_,_ when a + j1 >= 5 -> 1
+            | _,b::_ when b + j2 >=5 -> -1
+         // fire like, har du tre jokere går du hit
+            | a::_, b::_ when a + j1 >= 4 && b + j2 >= 4-> compareRule2 hand1 hand2 
+            | a::_,_ when a + j1 >=4 -> 1 
+            | _,b::_ when b + j2 >= 4 -> -1 
+            // hus, har du ett par og  to jokere kan du får tre like
+            | a::2::_, b::2::_ when a+j1 >=3 && b + j2 >=3   -> compareRule2 hand1 hand2 
+            | a::2::_, _ when a + j1 >=3 -> 1 
+            | _      , b::2::_ when b + j2 >=2 -> -1
+            // husvariant
+            | 2::a::_, 2::b::_ when a+j1 >=3 && b + j2 >=3   -> compareRule2 hand1 hand2 
+            | 2::a::_, _ when a + j1 >=3 -> 1 
+            | _      , 2::b::_ when b + j2 >=2 -> -1
+             // 3 like
+            | a::_, b::_ when a + j1 >= 3 && b+j2 >= 3 -> compareRule2 hand1 hand2 
+            | a::_, _ when a + j1 >= 3 -> 1
+            | _   , b::_ when b + j2 >= 3-> -1
             // 2o par
-            | 2::2::_, 2::2::_ -> compareRule2 hand1 hand2 
-            | 2::2::_,_        -> 1
-            | _      , 2::2::_ -> -1
+            | 2::a::_, 2::b::_ when a + j1 >= 2 && b+j2 >= 2-> compareRule2 hand1 hand2 
+            | 2::a::_,_        when a + j1 >= 2 -> 1
+            | _      , 2::b::_ when b + j2 >= 2 -> -1
             // 1 par
-            | 2::_,2::_ -> compareRule2 hand1 hand2 
-            | 2::_,_ -> 1
-            | _, 2::_ -> -1
+            | a::_,b::_ when a + j1 >= 2 && b + j2 >=2 -> compareRule2 hand1 hand2 
+            | a::_,_  when a + j1 >= 2 -> 1
+            | _, b::_ when b + j2 >= 2-> -1
             | _ -> compareRule2 hand1 hand2 
  
        
@@ -91,9 +99,11 @@ module Program =
                 |> Array.toList
         let jokersIn1 = countChar 'n' hand1 
         let jokersIn2 = countChar 'n' hand2 
-        let grouped1 = groupHand hand1 
-        let grouped2 = groupHand hand2
-        findWinner grouped1 grouped2 hand1 hand2
+        let hand1WithoutJokers = hand1 |> Seq.filter (fun x -> x <> 'n') |> String.Concat 
+        let hand2WithoutJokers = hand2 |> Seq.filter (fun x -> x <> 'n') |> String.Concat 
+        let grouped1 = groupHand hand1WithoutJokers 
+        let grouped2 = groupHand hand2WithoutJokers 
+        findWinner grouped1 grouped2 hand1 hand2 jokersIn1 jokersIn2
 
     let rankCards (cards: (string*int) []) : (int*int) list=
         cards |> Array.toList 
@@ -109,7 +119,12 @@ module Program =
     let sumRanked() = 
         let ranked = rankCards testinput 
         let productSum = productSum ranked 
-        Assert.Equal(6440, productSum) 
+        Assert.Equal(5905, productSum) 
 
+    [<Fact>]
+    let sumRankedprod() = 
+        let ranked = rankCards input 
+        let productSum = productSum ranked 
+        Assert.Equal(5905, productSum) 
 
     let [<EntryPoint>] main _ = 0
