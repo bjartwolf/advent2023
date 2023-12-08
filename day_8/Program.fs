@@ -43,6 +43,43 @@ module Input =
                     |> Map.ofArray
             
         instructions,maps
+
+    let start = "AAA"
+    let finish = "ZZZ"
+
+    let lookupInstruction (instrs: Instructions) (i: int): Instruction =
+        let instructionLength = instrs.Length
+        instrs[i % instructionLength] 
+
+    [<Fact>]
+    let testInstructions() = 
+        let instr, _= readInit "testinput1.txt" 
+        let lookup = lookupInstruction instr
+        Assert.Equal(Right, lookup 0)
+        Assert.Equal(Left, lookup 1)
+        Assert.Equal(Right, lookup 2)
+        Assert.Equal(Left, lookup 3)
+ 
+    let walkMapUntilEnd (desertMap:Map<string,Node>) (instructions: Instructions) : int= 
+        let instructionLength = instructions.Length
+        let lookup = lookupInstruction instructions
+        let rec walkMapInner (location:string) (i:int) = // watch for overflows.... 
+            if location = finish then i
+            else 
+                let currentInstruction = lookup i 
+                let currentSelection = desertMap[location]
+                let nextLocation  = 
+                    match currentInstruction with
+                        | Left -> currentSelection.Left 
+                        | Right -> currentSelection.Right 
+                walkMapInner nextLocation (i+1)
+        walkMapInner start 0
+    
+    [<Fact>]
+    let testFirstMap () = 
+        let instr, map = readInit "testinput1.txt" 
+        let step = walkMapUntilEnd map instr 
+        Assert.Equal(2, step) 
                     
 
     [<Fact>]
