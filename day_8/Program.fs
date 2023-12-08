@@ -18,6 +18,17 @@ module Input =
         Assert.Equal<(string*string*string)> (("QKX","SQD","XTJ"),parseLineToStr ex)
 
     type Node = { Left: string; Right: string }  
+
+    let parseMapToInput (input: string*string*string) : (string*Node) =
+        let key, l,r = input
+        (key, {Left= l; Right=r})
+
+    [<Fact>]
+    let toMapInput() =
+        let ex = ("QKX","SQD","XTJ")
+        Assert.Equal<(string*Node)> (("QKX",{Left = "SQD";Right ="XTJ" }), parseMapToInput ex)
+
+    
     let readInit (filePath: string)  = 
         let lines = System.IO.File.ReadAllLines filePath 
         let instructions = 
@@ -27,7 +38,8 @@ module Input =
         
 
         let maps = lines[2 ..]
-
+                    |> Array.map parseLineToStr
+            
         instructions,maps
                     
 
