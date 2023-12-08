@@ -39,6 +39,8 @@ module Input =
 
         let maps = lines[2 ..]
                     |> Array.map parseLineToStr
+                    |> Array.map parseMapToInput 
+                    |> Map.ofArray
             
         instructions,maps
                     
@@ -46,6 +48,6 @@ module Input =
     [<Fact>]
     let test2 () = 
         let instr, map = readInit "input.txt" 
-        Assert.Equal(714, map.Length) 
+        Assert.Equal(714, map.Count) 
 
 module Program = let [<EntryPoint>] main _ = 0
