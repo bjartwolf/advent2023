@@ -3,15 +3,26 @@ module Input =
     open System.IO
     open Xunit 
 
-    let readInit (filePath: string): int list = 
-        use sr = new StreamReader (filePath) 
-        let line = sr.ReadLine()
-        let numbers = line.Split(",")
-        numbers |> Array.map(fun f -> Int32.Parse(f)) |> Array.toList
+    type Instruction = Left | Right
+    type Instructions = Instruction list
+
+    type Node = { Left: string; Right: string }  
+    let readInit (filePath: string)  = 
+        let lines = System.IO.File.ReadAllLines filePath 
+        let instructions = 
+            lines[0].ToCharArray()
+                |> Array.map (fun x -> if x = 'L' then Left else if x = 'R' then Right else failwithf "No direction %A" x)
+                |> Seq.toList
+        
+
+        let maps = lines[2 ..]
+
+        instructions,maps
+                    
 
     [<Fact>]
     let test2 () = 
-        let input = readInit "input1.txt" 
-        Assert.Equal(1, input.Length) 
+        let instr, map = readInit "input.txt" 
+        Assert.Equal(714, map.Length) 
 
 module Program = let [<EntryPoint>] main _ = 0
