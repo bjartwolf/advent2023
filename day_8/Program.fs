@@ -87,6 +87,21 @@ module Program =
         let instructionLength = instrs.Length
         instrs[i % instructionLength] 
 
+    [<Fact>]
+    let testInstructions() = 
+        let instr, _= readInit "testinput2.txt" 
+        let lookup = lookupInstruction instr
+        Assert.Equal(Left, lookup 0)
+        Assert.Equal(Left, lookup 1)
+        Assert.Equal(Right, lookup 2)
+        Assert.Equal(Left, lookup 3)
+        Assert.Equal(Left, lookup 4)
+        Assert.Equal(Right, lookup 5)
+        Assert.Equal(Left, lookup 6)
+        Assert.Equal(Left, lookup 7)
+        Assert.Equal(Right, lookup 8)
+
+
     let walkMapUntilEnd (desertMap:Map<string,Node>) (instructions: Instructions) : int= 
         let lookup = lookupInstruction instructions
         let rec walkMapInner (locations:string list) (i:int) = 
