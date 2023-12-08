@@ -88,17 +88,17 @@ module Input =
 
     let walkMapUntilEnd (desertMap:Map<string,Node>) (instructions: Instructions) : int= 
         let lookup = lookupInstruction instructions
-        let rec walkMapInner (location:string) (i:int) = 
-            if location = finish then i
+        let rec walkMapInner (locations:string list) (i:int) = 
+            if areAllEndNodes locations then i
             else 
                 let currentInstruction = lookup i 
-                let currentSelection = desertMap[location]
-                let nextLocation  = 
+                let currentSelections = locations |> List.map (fun l -> desertMap[l])
+                let nextLocations  =  currentSelections |> List.map (fun s -> 
                     match currentInstruction with
-                        | Left -> currentSelection.Left 
-                        | Right -> currentSelection.Right 
-                walkMapInner nextLocation (i+1)
-        walkMapInner start 0
+                        | Left -> s.Left 
+                        | Right -> s.Right )
+                walkMapInner nextLocations (i+1)
+        walkMapInner (getAllStartNodes (desertMap.Keys |> Seq.toList)) 0
     
     [<Fact>]
     let testFirstMap () = 
@@ -112,12 +112,13 @@ module Input =
         let step = walkMapUntilEnd map instr 
         Assert.Equal(6, step) 
                      
+ (*
     [<Fact>]
     let tesINput() = 
         let instr, map = readInit "input.txt" 
         let step = walkMapUntilEnd map instr 
         Assert.Equal(14893, step) 
-
+*)
     [<Fact>]
     let test2 () = 
         let instr, map = readInit "input.txt" 
