@@ -6,12 +6,16 @@ module Input =
     type Instruction = Left | Right
     type Instructions = Instruction list
 
-//    let map 
+    let parseLineToStr (str: string) =
+        let a = str.Substring(0,3) 
+        let b = str.Substring(7,3) 
+        let c = str.Substring(12,3) 
+        (a,b,c)
     
     [<Fact>]
     let mapLine() =
         let ex = "QKX = (SQD, XTJ)"
-        Assert.Equal<(string*string*string)> (("QKX","SQD","XTJ"),("QKX","SQD","XTJ"))
+        Assert.Equal<(string*string*string)> (("QKX","SQD","XTJ"),parseLineToStr ex)
 
     type Node = { Left: string; Right: string }  
     let readInit (filePath: string)  = 
