@@ -105,7 +105,7 @@ module Program =
         Assert.Equal(Left, lookup 7L)
         Assert.Equal(Right, lookup 8L)
 
-    let walkMapUntilEnd (desertMap:Map<string,Node>) (instructions: Instructions) : int64= 
+    let walkMapUntilEndOne startNode (desertMap:Map<string,Node>) (instructions: Instructions) : int64= 
         let lookup = lookupInstruction instructions
         let rec walkMapInner (locations:string list) (i:int64) = 
             if (areAllEndNodes locations) then i
@@ -119,14 +119,39 @@ module Program =
  //               printfn "You are at %A" locations 
 //                printfn "You choose all of the %A paths leading you to %A" currentInstruction nextLocations 
                 walkMapInner nextLocations (i+1L)
-        walkMapInner (getAllStartNodes (desertMap.Keys |> Seq.toList)) 0L
+        walkMapInner startNode 0L
+
+    let walkMapFirst (desertMap: Map<string,Node>) (instructions: Instructions)  =
+        let startNodes = (getAllStartNodes (desertMap.Keys |> Seq.toList))
+        let firstNode = [startNodes[0]]
+        walkMapUntilEndOne firstNode desertMap instructions
+
+    let walkEntireMap (desertMap: Map<string,Node>) (instructions: Instructions) : int64 list =
+        let startNodes = (getAllStartNodes (desertMap.Keys |> Seq.toList))
+        let allDistances = startNodes |> List.map (fun x ->  walkMapUntilEndOne [x] desertMap instructions)
+        allDistances 
 
     [<Fact>]
-    let testSecondMap() = 
-        let instr, map = readInit "testinput3.txt" 
-        let step = walkMapUntilEnd map instr 
-        Assert.Equal(6L, step) 
-                     
+    let testfirststep () = 
+        let instr, map = readInit "input.txt" 
+        let foo = walkMapFirst map instr 
+        Assert.Equal(14893L, foo) 
+
+    [<Fact>]
+    let testalll() = 
+        let instr, map = readInit "input.txt" 
+        let startNodes = (getAllStartNodes (map.Keys |> Seq.toList))
+        let foo = walkEntireMap map instr 
+        Assert.Equal<int64 list>([14893L;16579L;12083L;13207L;22199L;20513L], foo) 
+
+
+
+
+    //[<Fact>]
+    //let testSecondMap() = 
+    //    let instr, map = readInit "testinput3.txt" 
+    //    let step = walkMapUntilEnd map instr 
+    //    Assert.Equal(6L, step) 
  (*
     [<Fact>]
     let tesINput() = 
@@ -134,15 +159,15 @@ module Program =
         let step = walkMapUntilEnd map instr 
         Assert.Equal(14893, step) 
 *)
-    [<Fact>]
-    let test2 () = 
-        let instr, map = readInit "input.txt" 
-        Assert.Equal(714, map.Count) 
+    //[<Fact>]
+    //let test2 () = 
+    //    let instr, map = readInit "input.txt" 
+    //    Assert.Equal(714, map.Count) 
 
     let [<EntryPoint>] main _ = 
             let instr, map = readInit "input.txt" 
 //            let instr, map = readInit "testinput3.txt" 
-            let steps = walkMapUntilEnd map instr 
-            printfn "Steps: %A" steps
+//            let steps = walkMapUntilEnd map instr 
+            // printfn "Steps: %A" steps
             Console.ReadKey() |> ignore
             0
