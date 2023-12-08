@@ -80,7 +80,18 @@ module Input =
         let instr, map = readInit "testinput1.txt" 
         let step = walkMapUntilEnd map instr 
         Assert.Equal(2, step) 
-                    
+
+    [<Fact>]
+    let testSecondMap() = 
+        let instr, map = readInit "testinput2.txt" 
+        let step = walkMapUntilEnd map instr 
+        Assert.Equal(6, step) 
+                     
+    [<Fact>]
+    let tesINput() = 
+        let instr, map = readInit "input.txt" 
+        let step = walkMapUntilEnd map instr 
+        Assert.Equal(14893, step) 
 
     [<Fact>]
     let test2 () = 
