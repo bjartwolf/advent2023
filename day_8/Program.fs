@@ -67,6 +67,14 @@ module Program =
     let areAllEndNodes (nodes: string list): bool =
         nodes |> List.forall isEndNode
 
+    [<Fact>]
+    let AreAllEndNodeTests() = 
+        Assert.Equal(false, areAllEndNodes ["ZZA";"ZZZ"])
+        Assert.Equal(true, areAllEndNodes ["ZZZ";"ZZZ"])
+        Assert.Equal(true, areAllEndNodes ["11Z";"22Z"])
+        Assert.Equal(false, areAllEndNodes ["11Z";"22A"])
+
+
     let getAllStartNodes (nodes: string list): string list = 
         nodes |> List.where isStartNode 
 
@@ -77,35 +85,30 @@ module Program =
         Assert.Equal<string list>(["11A";"22A"], getAllStartNodes ["11A";"BBB";"22A"])
         Assert.Equal<string list>([], getAllStartNodes ["A22"])
  
-    [<Fact>]
-    let AreAllEndNodeTests() = 
-        Assert.Equal(false, areAllEndNodes ["ZZA";"ZZZ"])
-        Assert.Equal(true, areAllEndNodes ["ZZZ";"ZZZ"])
-
  
-    let lookupInstruction (instrs: Instructions) (i: int): Instruction =
-        let instructionLength = instrs.Length
-        instrs[i % instructionLength] 
+    let lookupInstruction (instrs: Instructions) (i: int64): Instruction =
+        let instructionLength = int64 instrs.Length
+        let lookup = int(i % instructionLength)
+        instrs[lookup] 
 
     [<Fact>]
     let testInstructions() = 
         let instr, _= readInit "testinput2.txt" 
         let lookup = lookupInstruction instr
-        Assert.Equal(Left, lookup 0)
-        Assert.Equal(Left, lookup 1)
-        Assert.Equal(Right, lookup 2)
-        Assert.Equal(Left, lookup 3)
-        Assert.Equal(Left, lookup 4)
-        Assert.Equal(Right, lookup 5)
-        Assert.Equal(Left, lookup 6)
-        Assert.Equal(Left, lookup 7)
-        Assert.Equal(Right, lookup 8)
+        Assert.Equal(Left, lookup 0L)
+        Assert.Equal(Left, lookup 1L)
+        Assert.Equal(Right, lookup 2L)
+        Assert.Equal(Left, lookup 3L)
+        Assert.Equal(Left, lookup 4L)
+        Assert.Equal(Right, lookup 5L)
+        Assert.Equal(Left, lookup 6L)
+        Assert.Equal(Left, lookup 7L)
+        Assert.Equal(Right, lookup 8L)
 
-
-    let walkMapUntilEnd (desertMap:Map<string,Node>) (instructions: Instructions) : int= 
+    let walkMapUntilEnd (desertMap:Map<string,Node>) (instructions: Instructions) : int64= 
         let lookup = lookupInstruction instructions
-        let rec walkMapInner (locations:string list) (i:int) = 
-            if areAllEndNodes locations then i
+        let rec walkMapInner (locations:string list) (i:int64) = 
+            if (areAllEndNodes locations) then i
             else 
                 let currentInstruction = lookup i 
                 let currentSelections = locations |> List.map (fun l -> desertMap[l])
@@ -113,15 +116,16 @@ module Program =
                     match currentInstruction with
                         | Left -> n.Left 
                         | Right -> n.Right )
+ //               printfn "You are at %A" locations 
 //                printfn "You choose all of the %A paths leading you to %A" currentInstruction nextLocations 
-                walkMapInner nextLocations (i+1)
-        walkMapInner (getAllStartNodes (desertMap.Keys |> Seq.toList)) 0
+                walkMapInner nextLocations (i+1L)
+        walkMapInner (getAllStartNodes (desertMap.Keys |> Seq.toList)) 0L
 
     [<Fact>]
     let testSecondMap() = 
         let instr, map = readInit "testinput3.txt" 
         let step = walkMapUntilEnd map instr 
-        Assert.Equal(6, step) 
+        Assert.Equal(6L, step) 
                      
  (*
     [<Fact>]
