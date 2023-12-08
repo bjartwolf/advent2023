@@ -165,9 +165,11 @@ module Program =
     //    Assert.Equal(714, map.Count) 
 
     let [<EntryPoint>] main _ = 
-            let instr, map = readInit "input.txt" 
-//            let instr, map = readInit "testinput3.txt" 
-//            let steps = walkMapUntilEnd map instr 
-            // printfn "Steps: %A" steps
-            Console.ReadKey() |> ignore
-            0
+                let lcm x y =
+                    let rec gcd (x : int64) (y : int64) = 
+                        if y = 0 then abs x else gcd y (x % y)
+                    x * y / (gcd x y)
+                let foo = [14893L;16579L;12083L;13207L;22199L;20513L]
+                foo |> Seq.reduce lcm |> printfn "%A"
+                Console.ReadKey() |> ignore
+                0
