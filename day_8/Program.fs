@@ -47,6 +47,41 @@ module Input =
     let start = "AAA"
     let finish = "ZZZ"
 
+    let isStartNode (node: string) : bool = 
+        node[2] = 'A' 
+        
+    [<Fact>]
+    let isStartNodeTests() = 
+        Assert.Equal(true, isStartNode "11A")
+        Assert.Equal(true, isStartNode "22A")
+        Assert.Equal(false, isStartNode "A22")
+ 
+    let isEndNode (node: string) : bool = 
+        node[2] = 'Z' 
+        
+    [<Fact>]
+    let isEndNodeTests() = 
+        Assert.Equal(false, isEndNode "ZZA")
+        Assert.Equal(true, isEndNode "ZZZ")
+
+    let areAllEndNodes (nodes: string list): bool =
+        nodes |> List.forall isEndNode
+
+    let getAllStartNodes (nodes: string list): string list = 
+        nodes |> List.where isStartNode 
+
+    [<Fact>]
+    let getAllStartNodesTest() = 
+        Assert.Equal<string list>(["11A"], getAllStartNodes ["11A"])
+        Assert.Equal<string list>(["22A"], getAllStartNodes ["22A"])
+        Assert.Equal<string list>([], getAllStartNodes ["A22"])
+ 
+    [<Fact>]
+    let AreAllEndNodeTests() = 
+        Assert.Equal(false, areAllEndNodes ["ZZA";"ZZZ"])
+        Assert.Equal(true, areAllEndNodes ["ZZZ";"ZZZ"])
+
+ 
     let lookupInstruction (instrs: Instructions) (i: int): Instruction =
         let instructionLength = instrs.Length
         instrs[i % instructionLength] 
