@@ -6,6 +6,13 @@ module Input =
     type Instruction = Left | Right
     type Instructions = Instruction list
 
+//    let map 
+    
+    [<Fact>]
+    let mapLine() =
+        let ex = "QKX = (SQD, XTJ)"
+        Assert.Equal<(string*string*string)> (("QKX","SQD","XTJ"),("QKX","SQD","XTJ"))
+
     type Node = { Left: string; Right: string }  
     let readInit (filePath: string)  = 
         let lines = System.IO.File.ReadAllLines filePath 
