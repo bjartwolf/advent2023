@@ -63,7 +63,7 @@ module Input =
     let walkMapUntilEnd (desertMap:Map<string,Node>) (instructions: Instructions) : int= 
         let instructionLength = instructions.Length
         let lookup = lookupInstruction instructions
-        let rec walkMapInner (location:string) (i:int) = // watch for overflows.... 
+        let rec walkMapInner (location:string) (i:int) = 
             if location = finish then i
             else 
                 let currentInstruction = lookup i 
