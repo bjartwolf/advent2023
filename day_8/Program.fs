@@ -98,6 +98,7 @@ module Program =
                     match currentInstruction with
                         | Left -> n.Left 
                         | Right -> n.Right )
+//                printfn "You choose all of the %A paths leading you to %A" currentInstruction nextLocations 
                 walkMapInner nextLocations (i+1)
         walkMapInner (getAllStartNodes (desertMap.Keys |> Seq.toList)) 0
 
@@ -121,6 +122,7 @@ module Program =
 
     let [<EntryPoint>] main _ = 
             let instr, map = readInit "input.txt" 
+//            let instr, map = readInit "testinput3.txt" 
             let steps = walkMapUntilEnd map instr 
             printfn "Steps: %A" steps
             Console.ReadKey() |> ignore
