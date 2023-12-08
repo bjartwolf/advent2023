@@ -61,7 +61,6 @@ module Input =
         Assert.Equal(Left, lookup 3)
  
     let walkMapUntilEnd (desertMap:Map<string,Node>) (instructions: Instructions) : int= 
-        let instructionLength = instructions.Length
         let lookup = lookupInstruction instructions
         let rec walkMapInner (location:string) (i:int) = 
             if location = finish then i
