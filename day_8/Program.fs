@@ -1,6 +1,5 @@
-module Input =
+module Program =
     open System
-    open System.IO
     open Xunit 
 
     type Instruction = Left | Right
@@ -55,6 +54,7 @@ module Input =
         Assert.Equal(true, isStartNode "11A")
         Assert.Equal(true, isStartNode "22A")
         Assert.Equal(false, isStartNode "A22")
+        Assert.Equal(false, isStartNode "BBB")
  
     let isEndNode (node: string) : bool = 
         node[2] = 'Z' 
@@ -74,6 +74,7 @@ module Input =
     let getAllStartNodesTest() = 
         Assert.Equal<string list>(["11A"], getAllStartNodes ["11A"])
         Assert.Equal<string list>(["22A"], getAllStartNodes ["22A"])
+        Assert.Equal<string list>(["11A";"22A"], getAllStartNodes ["11A";"BBB";"22A"])
         Assert.Equal<string list>([], getAllStartNodes ["A22"])
  
     [<Fact>]
@@ -93,22 +94,16 @@ module Input =
             else 
                 let currentInstruction = lookup i 
                 let currentSelections = locations |> List.map (fun l -> desertMap[l])
-                let nextLocations  =  currentSelections |> List.map (fun s -> 
+                let nextLocations  =  currentSelections |> List.map (fun n -> 
                     match currentInstruction with
-                        | Left -> s.Left 
-                        | Right -> s.Right )
+                        | Left -> n.Left 
+                        | Right -> n.Right )
                 walkMapInner nextLocations (i+1)
         walkMapInner (getAllStartNodes (desertMap.Keys |> Seq.toList)) 0
-    
-    [<Fact>]
-    let testFirstMap () = 
-        let instr, map = readInit "testinput1.txt" 
-        let step = walkMapUntilEnd map instr 
-        Assert.Equal(2, step) 
 
     [<Fact>]
     let testSecondMap() = 
-        let instr, map = readInit "testinput2.txt" 
+        let instr, map = readInit "testinput3.txt" 
         let step = walkMapUntilEnd map instr 
         Assert.Equal(6, step) 
                      
@@ -124,4 +119,9 @@ module Input =
         let instr, map = readInit "input.txt" 
         Assert.Equal(714, map.Count) 
 
-module Program = let [<EntryPoint>] main _ = 0
+    let [<EntryPoint>] main _ = 
+            let instr, map = readInit "input.txt" 
+            let steps = walkMapUntilEnd map instr 
+            printfn "Steps: %A" steps
+            Console.ReadKey() |> ignore
+            0
