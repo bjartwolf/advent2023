@@ -36,7 +36,9 @@ module Input =
         }
 
     let makePyramidUntilZero lst : int64 list list =
-       lst |> makePyramidUntilZeroSeq |> Seq.toList
+       let pyramidBottom = lst |> makePyramidUntilZeroSeq |> Seq.toList
+       if pyramidBottom = [] then []
+       else lst :: pyramidBottom
 
     let printPyramid (pyramid: int64 list list) (desc:string) =
         printfn "Pyramid **** %s" desc
@@ -49,15 +51,32 @@ module Input =
             printfn ""
 
     [<Fact>]
-    let pyramidTest() = 
+    let pyramidTest1() = 
         Assert.Equal<int64 list list> ([], makePyramidUntilZero [])
-//        Assert.Equal<int64 list list> ([[1L];[0L]], makePyramidUntilZero [1L]) // not sure about this one
         let testPyramid1 = makePyramidUntilZero testinput[0]
         let expectedPyramid1 = [testinput[0]; [3L;3L;3L;3L;3L]; [0L;0L;0L;0L]]
         printPyramid testPyramid1 "test"
         printPyramid expectedPyramid1 "expected"
         Assert.Equal<int64 list list> (expectedPyramid1, testPyramid1) 
- 
+
+    [<Fact>]
+    let pyramidTest2() = 
+        Assert.Equal<int64 list list> ([], makePyramidUntilZero [])
+        let testPyramid = makePyramidUntilZero testinput[1]
+        let expectedPyramid = [testinput[1]; [2L;3L;4L;5L;6L]; [1L; 1L; 1L; 1L]; [0L;0L;0L]] 
+        printPyramid testPyramid "test 2"
+        printPyramid expectedPyramid "expected 2"
+        Assert.Equal<int64 list list> (expectedPyramid, testPyramid) 
+
+    [<Fact>]
+    let pyramidTest3() = 
+        Assert.Equal<int64 list list> ([], makePyramidUntilZero [])
+        let testPyramid = makePyramidUntilZero testinput[2]
+        let expectedPyramid = [testinput[2]; [3L;3L;5L;9L;15L]; [0L;2L;4L;6L]; [2L;2L;2L]; [0L;0L] ]
+        printPyramid testPyramid "test 3"
+        printPyramid expectedPyramid "expected 3"
+        Assert.Equal<int64 list list> (expectedPyramid, testPyramid) 
+   
     [<Fact>]
     let allZeroTest() = 
         Assert.True (allZeros [0L; 0L] )
