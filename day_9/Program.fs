@@ -25,6 +25,7 @@ module Input =
     let testdiffer () = 
         Assert.Equal<int64 list>([3L], findDiff [3L; 6L]) 
         Assert.Equal<int64 list>([3L; 3L], findDiff [3L; 6L; 9L]) 
+        Assert.Equal<int64 list>([2L;3L;4L;5L;6L;7L], findDiff [1L; 3L; 6L; 10L; 15L; 21L; 28L])
 
     [<Fact>]
     let test2 () = 
