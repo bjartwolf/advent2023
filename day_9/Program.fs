@@ -10,6 +10,7 @@ module Input =
 
     // maybe not use lists if slow
     let testinput = readInit "testinput.txt" 
+    let input = readInit "input.txt" 
 
     let rec findDiffSeq (lst: int64 list): int64 seq =
         seq {
@@ -60,6 +61,11 @@ module Input =
     [<Fact>]
     let testPyramidSum() = 
         Assert.Equal(114L, sumOfPyramidExpansion testinput)
+
+    [<Fact>]
+    let part1test() = 
+        Assert.Equal(1762065988L, sumOfPyramidExpansion input)
+
 
     [<Fact>]
     let pyramidExpansionTest1() = 
