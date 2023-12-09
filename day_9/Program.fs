@@ -19,13 +19,18 @@ module Input =
                                     yield! findDiffSeq (b :: tail)
                 | _ -> () 
         } 
-    let findDiff lst = findDiffSeq lst |> Seq.toList
+    let findDiff lst = 
+        let diffList = findDiffSeq lst |> Seq.toList
+        if diffList.Length <> lst.Length - 1 then failwith "Lists should be one shorter"
+        diffList
 
     [<Fact>]
     let testdiffer () = 
         Assert.Equal<int64 list>([3L], findDiff [3L; 6L]) 
         Assert.Equal<int64 list>([3L; 3L], findDiff [3L; 6L; 9L]) 
         Assert.Equal<int64 list>([2L;3L;4L;5L;6L;7L], findDiff [1L; 3L; 6L; 10L; 15L; 21L; 28L])
+        Assert.Equal<int64 list>([], findDiff [0L]) // think it should be empty list
+        Assert.Equal<int64 list>([0L], findDiff [0L; 0L]) 
 
     [<Fact>]
     let test2 () = 
