@@ -9,7 +9,7 @@ module Input =
         file |> Array.map parseLine |> Array.toList
 
 
-        // maybe not use lists if slow
+    // maybe not use lists if slow
     let testinput = readInit "testinput.txt" 
 
     let rec findDiffSeq (lst: int64 list): int64 seq =
@@ -19,6 +19,7 @@ module Input =
                                     yield! findDiffSeq (b :: tail)
                 | _ -> () 
         } 
+
     let findDiff lst = 
         let diffList = findDiffSeq lst |> Seq.toList
         if diffList.Length <> lst.Length - 1 then failwith "Lists should be one shorter"
@@ -26,6 +27,37 @@ module Input =
 
     let allZeros lst = lst |> List.forall (fun x -> x = 0L)
 
+    let rec makePyramidUntilZeroSeq lst : int64 list seq =
+        seq {
+            if not (allZeros lst) then 
+                let diffed = findDiff lst
+                yield diffed
+                yield! makePyramidUntilZeroSeq diffed 
+        }
+
+    let makePyramidUntilZero lst : int64 list list =
+       lst |> makePyramidUntilZeroSeq |> Seq.toList
+
+    let printPyramid (pyramid: int64 list list) (desc:string) =
+        printfn "Pyramid **** %s" desc
+        let mutable lineindent = ""
+        for line in pyramid do
+            printf "%s" lineindent
+            for num in line do
+                printf "%i " num 
+            lineindent <- " " + lineindent
+            printfn ""
+
+    [<Fact>]
+    let pyramidTest() = 
+        Assert.Equal<int64 list list> ([], makePyramidUntilZero [])
+//        Assert.Equal<int64 list list> ([[1L];[0L]], makePyramidUntilZero [1L]) // not sure about this one
+        let testPyramid1 = makePyramidUntilZero testinput[0]
+        let expectedPyramid1 = [testinput[0]; [3L;3L;3L;3L;3L]; [0L;0L;0L;0L]]
+        printPyramid testPyramid1 "test"
+        printPyramid expectedPyramid1 "expected"
+        Assert.Equal<int64 list list> (expectedPyramid1, testPyramid1) 
+ 
     [<Fact>]
     let allZeroTest() = 
         Assert.True (allZeros [0L; 0L] )
