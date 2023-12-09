@@ -24,6 +24,13 @@ module Input =
         if diffList.Length <> lst.Length - 1 then failwith "Lists should be one shorter"
         diffList
 
+    let allZeros lst = lst |> List.forall (fun x -> x = 0L)
+
+    [<Fact>]
+    let allZeroTest() = 
+        Assert.True (allZeros [0L; 0L] )
+        Assert.False (allZeros [0L; 1L; 0L] )
+ 
     [<Fact>]
     let testdiffer () = 
         Assert.Equal<int64 list>([3L], findDiff [3L; 6L]) 
