@@ -8,7 +8,6 @@ module Input =
         let file = File.ReadAllLines(filePath)
         file |> Array.map parseLine |> Array.toList
 
-
     // maybe not use lists if slow
     let testinput = readInit "testinput.txt" 
 
@@ -40,6 +39,37 @@ module Input =
        if pyramidBottom = [] then []
        else lst :: pyramidBottom
 
+    let findPyramidExpansionSeq (pyramid: int64 list list): int64 seq =
+        let mutable lastElement = 0L
+        [
+            for line in pyramid do
+                let linesLastElement = List.last line
+                yield lastElement + linesLastElement 
+                lastElement <- linesLastElement  + lastElement
+        ]
+
+    let rec findPyramidExpansion (pyramid: int64 list list): int64 list =
+        findPyramidExpansionSeq (pyramid |> List.rev) |> Seq.toList |> List.rev
+         
+
+    [<Fact>]
+    let pyramidExpansionTest1() = 
+        let testPyramid1 = makePyramidUntilZero testinput[0]
+        let expansion = findPyramidExpansion testPyramid1 
+        Assert.Equal<int64 list> ([18L;3L;0L], expansion)
+
+    [<Fact>]
+    let pyramidExpansionTest2() = 
+        let testPyramid = makePyramidUntilZero testinput[1]
+        let expansion = findPyramidExpansion testPyramid 
+        Assert.Equal<int64 list> ([28L;7L;1L;0L], expansion)
+
+    [<Fact>]
+    let pyramidExpansionTest3() = 
+        let testPyramid = makePyramidUntilZero testinput[2]
+        let expansion = findPyramidExpansion testPyramid 
+        Assert.Equal<int64 list> ([68L;23L;8L;2L;0L], expansion)
+
     let printPyramid (pyramid: int64 list list) (desc:string) =
         printfn "Pyramid **** %s" desc
         let mutable lineindent = ""
@@ -61,7 +91,6 @@ module Input =
 
     [<Fact>]
     let pyramidTest2() = 
-        Assert.Equal<int64 list list> ([], makePyramidUntilZero [])
         let testPyramid = makePyramidUntilZero testinput[1]
         let expectedPyramid = [testinput[1]; [2L;3L;4L;5L;6L]; [1L; 1L; 1L; 1L]; [0L;0L;0L]] 
         printPyramid testPyramid "test 2"
@@ -70,7 +99,6 @@ module Input =
 
     [<Fact>]
     let pyramidTest3() = 
-        Assert.Equal<int64 list list> ([], makePyramidUntilZero [])
         let testPyramid = makePyramidUntilZero testinput[2]
         let expectedPyramid = [testinput[2]; [3L;3L;5L;9L;15L]; [0L;2L;4L;6L]; [2L;2L;2L]; [0L;0L] ]
         printPyramid testPyramid "test 3"
