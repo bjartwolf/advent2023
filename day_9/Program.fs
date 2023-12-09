@@ -1,5 +1,4 @@
 module Input =
-    open System
     open System.IO
     open Xunit 
 
@@ -8,7 +7,6 @@ module Input =
         let file = File.ReadAllLines(filePath)
         file |> Array.map parseLine |> Array.toList
 
-    // maybe not use lists if slow
     let testinput = readInit "testinput.txt" 
     let input = readInit "input.txt" 
 
@@ -35,15 +33,6 @@ module Input =
                 yield! makePyramidUntilZeroSeq diffed 
         }
 
-    let rec makePyramidBackwardUntilZeroSeq lst : int64 list seq =
-        seq {
-            if not (allZeros lst) then 
-                let diffed = findDiff lst
-                yield diffed
-                yield! makePyramidUntilZeroSeq diffed 
-        }
-
-
     let makePyramidUntilZero lst : int64 list list =
        let pyramidBottom = lst |> makePyramidUntilZeroSeq |> Seq.toList
        if pyramidBottom = [] then []
@@ -69,7 +58,6 @@ module Input =
                 let el = linesFirstElement - lastElement
                 yield el
                 lastElement <- el 
-                0L
         ]
 
     let rec findPyramidExpansionBackwards (pyramid: int64 list list): int64 list =
@@ -90,7 +78,6 @@ module Input =
     [<Fact>]
     let testPyramidSumBack() = 
         Assert.Equal(1066L, sumOfPyramidExpansionBack input)
-
           
     let sumOfPyramidExpansion lst : int64 =
         lst |> List.map makePyramidUntilZero 
@@ -105,76 +92,5 @@ module Input =
     [<Fact>]
     let part1test() = 
         Assert.Equal(1762065988L, sumOfPyramidExpansion input)
-
-
-    [<Fact>]
-    let pyramidExpansionTest1() = 
-        let testPyramid1 = makePyramidUntilZero testinput[0]
-        let expansion = findPyramidExpansion testPyramid1 
-        Assert.Equal<int64 list> ([18L;3L;0L], expansion)
-
-    [<Fact>]
-    let pyramidExpansionTest2() = 
-        let testPyramid = makePyramidUntilZero testinput[1]
-        let expansion = findPyramidExpansion testPyramid 
-        Assert.Equal<int64 list> ([28L;7L;1L;0L], expansion)
-
-    [<Fact>]
-    let pyramidExpansionTest3() = 
-        let testPyramid = makePyramidUntilZero testinput[2]
-        let expansion = findPyramidExpansion testPyramid 
-        Assert.Equal<int64 list> ([68L;23L;8L;2L;0L], expansion)
-
-    let printPyramid (pyramid: int64 list list) (desc:string) =
-        printfn "Pyramid **** %s" desc
-        let mutable lineindent = ""
-        for line in pyramid do
-            printf "%s" lineindent
-            for num in line do
-                printf "%i " num 
-            lineindent <- " " + lineindent
-            printfn ""
-
-    [<Fact>]
-    let pyramidTest1() = 
-        Assert.Equal<int64 list list> ([], makePyramidUntilZero [])
-        let testPyramid1 = makePyramidUntilZero testinput[0]
-        let expectedPyramid1 = [testinput[0]; [3L;3L;3L;3L;3L]; [0L;0L;0L;0L]]
-        printPyramid testPyramid1 "test"
-        printPyramid expectedPyramid1 "expected"
-        Assert.Equal<int64 list list> (expectedPyramid1, testPyramid1) 
-
-    [<Fact>]
-    let pyramidTest2() = 
-        let testPyramid = makePyramidUntilZero testinput[1]
-        let expectedPyramid = [testinput[1]; [2L;3L;4L;5L;6L]; [1L; 1L; 1L; 1L]; [0L;0L;0L]] 
-        printPyramid testPyramid "test 2"
-        printPyramid expectedPyramid "expected 2"
-        Assert.Equal<int64 list list> (expectedPyramid, testPyramid) 
-
-    [<Fact>]
-    let pyramidTest3() = 
-        let testPyramid = makePyramidUntilZero testinput[2]
-        let expectedPyramid = [testinput[2]; [3L;3L;5L;9L;15L]; [0L;2L;4L;6L]; [2L;2L;2L]; [0L;0L] ]
-        printPyramid testPyramid "test 3"
-        printPyramid expectedPyramid "expected 3"
-        Assert.Equal<int64 list list> (expectedPyramid, testPyramid) 
-   
-    [<Fact>]
-    let allZeroTest() = 
-        Assert.True (allZeros [0L; 0L] )
-        Assert.False (allZeros [0L; 1L; 0L] )
- 
-    [<Fact>]
-    let testdiffer () = 
-        Assert.Equal<int64 list>([3L], findDiff [3L; 6L]) 
-        Assert.Equal<int64 list>([3L; 3L], findDiff [3L; 6L; 9L]) 
-        Assert.Equal<int64 list>([2L;3L;4L;5L;6L;7L], findDiff [1L; 3L; 6L; 10L; 15L; 21L; 28L])
-        Assert.Equal<int64 list>([], findDiff [0L]) // think it should be empty list
-        Assert.Equal<int64 list>([0L], findDiff [0L; 0L]) 
-
-    [<Fact>]
-    let test2 () = 
-        Assert.Equal(3, testinput.Length) 
 
 module Program = let [<EntryPoint>] main _ = 0
