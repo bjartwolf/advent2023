@@ -8,9 +8,26 @@ module Input =
         let file = File.ReadAllLines(filePath)
         file |> Array.map parseLine |> Array.toList
 
+
+        // maybe not use lists if slow
+    let testinput = readInit "testinput.txt" 
+
+    let rec findDiffSeq (lst: int64 list): int64 seq =
+        seq {
+            match lst with 
+                | a :: b :: tail -> yield b - a
+                                    yield! findDiffSeq (b :: tail)
+                | _ -> () 
+        } 
+    let findDiff lst = findDiffSeq lst |> Seq.toList
+
+    [<Fact>]
+    let testdiffer () = 
+        Assert.Equal<int64 list>([3L], findDiff [3L; 6L]) 
+        Assert.Equal<int64 list>([3L; 3L], findDiff [3L; 6L; 9L]) 
+
     [<Fact>]
     let test2 () = 
-        let input = readInit "testinput.txt" 
-        Assert.Equal(3, input.Length) 
+        Assert.Equal(3, testinput.Length) 
 
 module Program = let [<EntryPoint>] main _ = 0
