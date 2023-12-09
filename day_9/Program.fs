@@ -35,6 +35,15 @@ module Input =
                 yield! makePyramidUntilZeroSeq diffed 
         }
 
+    let rec makePyramidBackwardUntilZeroSeq lst : int64 list seq =
+        seq {
+            if not (allZeros lst) then 
+                let diffed = findDiff lst
+                yield diffed
+                yield! makePyramidUntilZeroSeq diffed 
+        }
+
+
     let makePyramidUntilZero lst : int64 list list =
        let pyramidBottom = lst |> makePyramidUntilZeroSeq |> Seq.toList
        if pyramidBottom = [] then []
@@ -51,7 +60,38 @@ module Input =
 
     let rec findPyramidExpansion (pyramid: int64 list list): int64 list =
         findPyramidExpansionSeq (pyramid |> List.rev) |> Seq.toList |> List.rev
-         
+
+    let findPyramidExpansionBackwardsSeq (pyramid: int64 list list): int64 seq =
+        let mutable lastElement = 0L
+        [
+            for line in pyramid do
+                let linesFirstElement = List.head line 
+                let el = linesFirstElement - lastElement
+                yield el
+                lastElement <- el 
+                0L
+        ]
+
+    let rec findPyramidExpansionBackwards (pyramid: int64 list list): int64 list =
+        findPyramidExpansionBackwardsSeq (pyramid |> List.rev) |> Seq.toList |> List.rev
+
+    [<Fact>]
+    let pyramidExpansionBackwardsTest3() = 
+        let testPyramid3 = makePyramidUntilZero testinput[2]
+        let expansion = findPyramidExpansionBackwards testPyramid3 
+        Assert.Equal<int64 list> ([5L;5L;-2L;2L;0L], expansion)
+
+    let sumOfPyramidExpansionBack lst : int64 =
+        lst |> List.map makePyramidUntilZero 
+            |> List.map findPyramidExpansionBackwards
+            |> List.map List.head
+            |> List.sum
+
+    [<Fact>]
+    let testPyramidSumBack() = 
+        Assert.Equal(1066L, sumOfPyramidExpansionBack input)
+
+          
     let sumOfPyramidExpansion lst : int64 =
         lst |> List.map makePyramidUntilZero 
             |> List.map findPyramidExpansion
