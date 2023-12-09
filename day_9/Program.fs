@@ -51,6 +51,15 @@ module Input =
     let rec findPyramidExpansion (pyramid: int64 list list): int64 list =
         findPyramidExpansionSeq (pyramid |> List.rev) |> Seq.toList |> List.rev
          
+    let sumOfPyramidExpansion lst : int64 =
+        lst |> List.map makePyramidUntilZero 
+            |> List.map findPyramidExpansion
+            |> List.map List.head
+            |> List.sum
+
+    [<Fact>]
+    let testPyramidSum() = 
+        Assert.Equal(114L, sumOfPyramidExpansion testinput)
 
     [<Fact>]
     let pyramidExpansionTest1() = 
