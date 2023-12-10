@@ -139,11 +139,11 @@
         let steps = walkMapInner 1 nextPosition startDirection 
         steps/2
 
-    let walkMapPositions (startPosition: Position) (map: PipeMap): Position seq =
+    let walkMapPositions (startPosition: Position) (map: PipeMap): (Position*Direction) seq =
         seq {
             let rec walkMapInner (steps: int) (position: Position) (direction: Direction) =
                 seq {
-                    yield position 
+                    yield position, direction 
                     if position <> startPosition then 
                         let pipe = Map.find position map
                         let nextPosition, nextDirection = nextPosition pipe position direction
@@ -151,11 +151,32 @@
                     }
             let startDirection = findStartDir startPosition map
             let nextPosition = move startDirection startPosition 
-            yield startPosition
-            yield nextPosition
+            yield startPosition,startDirection
             yield! walkMapInner 1 nextPosition startDirection 
         }
 
+    // non-unique points to the left of path constrained by closest point
+    let findAllPoints startPosition map : Position list =
+        let path = walkMapPositions startPosition map |> Seq.toList
+        [ 
+        for point, direction in path do
+            let y, x = point
+            if direction = N then
+            // what is closest path to the left
+                let pointsToTheLeft = path |> List.where  (fun ((y1,x1),_) -> y = y1 && x > x1)
+                let ((_,minX),_) = pointsToTheLeft |> List.minBy (fun ((_,x1),_) -> x1)
+                if minX <> x then
+                    for i in minX .. x do
+                        yield (y,i)
+        ]
+
+    [<Fact>]
+    let testWalkMapCountPath() = 
+        let input = readInit "testinput1.txt" 
+        let pipeMap,startPosition = parsePipeMap input
+        let points = findAllPoints startPosition pipeMap
+        Assert.Equal(1, points.Length)
+ 
 
     [<Fact>]
     let testWalkMap1() = 
@@ -183,8 +204,8 @@
         let input = readInit "input.txt" 
         let pipeMap,startPosition = parsePipeMap input
         let steps = walkMapPositions startPosition pipeMap
-        Assert.Equal((6828+1)*2, steps |> Seq.length)
-        Assert.Equal(steps |> Seq.head, steps |> Seq.last)
+        Assert.Equal(6828*2+1 , steps |> Seq.length)
+        //Assert.Equal(steps |> Seq.head, steps |> Seq.last)// coming in with another direction
 
 
     [<Fact>]
