@@ -139,6 +139,24 @@
         let steps = walkMapInner 1 nextPosition startDirection 
         steps/2
 
+    let walkMapPositions (startPosition: Position) (map: PipeMap): Position seq =
+        seq {
+            let rec walkMapInner (steps: int) (position: Position) (direction: Direction) =
+                seq {
+                    yield position 
+                    if position <> startPosition then 
+                        let pipe = Map.find position map
+                        let nextPosition, nextDirection = nextPosition pipe position direction
+                        yield! walkMapInner (steps + 1) nextPosition nextDirection
+                    }
+            let startDirection = findStartDir startPosition map
+            let nextPosition = move startDirection startPosition 
+            yield startPosition
+            yield nextPosition
+            yield! walkMapInner 1 nextPosition startDirection 
+        }
+
+
     [<Fact>]
     let testWalkMap1() = 
         let input = readInit "testinput1.txt" 
@@ -159,6 +177,14 @@
         let pipeMap,startPosition = parsePipeMap input
         let steps = walkMap startPosition pipeMap
         Assert.Equal(6828, steps)
+
+    [<Fact>]
+    let testWalkMapLargeAsSequence() = 
+        let input = readInit "input.txt" 
+        let pipeMap,startPosition = parsePipeMap input
+        let steps = walkMapPositions startPosition pipeMap
+        Assert.Equal((6828+1)*2, steps |> Seq.length)
+        Assert.Equal(steps |> Seq.head, steps |> Seq.last)
 
 
     [<Fact>]
