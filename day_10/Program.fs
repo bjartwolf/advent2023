@@ -28,8 +28,8 @@ module Input =
             | NS, N -> move N position, N 
             | EW, E -> move E position, E 
             | EW, W -> move W position, W 
-            | NE, N -> move N position, E 
-            | NE, W -> move E position, S  // blir snudd sydover baklengs om du kommer fra west
+            | NE, S -> move S position, E 
+            | NE, W -> move W position, N  
             | NW, N -> move N position, W 
             | NW, E -> move E position, S  
             | SW, S -> move S position, W
@@ -44,7 +44,20 @@ module Input =
         let nextPosition, nextDirection = nextPosition EW (3,4) W
         Assert.Equal<Position>( (2,4), nextPosition)
         Assert.Equal<Direction>(W, nextDirection) 
- 
+
+    [<Fact>]
+    let testDirectionNEGoingW() = 
+        let nextPosition, nextDirection = nextPosition NE (3,4) W
+        Assert.Equal<Position>( (2,4), nextPosition)
+        Assert.Equal<Direction>(N, nextDirection) 
+
+    [<Fact>]
+    let testDirectionNEGoingS() = 
+        let nextPosition, nextDirection = nextPosition NE (3,4) S
+        Assert.Equal<Position>( (3,3), nextPosition)
+        Assert.Equal<Direction>(E, nextDirection) 
+  
+  
     [<Fact>]
     let testDirectionSWGoingW() = 
         let moveNextPos () = nextPosition SW (3,4) W |> ignore
