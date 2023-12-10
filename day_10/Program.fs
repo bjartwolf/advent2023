@@ -146,21 +146,48 @@
                     if position <> startPosition then 
                         let pipe = Map.find position map
                         let nextPosition, nextDirection = nextPosition pipe position direction
+                        yield position,direction 
                         yield position,nextDirection
+//                        printfn "%A" (position, nextDirection)
                         yield! walkMapInner (steps + 1) nextPosition nextDirection
                     }
             let startDirection = findStartDir startPosition map
             let nextPosition = move startDirection startPosition 
             yield startPosition,startDirection
+            printfn "Startposition %A" (startPosition, startDirection)
             yield! walkMapInner 1 nextPosition startDirection 
         }
 
+    let plotPath (path: (Position*Direction) list) =  
+        printfn " Plotting "
+        for i in 0 .. 10 do 
+            for j in 0 .. 20 do
+                let getDir = List.tryFind (fun (p: Position,_: Direction) -> p = (i,j)) path 
+                match getDir with
+                    | None -> printf "." 
+                    | Some (p,d) -> match d with
+                                    | N -> printf "N"
+                                    | E -> printf "E"
+                                    | S -> printf "S"
+                                    | W -> printf "W"
+            printfn ""
+        ()
+
+
     // non-unique points to the left of path constrained by closest point
     let findAllPoints startPosition map : Position list =
-        let path = walkMapPositions startPosition map |> Seq.toList
-//        printfn "PATH %A" path
+        let path = walkMapPositions startPosition map |> Seq.toList 
+        let pathRef = path |> List.map (fun (p,d) ->
+            match d with 
+                | N -> (p,S)
+                | S -> (p,N)
+                | E -> (p,W)
+                | W -> (p,E)
+          )
+//////        printfn "PATH %A" path
         [ 
         for point, direction in path do
+            //plotPath pathRef
             let y, x = point
             if direction = N then
             // left when going north is west
@@ -170,6 +197,7 @@
                     let lowerBound, upperBound = maxX + 1, x - 1
                     for i in lowerBound .. upperBound do
                        if lowerBound > upperBound then failwith "wrong way"
+//                       printfn "At point %A yielding %A" point (y,i)
                        yield (y,i)
             if direction = S then
             // should hit the same points as north
@@ -186,9 +214,7 @@
                        yield (y,i)
             // left when going west south (down, increasing Y) 
             if direction = W then
-                //printfn "FOR POINT %A going west" point 
-                //printfn "******"
-
+            // left of west is south, increasing y
                 let pointsToTheLeft = path |> List.where  (fun ((y1,x1),_) -> x = x1 && y1 > y) // south, y1 > y 
                 if not pointsToTheLeft.IsEmpty then 
                     //printfn "to the left %A" pointsToTheLeft  
@@ -254,10 +280,6 @@
         let input = readInit "testinput5.txt" 
         let pipeMap,startPosition = parsePipeMap input
         let points = findAllPoints startPosition pipeMap
-        let distinctPoint = points |> List.distinct |> List.sortBy (fun (y,x) -> y)
-        plotPoints '*' input points |> ignore 
-        let path = walkMapPositions startPosition pipeMap|> Seq.toList |> List.map (fun (x,y) -> x)
-        plotPoints 'x' input path |> ignore 
         Assert.Equal(10, points |> List.distinct |> List.length)
   
     [<Fact>]
@@ -286,7 +308,9 @@
         let input = readInit "input.txt" 
         let pipeMap,startPosition = parsePipeMap input
         let steps = walkMapPositions startPosition pipeMap
-        Assert.Equal(6828*2 , steps |> Seq.length)
+        let count = findAllPoints startPosition pipeMap |> List.distinct |> List.length
+        Assert.Equal(6828*4-1 , steps |> Seq.length)
+        Assert.Equal(1203, count)
 
 
     [<Fact>]
