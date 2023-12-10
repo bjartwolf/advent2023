@@ -131,11 +131,8 @@
         let rec walkMapInner (steps: int) (position: Position) (direction: Direction) =
             if position = startPosition then steps
             else 
-                // I am at 2,1 going south
                 let pipe = Map.find position map
-                // hitting a pipe going south
                 let nextPosition, nextDirection = nextPosition pipe position direction
-                // then I end up in 3,1, entering direction is south
                 walkMapInner (steps + 1) nextPosition nextDirection
         let startDirection = findStartDir startPosition map
         let nextPosition = move startDirection startPosition 
