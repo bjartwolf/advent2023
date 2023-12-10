@@ -191,15 +191,9 @@
                    if lowerBound > upperBound then failwith "wrong way"
                    yield (i,x)
             if direction = E then // left is up, is north
-                printfn "FOR POINT %A" point 
-                printfn "******"
                 let pointsToTheLeft = path |> List.where  (fun ((y1,x1),_) -> x = x1 && y1 < y) // north, y1 < y 
-                printfn "to the left %A" pointsToTheLeft  
-                // points to the left is ok
                 let ((minY,_),_) = pointsToTheLeft |> List.maxBy(fun ((y1,_),_) -> y1) // closest is the max y  
-                printfn "minY is %A" minY
                 let lowerBound, upperBound = minY + 1, y - 1
-                printfn "dump lower:%A upper:%A" lowerBound upperBound 
                 for i in lowerBound .. upperBound do
                    if lowerBound > upperBound then failwith "wrong way"
                    yield (i,x)
