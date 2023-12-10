@@ -207,7 +207,20 @@
         Assert.Equal<Position list>([(2,2); (2,2);(2,2);(2,2)], points)
         Assert.Equal<Position list>([(2,2)], points |> List.distinct)
  
+    [<Fact>]
+    let testWalkMapCountPathExample3() = 
+        let input = readInit "testinput3.txt" 
+        let pipeMap,startPosition = parsePipeMap input
+        let points = findAllPoints startPosition pipeMap
+        Assert.Equal(4, points |> List.distinct |> List.length)
 
+    [<Fact>]
+    let testWalkMapCountPathExample4() = 
+        let input = readInit "testinput4.txt" 
+        let pipeMap,startPosition = parsePipeMap input
+        let points = findAllPoints startPosition pipeMap
+        Assert.Equal(10, points |> List.distinct |> List.length)
+  
     [<Fact>]
     let testWalkMap1() = 
         let input = readInit "testinput1.txt" 
