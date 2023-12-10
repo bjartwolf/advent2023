@@ -143,10 +143,10 @@
         seq {
             let rec walkMapInner (steps: int) (position: Position) (direction: Direction) =
                 seq {
-                    yield position, direction 
                     if position <> startPosition then 
                         let pipe = Map.find position map
                         let nextPosition, nextDirection = nextPosition pipe position direction
+                        yield position,nextDirection
                         yield! walkMapInner (steps + 1) nextPosition nextDirection
                     }
             let startDirection = findStartDir startPosition map
@@ -158,24 +158,39 @@
     // non-unique points to the left of path constrained by closest point
     let findAllPoints startPosition map : Position list =
         let path = walkMapPositions startPosition map |> Seq.toList
+//        printfn "PATH %A" path
         [ 
         for point, direction in path do
             let y, x = point
             if direction = N then
-            // what is closest path to the left
-                let pointsToTheLeft = path |> List.where  (fun ((y1,x1),_) -> y = y1 && x > x1)
-                let ((_,minX),_) = pointsToTheLeft |> List.minBy (fun ((_,x1),_) -> x1)
-                if minX <> x then
-                    for i in minX .. x do
-                        yield (y,i)
-        ]
+            // left when going north is west
+                let pointsToTheLeft = path |> List.where  (fun ((y1,x1),_) -> y = y1 && x1 < x) // west, x1 < x
+                let ((_,minX),_) = pointsToTheLeft |> List.maxBy(fun ((_,x1),_) -> x1) // closest is the max x1 smaller than x 
+                let lowerBound, upperBound = minX + 1, x - 1
+                for i in lowerBound .. upperBound do
+                   if lowerBound > upperBound then failwith "wrong way"
+                   yield (y,i)
+            if direction = S then
+            // should hit the same points as north
+            // left when going south is east
+                let pointsToTheLeft = path |> List.where  (fun ((y1,x1),_) -> y = y1 && x1 > x) // east, x1 > x
+                let ((_,minX),_) = pointsToTheLeft |> List.minBy(fun ((_,x1),_) -> x1) // closest is the min x1 to the east
+                let lowerBound, upperBound =  x + 1, minX - 1 
+                printfn "%A %A" point pointsToTheLeft 
+                printfn "lower %A upper %A" lowerBound upperBound 
+                for i in lowerBound .. upperBound do
+                   if lowerBound > upperBound then failwith "wrong way"
+                   printfn "%A %A" (y,x) (y,i)
+                   yield (y,i)
+         ]
 
     [<Fact>]
     let testWalkMapCountPath() = 
         let input = readInit "testinput1.txt" 
         let pipeMap,startPosition = parsePipeMap input
         let points = findAllPoints startPosition pipeMap
-        Assert.Equal(1, points.Length)
+        Assert.Equal<Position list>([(2,2); (2,2)], points)
+        Assert.Equal<Position list>([(2,2)], points |> List.distinct)
  
 
     [<Fact>]
@@ -204,8 +219,7 @@
         let input = readInit "input.txt" 
         let pipeMap,startPosition = parsePipeMap input
         let steps = walkMapPositions startPosition pipeMap
-        Assert.Equal(6828*2+1 , steps |> Seq.length)
-        //Assert.Equal(steps |> Seq.head, steps |> Seq.last)// coming in with another direction
+        Assert.Equal(6828*2 , steps |> Seq.length)
 
 
     [<Fact>]
