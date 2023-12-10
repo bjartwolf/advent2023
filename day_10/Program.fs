@@ -40,11 +40,10 @@ module Input =
 
 
     [<Fact>]
-    let testDirections() = 
+    let testDirectionEWGoingW() = 
         let nextPosition, nextDirection = nextPosition EW (3,4) W
         Assert.Equal<Position>( (2,4), nextPosition)
-        //Assert.Equal<Position*Direction>( ((4,4),West), nextPosition EW (3,4) W)
-        
+        Assert.Equal<Direction>(W, nextDirection) 
  
 
     [<Fact>]
