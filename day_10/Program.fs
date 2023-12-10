@@ -11,30 +11,42 @@ module Input =
     type Direction = W | N | E | S 
     type PipeMap = Map<Position, Pipe>
 
-    let parsePipeMap (mapinput: string[]): PipeMap =
-        let mapparts = [
-            for i in 0 .. (mapinput.Length - 1) do
-                let chars = mapinput[i].ToCharArray()
-                for charIndex in 0 .. (chars.Length - 1) do
-                    let char = chars[charIndex]
-                    let pipe = match char with 
-                                    | '|' -> Some NS
-                                    | '-' -> Some EW
-                                    | 'L' -> Some NE
-                                    | 'J' -> Some NW
-                                    | '7' -> Some SW
-                                    | 'F' -> Some SE
-                                    | _ -> None
-                    match pipe with 
-                        | Some p -> yield ((i,charIndex), p)
-                        | None -> () 
-        ]
-        Map.ofList mapparts 
+    type Tile = PipeTile of Pipe | StartPosition of Position
+
+    let parsePipeMap (mapinput: string[]): PipeMap*Position=
+            let pipeTiles : (Position*Pipe) list = [
+                for i in 0 .. (mapinput.Length - 1) do
+                    let chars = mapinput[i].ToCharArray()
+                    for charIndex in 0 .. (chars.Length - 1) do
+                        let char = chars[charIndex]
+                        let tile:Tile option = match char with 
+                                                    | '|' -> Some (PipeTile NS)
+                                                    | '-' -> Some (PipeTile EW)
+                                                    | 'L' -> Some (PipeTile NE)
+                                                    | 'J' -> Some (PipeTile NW)
+                                                    | '7' -> Some (PipeTile SW)
+                                                    | 'F' -> Some (PipeTile SE)
+                                                    | _ -> None
+                        match tile with 
+                            | Some (PipeTile p) -> yield ((i,charIndex), p)
+                            | _ -> () 
+            ]
+            let startPosition = [
+                for i in 0 .. (mapinput.Length - 1) do
+                    let chars = mapinput[i].ToCharArray()
+                    for charIndex in 0 .. (chars.Length - 1) do
+                        let char = chars[charIndex]
+                        match char with 
+                              | 'S' -> yield (i,charIndex)
+                              | _ -> () 
+            ] 
+            let pipeMap = Map.ofList pipeTiles 
+            (pipeMap, startPosition.Head)
 
     [<Fact>]
     let testMapParser () = 
         let input = readInit "testinput1.txt" 
-        let pipeMap = parsePipeMap input
+        let pipeMap,startPosition = parsePipeMap input
         Assert.Equal(EW, Map.find (0,0) pipeMap) 
         Assert.Equal(SE, Map.find (4,4) pipeMap) 
 
