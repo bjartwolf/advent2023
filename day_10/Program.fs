@@ -32,11 +32,23 @@ module Input =
             | NE, W -> move W position, N  
             | NW, S -> move S position, W 
             | NW, E -> move E position, N  
-            | SW, S -> move S position, W
-            | SW, E -> move E position, N
+            | SW, N -> move N position, W
+            | SW, E -> move E position, S
             | SE, S -> move S position, E
             | SE, W -> move W position, N 
             | _ -> failwithf "%A %A does not work" pipe direction 
+
+    [<Fact>]
+    let testDirectionSWGoingN() = 
+        let nextPosition, nextDirection = nextPosition SW (3,4) N
+        Assert.Equal<Position>( (3,5), nextPosition)
+        Assert.Equal<Direction>(W, nextDirection) 
+
+    [<Fact>]
+    let testDirectionSWGoingE() = 
+        let nextPosition, nextDirection = nextPosition SW (3,4) E
+        Assert.Equal<Position>( (4,4), nextPosition)
+        Assert.Equal<Direction>(S, nextDirection) 
 
 
     [<Fact>]
