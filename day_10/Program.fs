@@ -165,38 +165,49 @@
             if direction = N then
             // left when going north is west
                 let pointsToTheLeft = path |> List.where  (fun ((y1,x1),_) -> y = y1 && x1 < x) // west, x1 < x
-                let ((_,minX),_) = pointsToTheLeft |> List.maxBy(fun ((_,x1),_) -> x1) // closest is the max x1 smaller than x 
-                let lowerBound, upperBound = minX + 1, x - 1
-                for i in lowerBound .. upperBound do
-                   if lowerBound > upperBound then failwith "wrong way"
-                   yield (y,i)
+                if not pointsToTheLeft.IsEmpty then 
+                    let ((_,minX),_) = pointsToTheLeft |> List.maxBy(fun ((_,x1),_) -> x1) // closest is the max x1 smaller than x 
+                    let lowerBound, upperBound = minX + 1, x - 1
+                    for i in lowerBound .. upperBound do
+                       if lowerBound > upperBound then failwith "wrong way"
+                       yield (y,i)
             if direction = S then
             // should hit the same points as north
             // left when going south is east
                 let pointsToTheLeft = path |> List.where  (fun ((y1,x1),_) -> y = y1 && x1 > x) // east, x1 > x
-                let ((_,minX),_) = pointsToTheLeft |> List.minBy(fun ((_,x1),_) -> x1) // closest is the min x1 to the east
-                let lowerBound, upperBound =  x + 1, minX - 1 
-//                printfn "%A %A" point pointsToTheLeft 
-//                printfn "lower %A upper %A" lowerBound upperBound 
-                for i in lowerBound .. upperBound do
-                   if lowerBound > upperBound then failwith "wrong way"
- //                  printfn "%A %A" (y,x) (y,i)
-                   yield (y,i)
+                if not pointsToTheLeft.IsEmpty then 
+                    let ((_,minX),_) = pointsToTheLeft |> List.minBy(fun ((_,x1),_) -> x1) // closest is the min x1 to the east
+                    let lowerBound, upperBound =  x + 1, minX - 1 
+    //                printfn "%A %A" point pointsToTheLeft 
+    //                printfn "lower %A upper %A" lowerBound upperBound 
+                    for i in lowerBound .. upperBound do
+                       if lowerBound > upperBound then failwith "wrong way"
+     //                  printfn "%A %A" (y,x) (y,i)
+                       yield (y,i)
             // left when going west south (down, increasing Y) 
             if direction = W then
+                printfn "FOR POINT %A going west" point 
+                printfn "******"
+
                 let pointsToTheLeft = path |> List.where  (fun ((y1,x1),_) -> x = x1 && y1 > y) // south, y1 > y 
-                let ((minY,_),_) = pointsToTheLeft |> List.minBy(fun ((y1,_),_) -> y1) // closest is the minimum y  
-                let lowerBound, upperBound = y + 1, minY - 1
-                for i in lowerBound .. upperBound do
-                   if lowerBound > upperBound then failwith "wrong way"
-                   yield (i,x)
+                if not pointsToTheLeft.IsEmpty then 
+                    printfn "to the left %A" pointsToTheLeft  
+                    let ((minY,_),_) = pointsToTheLeft |> List.minBy(fun ((y1,_),_) -> y1) // closest is the minimum y  
+                    let lowerBound, upperBound = y + 1, minY - 1
+                    //let lowerBound, upperBound = minY - 1, y + 1 
+                    printfn "minY is %A" minY
+                    printfn "dump lower:%A upper:%A" lowerBound upperBound 
+                    for i in lowerBound .. upperBound do
+                       if lowerBound > upperBound then failwith "wrong way"
+                       yield (i,x)
             if direction = E then // left is up, is north
                 let pointsToTheLeft = path |> List.where  (fun ((y1,x1),_) -> x = x1 && y1 < y) // north, y1 < y 
-                let ((minY,_),_) = pointsToTheLeft |> List.maxBy(fun ((y1,_),_) -> y1) // closest is the max y  
-                let lowerBound, upperBound = minY + 1, y - 1
-                for i in lowerBound .. upperBound do
-                   if lowerBound > upperBound then failwith "wrong way"
-                   yield (i,x)
+                if not pointsToTheLeft.IsEmpty then 
+                    let ((minY,_),_) = pointsToTheLeft |> List.maxBy(fun ((y1,_),_) -> y1) // closest is the max y  
+                    let lowerBound, upperBound = minY + 1, y - 1
+                    for i in lowerBound .. upperBound do
+                       if lowerBound > upperBound then failwith "wrong way"
+                       yield (i,x)
            ]
 
     [<Fact>]
@@ -219,6 +230,14 @@
         let input = readInit "testinput4.txt" 
         let pipeMap,startPosition = parsePipeMap input
         let points = findAllPoints startPosition pipeMap
+        Assert.Equal(8, points |> List.distinct |> List.length)
+ 
+    [<Fact>]
+    let testWalkMapCountPathExample5() = 
+        let input = readInit "testinput5.txt" 
+        let pipeMap,startPosition = parsePipeMap input
+        let points = findAllPoints startPosition pipeMap
+        let distinctPoint = points |> List.distinct
         Assert.Equal(10, points |> List.distinct |> List.length)
   
     [<Fact>]
