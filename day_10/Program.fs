@@ -237,7 +237,7 @@
         let input = readInit "testinput5.txt" 
         let pipeMap,startPosition = parsePipeMap input
         let points = findAllPoints startPosition pipeMap
-        let distinctPoint = points |> List.distinct
+        let distinctPoint = points |> List.distinct |> List.sortBy (fun (y,x) -> y)
         Assert.Equal(10, points |> List.distinct |> List.length)
   
     [<Fact>]
