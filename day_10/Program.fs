@@ -6,14 +6,37 @@ module Input =
     let readInit (filePath: string): string []= 
         IO.File.ReadAllLines(filePath)
 
-    let North = (0,1)
-    let South = (0,-1)
-    let West = (1,0)
-    let East = (-1,0)
-
     type Position = int*int
     type Pipe = NS | EW | NE | NW | SW | SE 
     type Direction = W | N | E | S 
+    type PipeMap = Map<Position, Pipe>
+
+    let parsePipeMap (mapinput: string[]): PipeMap =
+        let mapparts = [
+            for i in 0 .. (mapinput.Length - 1) do
+                let chars = mapinput[i].ToCharArray()
+                for charIndex in 0 .. (chars.Length - 1) do
+                    let char = chars[charIndex]
+                    let pipe = match char with 
+                                    | '|' -> Some NS
+                                    | '-' -> Some EW
+                                    | 'L' -> Some NE
+                                    | 'J' -> Some NW
+                                    | '7' -> Some SW
+                                    | 'F' -> Some SE
+                                    | _ -> None
+                    match pipe with 
+                        | Some p -> yield ((i,charIndex), p)
+                        | None -> () 
+        ]
+        Map.ofList mapparts 
+
+    [<Fact>]
+    let testMapParser () = 
+        let input = readInit "testinput1.txt" 
+        let pipeMap = parsePipeMap input
+        Assert.Equal(EW, Map.find (0,0) pipeMap) 
+        Assert.Equal(SE, Map.find (4,4) pipeMap) 
 
     let move (direction: Direction) ((x,y): Position): Position  =
         match direction with 
@@ -37,7 +60,6 @@ module Input =
             | SE, N -> move N position, E
             | SE, W -> move W position, S 
             | _ -> failwithf "%A %A does not work" pipe direction 
-
 
     let findStartDir (position: Position) (map: Map<Position,Pipe>): Direction =
         // check north
