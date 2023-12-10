@@ -44,12 +44,21 @@ module Input =
             (pipeMap, startPosition.Head)
 
     [<Fact>]
-    let testMapParser () = 
+    let testMapParserTestMap1 () = 
         let input = readInit "testinput1.txt" 
         let pipeMap,startPosition = parsePipeMap input
         Assert.Equal(EW, Map.find (0,0) pipeMap) 
         Assert.Equal(SE, Map.find (4,4) pipeMap) 
         Assert.Equal<Position>((1,1), startPosition)
+
+    [<Fact>]
+    let testMapParserTestMap2 () = 
+        let input = readInit "testinput2.txt" 
+        let pipeMap,startPosition = parsePipeMap input
+        Assert.Equal(SW, Map.find (0,0) pipeMap) 
+        Assert.Equal(NW, Map.find (4,4) pipeMap) 
+        Assert.Equal<Position>((2,0), startPosition)
+
 
     let move (direction: Direction) ((x,y): Position): Position  =
         match direction with 
