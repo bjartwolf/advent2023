@@ -45,7 +45,11 @@ module Input =
         Assert.Equal<Position>( (2,4), nextPosition)
         Assert.Equal<Direction>(W, nextDirection) 
  
-
+    [<Fact>]
+    let testDirectionSWGoingW() = 
+        let moveNextPos () = nextPosition SW (3,4) W |> ignore
+        Assert.Throws<Exception>(Action( fun () -> moveNextPos () ))
+ 
     [<Fact>]
     let test2 () = 
         let input = readInit "testinput1.txt" 
