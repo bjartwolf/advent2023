@@ -140,15 +140,28 @@
         let startDirection = findStartDir startPosition map
         let nextPosition = move startDirection startPosition 
         let steps = walkMapInner 1 nextPosition startDirection 
-        steps / 2 // or something
+        steps/2
 
     [<Fact>]
     let testWalkMap1() = 
         let input = readInit "testinput1.txt" 
         let pipeMap,startPosition = parsePipeMap input
-        ()
-        //let steps = walkMap startPosition pipeMap
-        //Assert.Equal(8, steps)
+        let steps = walkMap startPosition pipeMap
+        Assert.Equal(4, steps)
+
+    [<Fact>]
+    let testWalkMap2() = 
+        let input = readInit "testinput2.txt" 
+        let pipeMap,startPosition = parsePipeMap input
+        let steps = walkMap startPosition pipeMap
+        Assert.Equal(8, steps)
+
+    [<Fact>]
+    let testWalkMapLarge() = 
+        let input = readInit "input.txt" 
+        let pipeMap,startPosition = parsePipeMap input
+        let steps = walkMap startPosition pipeMap
+        Assert.Equal(6828, steps)
 
 
     [<Fact>]
