@@ -15,7 +15,7 @@ module Input =
     type Pipe = NS | EW | NE | NW | SW | SE 
     type Direction = W | N | E | S 
 
-    let move (direction: Direction) ((x,y): Position)  =
+    let move (direction: Direction) ((x,y): Position): Position  =
         match direction with 
             | N -> (x,y+1)
             | W -> (x-1,y)
@@ -37,6 +37,23 @@ module Input =
             | SE, N -> move N position, E
             | SE, W -> move W position, S 
             | _ -> failwithf "%A %A does not work" pipe direction 
+
+
+    let findStartDir (position: Position) (map: Map<Position,Pipe>): Direction =
+        // check north
+        let northTile = Map.tryFind (move N position) map 
+        let southTile = Map.tryFind (move S position) map
+        let eastTile = Map.tryFind (move E position) map 
+        let westTile = Map.tryFind(move W position) map 
+        match northTile, southTile, eastTile, westTile with
+            | Some n,_,_,_ when n = NS || n = SW || n = SE -> N 
+            | _,Some s,_,_ when s = NS || s = NW || s = NE -> S 
+            | _,_,Some e,_ when e = EW || e = NW || e = SW -> E 
+            | _,_,_,Some w when w = EW || w = NE || w = SE -> W 
+            | _ -> failwithf "There has to be a direction from %A" position
+        
+
+
 
     [<Fact>]
     let testDirectionSEGoingW() = 
