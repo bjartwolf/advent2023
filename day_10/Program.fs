@@ -49,6 +49,7 @@ module Input =
         let pipeMap,startPosition = parsePipeMap input
         Assert.Equal(EW, Map.find (0,0) pipeMap) 
         Assert.Equal(SE, Map.find (4,4) pipeMap) 
+        Assert.Equal<Position>((1,1), startPosition)
 
     let move (direction: Direction) ((x,y): Position): Position  =
         match direction with 
