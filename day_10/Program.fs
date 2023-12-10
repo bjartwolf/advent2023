@@ -166,8 +166,8 @@
             // left when going north is west
                 let pointsToTheLeft = path |> List.where  (fun ((y1,x1),_) -> y = y1 && x1 < x) // west, x1 < x
                 if not pointsToTheLeft.IsEmpty then 
-                    let ((_,minX),_) = pointsToTheLeft |> List.maxBy(fun ((_,x1),_) -> x1) // closest is the max x1 smaller than x 
-                    let lowerBound, upperBound = minX + 1, x - 1
+                    let ((_,maxX),_) = pointsToTheLeft |> List.maxBy(fun ((_,x1),_) -> x1) // closest is the max x1 smaller than x 
+                    let lowerBound, upperBound = maxX + 1, x - 1
                     for i in lowerBound .. upperBound do
                        if lowerBound > upperBound then failwith "wrong way"
                        yield (y,i)
@@ -186,29 +186,37 @@
                        yield (y,i)
             // left when going west south (down, increasing Y) 
             if direction = W then
-                printfn "FOR POINT %A going west" point 
-                printfn "******"
+                //printfn "FOR POINT %A going west" point 
+                //printfn "******"
 
                 let pointsToTheLeft = path |> List.where  (fun ((y1,x1),_) -> x = x1 && y1 > y) // south, y1 > y 
                 if not pointsToTheLeft.IsEmpty then 
-                    printfn "to the left %A" pointsToTheLeft  
+                    //printfn "to the left %A" pointsToTheLeft  
                     let ((minY,_),_) = pointsToTheLeft |> List.minBy(fun ((y1,_),_) -> y1) // closest is the minimum y  
                     let lowerBound, upperBound = y + 1, minY - 1
-                    //let lowerBound, upperBound = minY - 1, y + 1 
-                    printfn "minY is %A" minY
-                    printfn "dump lower:%A upper:%A" lowerBound upperBound 
+                    //printfn "minY is %A" minY
+                    //printfn "dump lower:%A upper:%A" lowerBound upperBound 
                     for i in lowerBound .. upperBound do
                        if lowerBound > upperBound then failwith "wrong way"
                        yield (i,x)
             if direction = E then // left is up, is north
                 let pointsToTheLeft = path |> List.where  (fun ((y1,x1),_) -> x = x1 && y1 < y) // north, y1 < y 
                 if not pointsToTheLeft.IsEmpty then 
-                    let ((minY,_),_) = pointsToTheLeft |> List.maxBy(fun ((y1,_),_) -> y1) // closest is the max y  
-                    let lowerBound, upperBound = minY + 1, y - 1
+                    let ((maxY,_),_) = pointsToTheLeft |> List.maxBy(fun ((y1,_),_) -> y1) // closest is the max y  
+                    let lowerBound, upperBound = maxY + 1, y - 1
                     for i in lowerBound .. upperBound do
                        if lowerBound > upperBound then failwith "wrong way"
                        yield (i,x)
            ]
+
+    let plotPoints (c: char) (input: string []) (positions: Position list)  =
+        printfn " Plotting "
+        for i in 0 .. input.Length - 1 do 
+            for j in 0 .. input[0].Length - 1 do
+                if List.contains (i,j) positions then printf "%c" c 
+                else printf "." 
+            printfn ""
+        ()
 
     [<Fact>]
     let testWalkMapCountPath() = 
@@ -217,6 +225,9 @@
         let points = findAllPoints startPosition pipeMap
         Assert.Equal<Position list>([(2,2); (2,2);(2,2);(2,2)], points)
         Assert.Equal<Position list>([(2,2)], points |> List.distinct)
+        plotPoints '*' input points |> ignore 
+        let path = walkMapPositions startPosition pipeMap|> Seq.toList |> List.map (fun (x,y) -> x)
+        plotPoints 'x' input path |> ignore 
  
     [<Fact>]
     let testWalkMapCountPathExample3() = 
@@ -224,20 +235,29 @@
         let pipeMap,startPosition = parsePipeMap input
         let points = findAllPoints startPosition pipeMap
         Assert.Equal(4, points |> List.distinct |> List.length)
+        plotPoints '*' input points |> ignore 
+        let path = walkMapPositions startPosition pipeMap|> Seq.toList |> List.map (fun (x,y) -> x)
+        plotPoints 'x' input path |> ignore 
 
     [<Fact>]
     let testWalkMapCountPathExample4() = 
         let input = readInit "testinput4.txt" 
         let pipeMap,startPosition = parsePipeMap input
         let points = findAllPoints startPosition pipeMap
+        plotPoints '*' input points |> ignore 
+        let path = walkMapPositions startPosition pipeMap|> Seq.toList |> List.map (fun (x,y) -> x)
+        plotPoints 'x' input path |> ignore 
         Assert.Equal(8, points |> List.distinct |> List.length)
- 
+
     [<Fact>]
     let testWalkMapCountPathExample5() = 
         let input = readInit "testinput5.txt" 
         let pipeMap,startPosition = parsePipeMap input
         let points = findAllPoints startPosition pipeMap
         let distinctPoint = points |> List.distinct |> List.sortBy (fun (y,x) -> y)
+        plotPoints '*' input points |> ignore 
+        let path = walkMapPositions startPosition pipeMap|> Seq.toList |> List.map (fun (x,y) -> x)
+        plotPoints 'x' input path |> ignore 
         Assert.Equal(10, points |> List.distinct |> List.length)
   
     [<Fact>]
