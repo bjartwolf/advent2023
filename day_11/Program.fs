@@ -14,9 +14,13 @@ module Input =
                         yield (i,j)
         ]
 
+
+
     [<Fact>]
     let test2 () = 
         let input = readInit "testinput.txt" 
         Assert.Equal(9, input.Length) 
+        Assert.True(input |> List.contains (9,0))
+        Assert.True(input |> List.contains (9,4))
 
 module Program = let [<EntryPoint>] main _ = 0
