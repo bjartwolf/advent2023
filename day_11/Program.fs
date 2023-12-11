@@ -43,17 +43,13 @@ module Input =
             | g1::g2 -> List.allPairs [g1] g2 @ findPairs g2
             | [] -> []
 
-    let distanceAllPairs inputPath factor =
+    let sumDistanceAllPairs inputPath factor = 
         let zeroRows = findZeroRows inputPath
         let zeroCols = findZeroColumns inputPath
         let galaxies = readInit inputPath
-        let allPairs = findPairs galaxies 
-        let allDistances = allPairs |> List.map (fun pair -> distance pair zeroCols zeroRows factor)
-        allDistances 
-
-    let sumDistanceAllPairs inputPath factor = 
-        let distances = distanceAllPairs inputPath factor
-        distances |> List.sum 
+        galaxies |> findPairs
+                 |> List.map (fun pair -> distance pair zeroCols zeroRows factor)
+                 |> List.sum 
 
     [<Fact>]
     let testSum() = 
