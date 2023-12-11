@@ -36,7 +36,7 @@ module Input =
         let minX, maxX = min ax bx, max ax bx 
         let spacesInX:int64 = zeroCols |> List.where (fun c -> c > minX && c < maxX) |> List.length |> int64
         let spacesInY = zeroRows|> List.where (fun c -> c > minY && c < maxY) |> List.length |> int64
-        (maxY-minY) + (maxX - minX) +  (spacesInX+spacesInY)*(factor - 1L)
+        (maxY-minY) + (maxX - minX) +  (spacesInX+spacesInY)*(factor)
 
     let rec findPairs galaxies = 
         match galaxies with 
@@ -53,27 +53,27 @@ module Input =
 
     [<Fact>]
     let testSum() = 
-        let input = sumDistanceAllPairs "testinput.txt" 2L
+        let input = sumDistanceAllPairs "testinput.txt" 1L
         Assert.Equal(374L, input)
 
     [<Fact>]
     let testSumFactor10() = 
-        let input = sumDistanceAllPairs "testinput.txt" 10L
+        let input = sumDistanceAllPairs "testinput.txt" (10L-1L)
         Assert.Equal(1030L, input)
 
     [<Fact>]
     let testSumFactor100() = 
-        let input = sumDistanceAllPairs "testinput.txt" 100L
+        let input = sumDistanceAllPairs "testinput.txt" (100L-1L)
         Assert.Equal(8410L, input)
 
     [<Fact>]
     let testDistancesFactorOne() = 
-        let input = sumDistanceAllPairs "input.txt" 2L 
+        let input = sumDistanceAllPairs "input.txt" 1L 
         Assert.Equal(10490062L, input)
 
     [<Fact>]
     let testDistancesFactormillion() = 
-        let input = sumDistanceAllPairs "input.txt" 1000000L
+        let input = sumDistanceAllPairs "input.txt" (1000000L-1L)
         Assert.Equal(382979724122L, input)
 
 module Program = let [<EntryPoint>] main _ = 0
