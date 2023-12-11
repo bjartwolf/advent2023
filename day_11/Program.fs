@@ -38,8 +38,9 @@ module Input =
         let minY, maxY = min ay by, max ay by 
         let minX, maxX = min ax bx, max ax bx 
         let spacesInX = zeroCols |> List.where (fun c -> c > minX && c < maxX) |> List.length
-        let spacesInY = zeroCols |> List.where (fun c -> c > minY && c < maxY) |> List.length
+        let spacesInY = zeroRows|> List.where (fun c -> c > minY && c < maxY) |> List.length
         (maxY-minY) + (maxX - minX) + spacesInX + spacesInY
+
 
         // distX
 
@@ -57,7 +58,6 @@ module Input =
         let allPairs = findPairs galaxies 
         let allDistances = allPairs |> List.map (fun pair -> distance pair zeroCols zeroRows)
         allDistances 
-
 
     let sumDistanceAllPairs (inputPath:string) =
         let distances = distanceAllPairs inputPath
