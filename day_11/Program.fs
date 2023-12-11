@@ -75,6 +75,12 @@ module Input =
         Assert.Equal(374, input)
 
     [<Fact>]
+    let testDistances() = 
+        let input = sumDistanceAllPairs "input.txt" 
+        Assert.Equal(10490062, input)
+
+
+    [<Fact>]
     let testFindRows() = 
         let input = findZeroRows "testinput.txt" 
         Assert.Equal<int list>([3;7], input)
