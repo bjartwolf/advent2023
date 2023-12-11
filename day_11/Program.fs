@@ -3,6 +3,17 @@ module Input =
     open System.IO
     open Xunit 
 
+    let findZeroColumns (filePath: string): int list = 
+        let lines = IO.File.ReadAllLines(filePath)
+        [
+            let height = lines.Length
+            for i in 0 .. height - 1 do
+                if lines[i] |> String.forall (fun c -> c = '.') then
+                    yield i
+        ]
+
+
+
     let readInit (filePath: string): (int*int) list = 
         let lines = IO.File.ReadAllLines(filePath)
         [
@@ -14,6 +25,13 @@ module Input =
                         yield (i,j)
         ]
 
+     //  the sum of the shortest path
+     //  path is absolute value of taxicab distance all the pairs with added value, can count itself because it is zero anyway 
+
+    [<Fact>]
+    let testFindColumns () = 
+        let input = findZeroColumns "testinput.txt" 
+        Assert.Equal<int list>([3;7], input)
 
 
     [<Fact>]
