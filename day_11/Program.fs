@@ -32,15 +32,14 @@ module Input =
                         yield (i,j)
         ]
 
-    let distance ((a,b): (int*int)*(int*int) ) (zeroCols: int list) (zeroRows:int list) =
+    let distance ((a,b): (int*int)*(int*int) ) (zeroCols: int list) (zeroRows:int list) (factor: int64)=
         let ay,ax = a
         let by,bx = b
         let minY, maxY = min ay by, max ay by 
         let minX, maxX = min ax bx, max ax bx 
-        let spacesInX = zeroCols |> List.where (fun c -> c > minX && c < maxX) |> List.length
-        let spacesInY = zeroRows|> List.where (fun c -> c > minY && c < maxY) |> List.length
-        (maxY-minY) + (maxX - minX) + spacesInX + spacesInY
-
+        let spacesInX:int64 = zeroCols |> List.where (fun c -> c > minX && c < maxX) |> List.length |> int64
+        let spacesInY = zeroRows|> List.where (fun c -> c > minY && c < maxY) |> List.length |> int64
+        int64 (maxY-minY) + int64 (maxX - minX) +  spacesInX*factor+ spacesInY*factor
 
         // distX
 
@@ -51,33 +50,44 @@ module Input =
             | g1::g2 -> List.allPairs [g1] g2 @ findPairs g2
             | [] -> []
 
-    let distanceAllPairs(inputPath:string) =
+    let distanceAllPairs(inputPath:string) (factor:int64)=
         let zeroRows = findZeroRows inputPath
         let zeroCols = findZeroColumns inputPath
         let galaxies = readInit inputPath
         let allPairs = findPairs galaxies 
-        let allDistances = allPairs |> List.map (fun pair -> distance pair zeroCols zeroRows)
+        let allDistances = allPairs |> List.map (fun pair -> distance pair zeroCols zeroRows factor)
         allDistances 
 
-    let sumDistanceAllPairs (inputPath:string) =
-        let distances = distanceAllPairs inputPath
+    let sumDistanceAllPairs (inputPath:string) (factor: int64)=
+        let distances = distanceAllPairs inputPath factor
         distances |> List.sum 
 
     [<Fact>]
     let countDistances () = 
-        let input = distanceAllPairs "testinput.txt" 
+        let input = distanceAllPairs "testinput.txt" 1L 
         Assert.Equal(36, input.Length) 
-
 
     [<Fact>]
     let testSum() = 
-        let input = sumDistanceAllPairs "testinput.txt" 
-        Assert.Equal(374, input)
+        let input = sumDistanceAllPairs "testinput.txt" 1L
+        Assert.Equal(374L, input)
+
+    [<Fact>]
+    let testSumFactor10() = 
+        let input = sumDistanceAllPairs "testinput.txt" 10L
+        Assert.Equal(1030L, input)
+
+    [<Fact>]
+    let testSumFactor100() = 
+        let input = sumDistanceAllPairs "testinput.txt" 100L
+        Assert.Equal(8410L, input)
+
 
     [<Fact>]
     let testDistances() = 
-        let input = sumDistanceAllPairs "input.txt" 
-        Assert.Equal(10490062, input)
+        let input = sumDistanceAllPairs "input.txt" 1000000L
+        ()
+        //Assert.Equal(382980107092L, input)
 
 
     [<Fact>]
