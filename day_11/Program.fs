@@ -39,7 +39,7 @@ module Input =
         let minX, maxX = min ax bx, max ax bx 
         let spacesInX:int64 = zeroCols |> List.where (fun c -> c > minX && c < maxX) |> List.length |> int64
         let spacesInY = zeroRows|> List.where (fun c -> c > minY && c < maxY) |> List.length |> int64
-        (maxY-minY) + (maxX - minX) +  spacesInX*factor+ spacesInY*factor
+        (maxY-minY) + (maxX - minX) +  (spacesInX+spacesInY)*(factor - 1L)
         // distX
 
      //  the sum of the shortest path
@@ -63,12 +63,12 @@ module Input =
 
     [<Fact>]
     let countDistances () = 
-        let input = distanceAllPairs "testinput.txt" 1L 
+        let input = distanceAllPairs "testinput.txt" 2L 
         Assert.Equal(36, input.Length) 
 
     [<Fact>]
     let testSum() = 
-        let input = sumDistanceAllPairs "testinput.txt" 1L
+        let input = sumDistanceAllPairs "testinput.txt" 2L
         Assert.Equal(374L, input)
 
     [<Fact>]
@@ -84,16 +84,13 @@ module Input =
 
     [<Fact>]
     let testDistancesFactorOne() = 
-        let input = sumDistanceAllPairs "input.txt" 1L 
+        let input = sumDistanceAllPairs "input.txt" 2L 
         Assert.Equal(10490062L, input)
 
     [<Fact>]
     let testDistancesFactormillion() = 
         let input = sumDistanceAllPairs "input.txt" 1000000L
-        ()
-        //Assert.Equal(382980107092L, input)
-
-        10490062
+        Assert.Equal(3829724122L, input)
 
     [<Fact>]
     let testFindRows() = 
