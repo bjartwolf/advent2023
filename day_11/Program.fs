@@ -3,7 +3,7 @@ module Input =
     open System.IO
     open Xunit 
 
-    let findZeroRows (filePath: string): int list = 
+    let findZeroRows (filePath: string): int64 list = 
         let lines = IO.File.ReadAllLines(filePath)
         [
             let height = lines.Length
@@ -12,7 +12,7 @@ module Input =
                     yield i
         ]
 
-    let findZeroColumns(filePath: string): int list = 
+    let findZeroColumns(filePath: string): int64 list = 
         let lines = IO.File.ReadAllLines(filePath)
         [
             let width = lines[0].Length
@@ -21,7 +21,7 @@ module Input =
                     yield i
         ]
 
-    let readInit (filePath: string): (int*int) list = 
+    let readInit (filePath: string): (int64*int64) list = 
         let lines = IO.File.ReadAllLines(filePath)
         [
             let height = lines.Length
@@ -32,20 +32,19 @@ module Input =
                         yield (i,j)
         ]
 
-    let distance ((a,b): (int*int)*(int*int) ) (zeroCols: int list) (zeroRows:int list) (factor: int64)=
+    let distance ((a,b): (int64*int64)*(int64*int64) ) (zeroCols: int64 list) (zeroRows:int64 list) (factor: int64)=
         let ay,ax = a
         let by,bx = b
         let minY, maxY = min ay by, max ay by 
         let minX, maxX = min ax bx, max ax bx 
         let spacesInX:int64 = zeroCols |> List.where (fun c -> c > minX && c < maxX) |> List.length |> int64
         let spacesInY = zeroRows|> List.where (fun c -> c > minY && c < maxY) |> List.length |> int64
-        int64 (maxY-minY) + int64 (maxX - minX) +  spacesInX*factor+ spacesInY*factor
-
+        (maxY-minY) + (maxX - minX) +  spacesInX*factor+ spacesInY*factor
         // distX
 
      //  the sum of the shortest path
      //  path is absolute value of taxicab distance all the pairs with added value, can count itself because it is zero anyway 
-    let rec findPairs (galaxies: (int*int) list): ((int*int)*(int*int)) list =
+    let rec findPairs (galaxies: (int64*int64) list): ((int64*int64)*(int64*int64)) list =
         match galaxies with 
             | g1::g2 -> List.allPairs [g1] g2 @ findPairs g2
             | [] -> []
@@ -76,6 +75,7 @@ module Input =
     let testSumFactor10() = 
         let input = sumDistanceAllPairs "testinput.txt" 10L
         Assert.Equal(1030L, input)
+    // begge mangler 82...
 
     [<Fact>]
     let testSumFactor100() = 
@@ -98,19 +98,18 @@ module Input =
     [<Fact>]
     let testFindRows() = 
         let input = findZeroRows "testinput.txt" 
-        Assert.Equal<int list>([3;7], input)
+        Assert.Equal<int64 list>([3L;7L], input)
 
     [<Fact>]
     let testFindColumns () = 
         let input = findZeroColumns "testinput.txt" 
-        Assert.Equal<int list>([2;5;8], input)
-
+        Assert.Equal<int64 list>([2L;5L;8L], input)
 
     [<Fact>]
     let test2 () = 
         let input = readInit "testinput.txt" 
         Assert.Equal(9, input.Length) 
-        Assert.True(input |> List.contains (9,0))
-        Assert.True(input |> List.contains (9,4))
+        Assert.True(input |> List.contains (9L,0L))
+        Assert.True(input |> List.contains (9L,4L))
 
 module Program = let [<EntryPoint>] main _ = 0
