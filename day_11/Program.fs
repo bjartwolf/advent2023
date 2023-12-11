@@ -15,13 +15,11 @@ module Input =
     let findZeroColumns(filePath: string): int list = 
         let lines = IO.File.ReadAllLines(filePath)
         [
-            let height = lines.Length
-            for i in 0 .. height - 1 do
+            let width = lines[0].Length
+            for i in 0 .. width - 1 do
                 if (lines |> Array.forall (fun l -> l[i] = '.')) then
                     yield i
         ]
-
-
 
     let readInit (filePath: string): (int*int) list = 
         let lines = IO.File.ReadAllLines(filePath)
@@ -34,8 +32,47 @@ module Input =
                         yield (i,j)
         ]
 
+    let distance ((a,b): (int*int)*(int*int) ) (zeroCols: int list) (zeroRows:int list) =
+        let ay,ax = a
+        let by,bx = b
+        let minY, maxY = min ay by, max ay by 
+        let minX, maxX = min ax bx, max ax bx 
+        let spacesInX = zeroCols |> List.where (fun c -> c > minX && c < maxX) |> List.length
+        let spacesInY = zeroCols |> List.where (fun c -> c > minY && c < maxY) |> List.length
+        (maxY-minY) + (maxX - minX) + spacesInX + spacesInY
+
+        // distX
+
      //  the sum of the shortest path
      //  path is absolute value of taxicab distance all the pairs with added value, can count itself because it is zero anyway 
+    let rec findPairs (galaxies: (int*int) list): ((int*int)*(int*int)) list =
+        match galaxies with 
+            | g1::g2 -> List.allPairs [g1] g2 @ findPairs g2
+            | [] -> []
+
+    let distanceAllPairs(inputPath:string) =
+        let zeroRows = findZeroRows inputPath
+        let zeroCols = findZeroColumns inputPath
+        let galaxies = readInit inputPath
+        let allPairs = findPairs galaxies 
+        let allDistances = allPairs |> List.map (fun pair -> distance pair zeroCols zeroRows)
+        allDistances 
+
+
+    let sumDistanceAllPairs (inputPath:string) =
+        let distances = distanceAllPairs inputPath
+        distances |> List.sum 
+
+    [<Fact>]
+    let countDistances () = 
+        let input = distanceAllPairs "testinput.txt" 
+        Assert.Equal(36, input.Length) 
+
+
+    [<Fact>]
+    let testSum() = 
+        let input = sumDistanceAllPairs "testinput.txt" 
+        Assert.Equal(374, input)
 
     [<Fact>]
     let testFindRows() = 
