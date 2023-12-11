@@ -2,7 +2,7 @@ module Input =
     open System
     open Xunit 
 
-    let findZeroRows (filePath: string): int64 list = 
+    let findZeroRows filePath :int64 list = 
         let lines = IO.File.ReadAllLines(filePath)
         [
             let height = lines.Length
@@ -11,7 +11,7 @@ module Input =
                     yield i
         ]
 
-    let findZeroColumns(filePath: string): int64 list = 
+    let findZeroColumns filePath : int64 list = 
         let lines = IO.File.ReadAllLines(filePath)
         [
             let width = lines[0].Length
@@ -20,7 +20,7 @@ module Input =
                     yield i
         ]
 
-    let readInit (filePath: string): (int64*int64) list = 
+    let readInit filePath : (int64*int64) list= 
         let lines = IO.File.ReadAllLines(filePath)
         [
             let height = lines.Length
@@ -31,21 +31,19 @@ module Input =
                         yield (i,j)
         ]
 
-    let distance ((a,b): (int64*int64)*(int64*int64) ) (zeroCols: int64 list) (zeroRows:int64 list) (factor: int64)=
-        let ay,ax = a
-        let by,bx = b
+    let distance ((ay,ax),(by,bx)) zeroCols zeroRows factor =
         let minY, maxY = min ay by, max ay by 
         let minX, maxX = min ax bx, max ax bx 
         let spacesInX:int64 = zeroCols |> List.where (fun c -> c > minX && c < maxX) |> List.length |> int64
         let spacesInY = zeroRows|> List.where (fun c -> c > minY && c < maxY) |> List.length |> int64
         (maxY-minY) + (maxX - minX) +  (spacesInX+spacesInY)*(factor - 1L)
 
-    let rec findPairs (galaxies: (int64*int64) list): ((int64*int64)*(int64*int64)) list =
+    let rec findPairs galaxies = 
         match galaxies with 
             | g1::g2 -> List.allPairs [g1] g2 @ findPairs g2
             | [] -> []
 
-    let distanceAllPairs(inputPath:string) (factor:int64)=
+    let distanceAllPairs inputPath factor =
         let zeroRows = findZeroRows inputPath
         let zeroCols = findZeroColumns inputPath
         let galaxies = readInit inputPath
@@ -53,7 +51,7 @@ module Input =
         let allDistances = allPairs |> List.map (fun pair -> distance pair zeroCols zeroRows factor)
         allDistances 
 
-    let sumDistanceAllPairs (inputPath:string) (factor: int64)=
+    let sumDistanceAllPairs inputPath factor = 
         let distances = distanceAllPairs inputPath factor
         distances |> List.sum 
 
