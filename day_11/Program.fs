@@ -82,13 +82,18 @@ module Input =
         let input = sumDistanceAllPairs "testinput.txt" 100L
         Assert.Equal(8410L, input)
 
+    [<Fact>]
+    let testDistancesFactorOne() = 
+        let input = sumDistanceAllPairs "input.txt" 1L 
+        Assert.Equal(10490062L, input)
 
     [<Fact>]
-    let testDistances() = 
+    let testDistancesFactormillion() = 
         let input = sumDistanceAllPairs "input.txt" 1000000L
         ()
         //Assert.Equal(382980107092L, input)
 
+        10490062
 
     [<Fact>]
     let testFindRows() = 
