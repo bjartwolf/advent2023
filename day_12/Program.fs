@@ -55,6 +55,16 @@ module Input =
         let test1 = ".#.##.###."
         Assert.Equal<int list>([1;2;3], countHashGroups test1)
  
+    let countLegal (inputDamaged: string) (counts: int list) : int =
+        let combos = findAll inputDamaged
+        let legalCombos = combos |> Seq.filter (fun c -> countHashGroups c = counts) 
+        legalCombos |> Seq.length 
+
+    [<Fact>]
+    let countLegalTest() = 
+        Assert.Equal(1, countLegal "???.###" [1;1;3])
+        Assert.Equal(4, countLegal ".??..??...?##." [1;1;3])
+        Assert.Equal(10, countLegal "?###????????" [3;2;1])
 
     // ingen spørsmålstegn lenger, har bare prikker og grupper, kan
     // kanskje gruppere antall på rad
