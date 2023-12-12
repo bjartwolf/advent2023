@@ -8,13 +8,6 @@ module Input =
     let readInit (filePath: string): string []= 
         IO.File.ReadAllLines(filePath)
 
-    // strategi 1, lage alle komboer, filtrere ut 
-    // bruke mengder
-    // strategi 2, regulært uttrykk
-    // compile noe catchgroups, blir fort vanskelig.
-
-    // 2 i n antall spørsmålstegn, men det er ikke så mange ? i input
-
     let rec findAllCombos (x:string) : string seq =
         seq {
             let index = x.IndexOf(q)
@@ -37,6 +30,21 @@ module Input =
         let fasit = ["..";".#";"#.";"##"] |> Set.ofList
         let combos = findAll test
         Assert.Equal<Set<string>>(fasit, combos)
+
+    [<Fact>]
+    let yieldCombinationsTest2() = 
+        let test = "??#"
+        let fasit = ["..#";".##";"#.#";"###"] |> Set.ofList
+        let combos = findAll test
+        Assert.Equal<Set<string>>(fasit, combos)
+
+    [<Fact>]
+    let yieldCombinationsTest3() = 
+        let test = ".??#"
+        let fasit = ["...#";"..##";".#.#";".###"] |> Set.ofList
+        let combos = findAll test
+        Assert.Equal<Set<string>>(fasit, combos)
+
 
     [<Fact>]
     let test2 () = 
