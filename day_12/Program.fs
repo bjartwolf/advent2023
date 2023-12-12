@@ -1,3 +1,6 @@
+open System.Collections.Generic
+
+
 module Input =
     open System
     open System.IO
@@ -23,6 +26,41 @@ module Input =
 
     let findAll x =
         findAllCombos x |> Set.ofSeq
+
+    open System.Collections.Generic
+    let countHashGroupsInner (input: Char []) : int seq =
+        let groups: Dictionary<int, byte[]> =  Dictionary<int,byte[]>()
+        let mutable currentFoundHashes = 0 
+        let mutable foundHash = false
+        seq {
+         for i = 0 to Array.length input - 1 do
+            if input.[i] = '#' && foundHash then
+                currentFoundHashes <- currentFoundHashes + 1
+            else if input.[i] = '#' && not foundHash then
+                foundHash <- true
+                currentFoundHashes <- 1 
+            else if input.[i] = '.' && foundHash then
+                yield currentFoundHashes 
+                foundHash <- false
+                currentFoundHashes <- 0
+                // ignore if just . 
+        }
+
+    let countHashGroups (input: string): int list =
+        let inputMod = "." + input + "."
+        countHashGroupsInner (inputMod.ToCharArray()) |> Seq.toList
+
+    [<Fact>]
+    let countHashGroupsTest () = 
+        let test1 = ".#.##.###."
+        Assert.Equal<int list>([1;2;3], countHashGroups test1)
+ 
+
+    // ingen spørsmålstegn lenger, har bare prikker og grupper, kan
+    // kanskje gruppere antall på rad
+    //let rec isMatching (x: string) (groups: int list) : bool =
+    //    if x = "" && groups = [] then true
+    //    else false
 
     [<Fact>]
     let yieldCombinationsTest() = 
