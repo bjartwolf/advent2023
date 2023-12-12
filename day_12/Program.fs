@@ -8,9 +8,6 @@ module Input =
 
     let q = '?'
 
-    let readInit (filePath: string): string []= 
-        IO.File.ReadAllLines(filePath)
-
     let rec findAllCombos (x:string) : string seq =
         seq {
             let index = x.IndexOf(q)
@@ -67,11 +64,27 @@ module Input =
         Assert.Equal(4, countLegal "????.######..#####." [1;6;5])
         Assert.Equal(10, countLegal "?###????????" [3;2;1])
 
-    // ingen spørsmålstegn lenger, har bare prikker og grupper, kan
-    // kanskje gruppere antall på rad
-    //let rec isMatching (x: string) (groups: int list) : bool =
-    //    if x = "" && groups = [] then true
-    //    else false
+    let parseLine (s: string): string*(int list) =
+        let splitted = s.Split(" ")
+        let ints = splitted[1].Split(",") |> Array.map int |> Array.toList 
+        splitted[0],ints
+
+    [<Fact>]
+    let testParseLines() = 
+        Assert.Equal<string*(int list)>(("???.###", [1;1;3]), parseLine "???.### 1,1,3")
+
+    let readInit (filePath: string): string []= 
+        IO.File.ReadAllLines(filePath)
+
+
+    [<Fact>]
+    let checkInputTest() = 
+        let input = readInit "testinput.txt" 
+        let lines = input |> Array.map parseLine 
+                          |> Array.map (fun (a,b) -> countLegal a b)
+                          |> Array.sum
+        Assert.Equal(21, lines)
+
 
     [<Fact>]
     let yieldCombinationsTest() = 
