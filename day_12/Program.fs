@@ -64,6 +64,7 @@ module Input =
     let countLegalTest() = 
         Assert.Equal(1, countLegal "???.###" [1;1;3])
         Assert.Equal(4, countLegal ".??..??...?##." [1;1;3])
+        Assert.Equal(4, countLegal "????.######..#####." [1;6;5])
         Assert.Equal(10, countLegal "?###????????" [3;2;1])
 
     // ingen spørsmålstegn lenger, har bare prikker og grupper, kan
