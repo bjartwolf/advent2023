@@ -51,14 +51,15 @@ module Input =
         matrixRowsSymmetricalAroundNSmudged (matrix |> Matrix.transpose) n
 
     let findMatrixSymmetryNr (matrix: Matrix<float>): int =
-        [
-            for i in 1 .. matrix.RowCount - 1 do
-                if matrixRowsSymmetricalAroundN matrix i then
-                    yield i*100
-            for i in 1 .. matrix.ColumnCount - 1 do 
-                if matrixColumnSymmetricalAroundN matrix i then
-                    yield i
-        ] |> List.head
+        let rowsum = [1 .. matrix.RowCount-1] 
+                        |> List.map (fun row -> if matrixRowsSymmetricalAroundN matrix row then
+                                                    row*100 else 0) 
+                        |> List.sum
+        let colsum = [1 .. matrix.ColumnCount-1] 
+                        |> List.map (fun col -> if matrixColumnSymmetricalAroundN matrix col then
+                                                    col else 0) 
+                        |> List.sum
+        rowsum + colsum
 
     let findMatrixSymmetryNrSmuged (matrix: Matrix<float>): int =
         let rowsum = [1 .. matrix.RowCount] |> List.map (fun row -> if matrixRowsSymmetricalAroundNSmudged matrix row then
