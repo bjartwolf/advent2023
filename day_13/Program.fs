@@ -28,8 +28,9 @@ module Input =
     let test2 () = 
         let input = getMatrixes "testinput.txt" 
         let flipped = input |> Array.map mirror 
-        printfn "%A" input
-        printfn "%A" flipped 
+        printfn "%A" input.[0]
+        input.[0].[1..,1..] |> printfn "%A"
+//        printfn "%A" flipped 
         Assert.Equal(2, input.Length) 
 
 module Program = let [<EntryPoint>] main _ = 0
