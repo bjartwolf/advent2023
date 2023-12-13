@@ -17,11 +17,8 @@ module Input =
     let flip matrix = matrix |> Matrix.transpose |> mirror |> Matrix.transpose
 
     let getSubmatrixes (matrix: Matrix<float>) n =
-        let rowCount = matrix.RowCount
-        let maxCount = min n (rowCount - n)
-        let firstRow = n - maxCount
-        let lastRow = n + maxCount - 1
-        (matrix.[firstRow ..n-1,0..], matrix.[n ..lastRow,0..])
+        let maxCount = min n (matrix.RowCount - n)
+        (matrix.[n - maxCount ..n-1,0..], matrix.[n ..n + maxCount - 1,0..])
 
     let matrixRowsSymmetricalAroundN (matrix: Matrix<float>) (n:int) =
         let subMatrix1, subMatrix2 = getSubmatrixes matrix n 
