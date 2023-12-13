@@ -20,6 +20,28 @@ module Input =
 
     let flip matrix = matrix |> Matrix.transpose |> mirror |> Matrix.transpose
 
+    let matrixRowsSymmetricalAroundN (matrix: Matrix<float>) (n:int) =
+        let rowCount = matrix.RowCount
+        let maxCount = min n (rowCount - n) // helst skal vi ta n rader frem og tilbake, men vi klarer det ikke alltid 
+        let firstRow = n - maxCount
+        let lastRow = n + maxCount - 1
+        printfn "maxCount : %d rowCount: %d n: %d" maxCount rowCount n 
+        printfn "firstRow: %d lastRow %d" firstRow lastRow
+
+        let subMatrix1 = matrix.[firstRow ..n-1,0..]
+        let subMatrix2 = matrix.[n ..lastRow,0..]
+        printfn "%A" matrix  
+        printfn "%A" subMatrix1
+        printfn "%A" subMatrix2
+        subMatrix1 = flip subMatrix2
+
+    [<Fact>]
+    let rowSymmetricsTest () = 
+        let input = getMatrixes "testinput.txt" 
+        Assert.True(matrixRowsSymmetricalAroundN input.[1] 4) 
+        Assert.False(matrixRowsSymmetricalAroundN input.[1] 3) 
+        Assert.False(matrixRowsSymmetricalAroundN input.[1] 5) 
+
     [<Fact>]
     let doubleMirrorTest () = 
         let input = getMatrixes "testinput.txt" 
@@ -32,10 +54,10 @@ module Input =
         let mirrored = input |> Array.map mirror 
         let flipped = input |> Array.map flip 
         printfn "%A input" input.[0]
-        printfn "%A flipped" flipped.[0]
-        printfn "%A mirroed" mirrored.[0]
+ //       printfn "%A flipped" flipped.[0]
+//        printfn "%A mirroed" mirrored.[0]
 //        printfn "%A" input.[0]
- //       input.[0].[1..,1..] |> printfn "%A"
+        input.[0].[3..6,0..] |> printfn "%A"
 //        printfn "%A" flipped 
         Assert.Equal(2, input.Length) 
 
