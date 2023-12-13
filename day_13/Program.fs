@@ -53,21 +53,31 @@ module Input =
     let findMatrixSymmetryNr (matrix: Matrix<float>): int =
         let rowsum = [1 .. matrix.RowCount-1] 
                         |> List.map (fun row -> if matrixRowsSymmetricalAroundN matrix row then
-                                                    row*100 else 0) 
+                                                    row*100 
+                                                else 
+                                                    0) 
                         |> List.sum
         let colsum = [1 .. matrix.ColumnCount-1] 
                         |> List.map (fun col -> if matrixColumnSymmetricalAroundN matrix col then
-                                                    col else 0) 
+                                                    col 
+                                                else 
+                                                    0) 
                         |> List.sum
         rowsum + colsum
 
     let findMatrixSymmetryNrSmuged (matrix: Matrix<float>): int =
-        let rowsum = [1 .. matrix.RowCount] |> List.map (fun row -> if matrixRowsSymmetricalAroundNSmudged matrix row then
-                                                                        row*100
-                                                                    else 0) |> List.sum
-        let colsum = [1 .. matrix.ColumnCount] |> List.map (fun col -> if matrixColumnSymmetricalAroundNSmugded matrix col then
-                                                                            col
-                                                                       else 0) |> List.sum
+        let rowsum = [1 .. matrix.RowCount] 
+                           |> List.map (fun row -> if matrixRowsSymmetricalAroundNSmudged matrix row then
+                                                        row*100
+                                                   else 
+                                                        0)
+                           |> List.sum
+        let colsum = [1 .. matrix.ColumnCount] 
+                           |> List.map (fun col -> if matrixColumnSymmetricalAroundNSmugded matrix col then
+                                                        col 
+                                                   else 
+                                                        0) 
+                           |> List.sum
         rowsum + colsum
 
     [<Fact>]
