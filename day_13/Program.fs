@@ -32,6 +32,22 @@ module Input =
     let matrixColumnSymmetricalAroundN (matrix: Matrix<float>) (n:int) =
         matrixRowsSymmetricalAroundN (matrix |> Matrix.transpose) n
 
+    let findMatrixSymmetryNr (matrix: Matrix<float>): int =
+        [
+            for i in 1 .. matrix.RowCount - 1 do
+                if matrixRowsSymmetricalAroundN matrix i then
+                    yield i*100
+            for i in 1 .. matrix.ColumnCount - 1 do 
+                if matrixColumnSymmetricalAroundN matrix i then
+                    yield i
+        ] |> List.head
+
+    [<Fact>]
+    let testSumTest() = 
+        let input = getMatrixes "testinput.txt" 
+        let sum = input |> Array.map findMatrixSymmetryNr |> Array.sum
+        Assert.Equal(405, sum)
+
     [<Fact>]
     let colSymmetricsTest () = 
         let input = getMatrixes "testinput.txt" 
