@@ -22,17 +22,11 @@ module Input =
 
     let matrixRowsSymmetricalAroundN (matrix: Matrix<float>) (n:int) =
         let rowCount = matrix.RowCount
-        let maxCount = min n (rowCount - n) // helst skal vi ta n rader frem og tilbake, men vi klarer det ikke alltid 
+        let maxCount = min n (rowCount - n)
         let firstRow = n - maxCount
         let lastRow = n + maxCount - 1
-        printfn "maxCount : %d rowCount: %d n: %d" maxCount rowCount n 
-        printfn "firstRow: %d lastRow %d" firstRow lastRow
-
         let subMatrix1 = matrix.[firstRow ..n-1,0..]
         let subMatrix2 = matrix.[n ..lastRow,0..]
-        printfn "%A" matrix  
-        printfn "%A" subMatrix1
-        printfn "%A" subMatrix2
         subMatrix1 = flip subMatrix2
 
     let matrixColumnSymmetricalAroundN (matrix: Matrix<float>) (n:int) =
@@ -64,11 +58,7 @@ module Input =
         let mirrored = input |> Array.map mirror 
         let flipped = input |> Array.map flip 
         printfn "%A input" input.[0]
- //       printfn "%A flipped" flipped.[0]
-//        printfn "%A mirroed" mirrored.[0]
-//        printfn "%A" input.[0]
         input.[0].[3..6,0..] |> printfn "%A"
-//        printfn "%A" flipped 
         Assert.Equal(2, input.Length) 
 
 module Program = let [<EntryPoint>] main _ = 0
