@@ -1,5 +1,4 @@
 open MathNet.Numerics.LinearAlgebra
-open MathNet.Numerics.LinearAlgebra.Double
 
 
 module Input =
@@ -20,10 +19,15 @@ module Input =
             fun x -> x |> Array.map (fun a -> a.ToCharArray() |> Array.map ( fun c -> if c = '#' then 1.0 else 0.0))
                        |> matrix )
 
+    let mirror matrix = matrix |> Matrix.mapRows (fun i row -> row |> Vector.toArray |> Array.rev |> vector) 
+
+
     [<Fact>]
     let test2 () = 
         let input = getMatrixes "testinput.txt" 
+        let flipped = input |> Array.map mirror 
         printfn "%A" input
+        printfn "%A" flipped 
         Assert.Equal(2, input.Length) 
 
 module Program = let [<EntryPoint>] main _ = 0
