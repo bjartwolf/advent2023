@@ -21,7 +21,12 @@ module Input =
 
     let mirror matrix = matrix |> Matrix.mapRows (fun i row -> row |> Vector.toArray |> Array.rev |> vector) 
 
-
+    [<Fact>]
+    let doubleMirrorTest () = 
+        let input = getMatrixes "testinput.txt" 
+        let isEqual =  input = (input |> Array.map mirror |> Array.map mirror )
+        Assert.True(isEqual) 
+ 
     [<Fact>]
     let test2 () = 
         let input = getMatrixes "testinput.txt" 
