@@ -49,32 +49,9 @@ module Input =
         Assert.Equal(405, sum)
 
     [<Fact>]
-    let colSymmetricsTest () = 
-        let input = getMatrixes "testinput.txt" 
-        Assert.False(matrixColumnSymmetricalAroundN input.[0] 4) 
-        Assert.False(matrixColumnSymmetricalAroundN input.[0] 3) 
-        Assert.True(matrixColumnSymmetricalAroundN input.[0] 5) 
-
-    [<Fact>]
-    let rowSymmetricsTest () = 
-        let input = getMatrixes "testinput.txt" 
-        Assert.True(matrixRowsSymmetricalAroundN input.[1] 4) 
-        Assert.False(matrixRowsSymmetricalAroundN input.[1] 3) 
-        Assert.False(matrixRowsSymmetricalAroundN input.[1] 5) 
-
-    [<Fact>]
-    let doubleMirrorTest () = 
-        let input = getMatrixes "testinput.txt" 
-        let isEqual =  input = (input |> Array.map mirror |> Array.map mirror )
-        Assert.True(isEqual) 
- 
-    [<Fact>]
-    let test2 () = 
-        let input = getMatrixes "testinput.txt" 
-        let mirrored = input |> Array.map mirror 
-        let flipped = input |> Array.map flip 
-        printfn "%A input" input.[0]
-        input.[0].[3..6,0..] |> printfn "%A"
-        Assert.Equal(2, input.Length) 
+    let prodSumTest() = 
+        let input = getMatrixes "input.txt" 
+        let sum = input |> Array.map findMatrixSymmetryNr |> Array.sum
+        Assert.Equal(33735, sum)
 
 module Program = let [<EntryPoint>] main _ = 0
