@@ -20,24 +20,24 @@ module Input =
 
     let flip matrix = matrix |> Matrix.transpose |> mirror |> Matrix.transpose
 
-    let matrixRowsSymmetricalAroundN (matrix: Matrix<float>) (n:int) =
+    let getSubmatrixes (matrix: Matrix<float>) n =
         let rowCount = matrix.RowCount
         let maxCount = min n (rowCount - n)
         let firstRow = n - maxCount
         let lastRow = n + maxCount - 1
-        let subMatrix1 = matrix.[firstRow ..n-1,0..]
-        let subMatrix2 = matrix.[n ..lastRow,0..]
+        (matrix.[firstRow ..n-1,0..], matrix.[n ..lastRow,0..])
+
+    let matrixRowsSymmetricalAroundN (matrix: Matrix<float>) (n:int) =
+        let subMatrix1, subMatrix2 = getSubmatrixes matrix n 
         subMatrix1 = flip subMatrix2
 
     let matrixRowsSymmetricalAroundNSmudgedInner (matrix: Matrix<float>) (n:int) ((smudgeRow, smudgeCol): (int*int)) =
         let rowCount = matrix.RowCount
         let maxCount = min n (rowCount - n)
         let firstRow = n - maxCount
-        let lastRow = n + maxCount - 1
         let subMatrix1 = matrix.[firstRow ..n-1,0..]
-        let subMatrix2 = matrix.[n ..lastRow,0..]
-        let M = Matrix<float>.Build
-        if smudgeCol > subMatrix2.ColumnCount || smudgeRow > subMatrix2.RowCount then 
+        let subMatrix2 = matrix.[n ..n + maxCount - 1,0..]
+        if smudgeCol > subMatrix2.ColumnCount - 1 || smudgeRow > subMatrix2.RowCount - 1 then 
             false
         else
             let value = subMatrix2.[smudgeRow,smudgeCol] 
@@ -48,23 +48,18 @@ module Input =
             subMatrix1 = flip subMatrix2
 
     let matrixRowsSymmetricalAroundNSmudged (matrix: Matrix<float>) (n:int) =
-        let symmetries = [
+        List.isEmpty [
             for smudgeCol in 0 .. matrix.ColumnCount - 1 do
                 for smugdeRow in 0 .. matrix.RowCount - 1 do
                     if matrixRowsSymmetricalAroundNSmudgedInner matrix n (smugdeRow, smudgeCol) then 
                         yield true 
-        ]
-        if symmetries.IsEmpty then
-            false
-        else 
-            symmetries.Head 
+        ] |> not  
 
     let matrixColumnSymmetricalAroundN (matrix: Matrix<float>) (n:int) =
         matrixRowsSymmetricalAroundN (matrix |> Matrix.transpose) n
 
     let matrixColumnSymmetricalAroundNSmugded (matrix: Matrix<float>) (n:int) =
         matrixRowsSymmetricalAroundNSmudged (matrix |> Matrix.transpose) n
-
 
     let findMatrixSymmetryNr (matrix: Matrix<float>): int =
         [
@@ -96,7 +91,7 @@ module Input =
     let testSumSmugedProd() = 
         let input = getMatrixes "input.txt" 
         let sum = input |> Array.map findMatrixSymmetryNrSmuged |> Array.sum
-        Assert.Equal(45673, sum)
+        Assert.Equal(38063, sum)
 
     [<Fact>]
     let testSumTest() = 
