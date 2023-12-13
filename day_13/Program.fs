@@ -35,6 +35,16 @@ module Input =
         printfn "%A" subMatrix2
         subMatrix1 = flip subMatrix2
 
+    let matrixColumnSymmetricalAroundN (matrix: Matrix<float>) (n:int) =
+        matrixRowsSymmetricalAroundN (matrix |> Matrix.transpose) n
+
+    [<Fact>]
+    let colSymmetricsTest () = 
+        let input = getMatrixes "testinput.txt" 
+        Assert.False(matrixColumnSymmetricalAroundN input.[0] 4) 
+        Assert.False(matrixColumnSymmetricalAroundN input.[0] 3) 
+        Assert.True(matrixColumnSymmetricalAroundN input.[0] 5) 
+
     [<Fact>]
     let rowSymmetricsTest () = 
         let input = getMatrixes "testinput.txt" 
