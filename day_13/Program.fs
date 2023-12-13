@@ -3,7 +3,6 @@ open MathNet.Numerics.LinearAlgebra
 
 module Input =
     open System
-    open System.IO
     open Xunit 
 
     let readInit (filePath: string): string [] []= 
@@ -13,11 +12,9 @@ module Input =
             |> Array.map (fun b -> b.Split(Environment.NewLine)) 
 
     let getMatrixes (filePath:string) : Matrix<float> array =
-        let rawData = readInit filePath
-
-        rawData |> Array.map (
-            fun x -> x |> Array.map (fun a -> a.ToCharArray() |> Array.map ( fun c -> if c = '#' then 1.0 else 0.0))
-                       |> matrix )
+        readInit filePath
+         |> Array.map ( fun x -> x |> Array.map (fun a -> a.ToCharArray() |> Array.map ( fun c -> if c = '#' then 1.0 else 0.0))
+                                   |> matrix )
 
     let mirror matrix = matrix |> Matrix.mapRows (fun i row -> row |> Vector.toArray |> Array.rev |> vector) 
 
