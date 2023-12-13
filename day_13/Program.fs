@@ -44,10 +44,8 @@ module Input =
             subMatrix1 = flip smugdedMatrix 
 
     let matrixRowsSymmetricalAroundNSmudged (matrix: Matrix<float>) (n:int) =
-        let cols = [0 .. matrix.ColumnCount - 1 ]
-        let rows = [0 .. matrix.RowCount - 1]
-        let coords = List.allPairs rows cols
-        coords |> List.exists (fun smudge -> matrixRowsSymmetricalAroundNSmudgedInner matrix n smudge) 
+        List.allPairs [0 .. matrix.RowCount - 1] [0 .. matrix.ColumnCount - 1 ]
+            |> List.exists (fun smudge -> matrixRowsSymmetricalAroundNSmudgedInner matrix n smudge) 
 
     let matrixColumnSymmetricalAroundN (matrix: Matrix<float>) (n:int) =
         matrixRowsSymmetricalAroundN (matrix |> Matrix.transpose) n
