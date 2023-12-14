@@ -7,11 +7,20 @@ module Input =
     let round = 2
     let space = 3
 
-    let readInit (filePath: string): int list = 
-        use sr = new StreamReader (filePath) 
-        let line = sr.ReadLine()
-        let numbers = line.Split(",")
-        numbers |> Array.map(fun f -> Int32.Parse(f)) |> Array.toList
+    let readInit (filePath: string): int array list = 
+        let lines = File.ReadAllLines filePath
+        let lengthOfLine = lines[0].Length
+        [
+            for i in 0 .. lengthOfLine - 1 do
+                // i'th character of all lines into 
+                let col = lines |> Array.map (fun x -> x.[i])
+                                |> Array.map (fun c -> if c = '.' then space 
+                                                       else if c = '#' then square
+                                                       else if c = 'O' then round
+                                                       else failwith "whoopsy")
+                yield col 
+        ]
+
 
     let row1 = [|1;3;3;2;2;1;3;3;2;2;3;2|] 
 
@@ -63,16 +72,17 @@ module Input =
         Assert.Equal<int list>([3;1], splitAndSort [|3;1|])
           
 
-    // får evt bli float array
-    let sortRow (row: int array): int array =
-        //let splitted = row |> 
-
-        row
-
     [<Fact>]
     let test2 () = 
-        ()
-        //let input = readInit "input1.txt" 
-        //Assert.Equal(1, input.Length) 
+        let input = readInit "testinput.txt" 
+        let sum = input |> List.map splitAndSort |> List.map calcLoad |> List.sum
+        Assert.Equal(136, sum) 
+
+    [<Fact>]
+    let testprod () = 
+        let input = readInit "input.txt" 
+        let sum = input |> List.map splitAndSort |> List.map calcLoad |> List.sum
+        Assert.Equal(109638, sum) 
+
 
 module Program = let [<EntryPoint>] main _ = 0
