@@ -47,13 +47,9 @@ module Program =
         splitRowAtRocks input
             |> sortRowAndJoin
             |> List.toArray
-
-    let splitAndSortM = splitAndSort 
  
     let splitAndSortMatrixN (input: Matrix) : Matrix = 
-       input |> List.map splitAndSortM
-
-    let splitAndSortMatrixNM = splitAndSortMatrixN 
+       input |> List.map splitAndSort
 
     let transpose (input: Matrix): Matrix = 
         [
@@ -77,20 +73,18 @@ module Program =
             printfn "%A" (new string(prettyLine ))
 
     let rotateAndSortCycle (input: Matrix): Matrix =
-        let north = splitAndSortMatrixNM input
-        let west = splitAndSortMatrixNM (north |> rotate90CM) 
-        let south = splitAndSortMatrixNM (west |> rotate90CM) 
-        let east = splitAndSortMatrixNM (south |> rotate90CM) 
-        east |> rotate90CM
-
-    let rotateAndSortCycleM = rotateAndSortCycle
+        let north = splitAndSortMatrixN input
+        let west = splitAndSortMatrixN (north |> rotate90CM) 
+        let south = splitAndSortMatrixN (west |> rotate90CM) 
+        let east = splitAndSortMatrixN (south |> rotate90CM) 
+        east |> rotate90C
 
     let rotateAndSortN (max: int) (matrix: Matrix)  =
         let rec rotateInner (i: int) (mtrx: Matrix) (seenBefore: Map<Matrix,int>) =
             if i = max then 
                 mtrx 
             else 
-                let nextMatrix = rotateAndSortCycleM mtrx 
+                let nextMatrix = rotateAndSortCycle mtrx 
                 if Map.containsKey nextMatrix seenBefore then
                     let lastIterationWithMap = Map.find nextMatrix seenBefore
                     // we know that we saw this on iteration X. That means we can just skip ahead, this part I stole from Einarwh
