@@ -54,16 +54,16 @@ module Program =
        input |> List.map splitAndSort
 
     let transpose (input: Matrix): Matrix = 
-        [
-            for i in 0 .. input[0].Length - 1 do
-                yield input |> List.map (fun x -> x.[i]) 
-        ]
+        DenseMatrix.ofRowList (input |> List.map (List.map float))
+            |> Matrix.transpose
+            |> Matrix.toRowArrays
+            |> Array.map (Array.map int) 
+            |> Array.toList 
+            |> List.map Array.toList
 
     // rotate 90 degrees clockwise
     let rotate90C(matrix: Matrix) =
         matrix |> List.map List.rev |> transpose
-
-    let rotate90CM = rotate90C
 
     let prettyPrintMatrix (matrixT: Matrix) =
         let matrix = transpose matrixT
@@ -76,9 +76,9 @@ module Program =
 
     let rotateAndSortCycle (input: Matrix): Matrix =
         let north = splitAndSortMatrixN input
-        let west = splitAndSortMatrixN (north |> rotate90CM) 
-        let south = splitAndSortMatrixN (west |> rotate90CM) 
-        let east = splitAndSortMatrixN (south |> rotate90CM) 
+        let west = splitAndSortMatrixN (north |> rotate90C) 
+        let south = splitAndSortMatrixN (west |> rotate90C) 
+        let east = splitAndSortMatrixN (south |> rotate90C) 
         east |> rotate90C
 
     let rotateAndSortN (max: int) (matrix: Matrix)  =
