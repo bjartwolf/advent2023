@@ -40,7 +40,16 @@ module Input =
     let splitAndSort (input: int[]) : int list =
         splitRowAtRocks input
             |> sortRowAndJoin 
-       
+    
+    let calcLoad (input: int list): int =
+        input |> List.rev
+              |> List.mapi (fun i elem -> if elem = round then i + 1 else 0)
+              |> List.sum
+
+    [<Fact>]
+    let calcLoadTest() = 
+        Assert.Equal(36, splitAndSort row1 |> calcLoad)
+
     [<Fact>]
     let splitTest() = 
         Assert.Equal<int list list>([ [1;3;3;2;2]; [1;3;3;2;2;3;2 ]], splitRowAtRocks row1)
@@ -48,7 +57,7 @@ module Input =
         Assert.Equal<int list list>([ [3]; [1]], splitRowAtRocks [|3;1|])
 
     [<Fact>]
-    let splitAndSortTest() = 
+    let splitAndSortTest() =
         Assert.Equal<int list>([1;2;2;3;3;1;2;2;2;3;3;3], splitAndSort row1)
         Assert.Equal<int list>([1;1], splitAndSort [|1;1|])
         Assert.Equal<int list>([3;1], splitAndSort [|3;1|])
