@@ -53,9 +53,7 @@ module Program =
        input |> Array.map splitAndSort
 
     let transpose (input: Matrix): Matrix = 
-        DenseMatrix.ofRowArrays (input |> Array.map (Array.map float))
-            |> Matrix.transpose
-            |> Matrix.toRowArrays
+        input |> Seq.transpose |> Seq.toArray |> Array.map Seq.toArray
 
     // rotate 90 degrees clockwise
     let rotate90C(matrix: Matrix) =
@@ -101,7 +99,7 @@ module Program =
               |> Array.sum
 
     [<Fact>]
-    let testcycletestdata () = 
+    let cycletest () = 
         let input = readMatrix "testinput.txt" 
         let sum = input |> splitAndSortMatrixN 
                         |> rotateAndSortN 1000000000
@@ -110,7 +108,7 @@ module Program =
         Assert.Equal(64, int sum) 
 
     [<Fact>]
-    let testcycledata () = 
+    let cycle () = 
         let input = readMatrix "input.txt" 
         let sum = input |> splitAndSortMatrixN 
                         |> rotateAndSortN 1000000000
@@ -119,7 +117,7 @@ module Program =
         Assert.Equal(102657, int sum) 
 
     [<Fact>]
-    let test2 () = 
+    let spintest () = 
         let input = readMatrix "testinput.txt" 
         prettyPrintMatrix (input |> transpose)
         let sum = input |> splitAndSortMatrixN 
@@ -128,7 +126,7 @@ module Program =
         Assert.Equal(136, int sum) 
 
     [<Fact>]
-    let testprod () = 
+    let spin () = 
         let input = readMatrix "input.txt" 
         let sum = input |> splitAndSortMatrixN
                         |> Array.map calcLoad
