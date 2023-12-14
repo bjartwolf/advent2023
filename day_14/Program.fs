@@ -43,7 +43,7 @@ module Program =
         splitRow |> List.map List.sort
                  |> List.collect id
     
-    let splitAndSort (input: int[]) : int []=
+    let splitAndSort input =  
         splitRowAtRocks input
             |> sortRowAndJoin
             |> List.toArray
@@ -58,7 +58,7 @@ module Program =
         ]
 
     // rotate 90 degrees clockwise
-    let rotate90C(matrix: int array list) =
+    let rotate90C(matrix: Matrix) =
         matrix |> List.map Array.rev  |> transpose
 
     let rotate90CM = rotate90C
