@@ -31,7 +31,7 @@ module Input =
                 tmpGroup <- tmpGroup @ [current]
               if i = Array.length input - 1 then
                 yield tmpGroup
-       ] // få med siste og...
+       ] 
 
     let sortRowAndJoin (splitRow: int list list) =
         splitRow |> List.map List.sort
