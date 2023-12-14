@@ -9,70 +9,70 @@ module Program =
     let round = 2
     let space = 3
 
-    type Matrix = int list list 
+    type Matrix = int [] [] 
 
     let readMatrix (filePath: string): Matrix = 
-        let lines = File.ReadAllLines filePath |> Array.toList
+        let lines = File.ReadAllLines filePath 
         let lengthOfLine = lines[0].Length
-        [
+        [|
             for i in 0 .. lengthOfLine - 1 do
-                let col = lines |> List.map (fun x -> x.[i])
-                                |> List.map (fun c -> if c = '.' then space 
+                let col = lines |> Array.map (fun x -> x.[i])
+                                |> Array.map (fun c -> if c = '.' then space 
                                                        else if c = '#' then square
                                                        else if c = 'O' then round
                                                        else failwith "whoopsy")
                 yield col 
-        ]
+        |]
 
-    let splitRowAtRocks (input: int list) : int list list =
+    let splitRowAtRocks (input: int []) : Matrix =
         let mutable tmpGroup: int list = []
         let mutable readingGroup = false
 
-        [ for i = 0 to List.length input - 1 do
+        [| for i = 0 to Array.length input - 1 do
               let current = input[i]
               if (not readingGroup) then
                 tmpGroup <- [current] 
                 readingGroup <- true
               else if (readingGroup && current = square) then
-                yield tmpGroup
+                yield tmpGroup |> List.toArray
                 tmpGroup <- [square] 
               else if (readingGroup && current <> square) then
                 tmpGroup <- tmpGroup @ [current]
-              if i = List.length input - 1 then
-                yield tmpGroup
-        ] 
+              if i = Array.length input - 1 then
+                yield tmpGroup |> List.toArray
+        |] 
 
     let sortRowAndJoin (splitRow: Matrix ) =
-        splitRow |> List.map List.sort
-                 |> List.collect id
+        splitRow |> Array.map Array.sort
+                 |> Array.collect id
     
     let splitAndSort input =  
         splitRowAtRocks input
             |> sortRowAndJoin
  
     let splitAndSortMatrixN (input: Matrix) : Matrix = 
-       input |> List.map splitAndSort
+       input |> Array.map splitAndSort
 
     let transpose (input: Matrix): Matrix = 
-        DenseMatrix.ofRowList (input |> List.map (List.map float))
+        DenseMatrix.ofRowArrays (input |> Array.map (Array.map float))
             |> Matrix.transpose
             |> Matrix.toRowArrays
             |> Array.map (Array.map int) 
-            |> Array.toList 
-            |> List.map Array.toList
 
     // rotate 90 degrees clockwise
     let rotate90C(matrix: Matrix) =
-        matrix |> List.map List.rev |> transpose
+        matrix |> Array.map Array.rev |> transpose
 
-    let prettyPrintMatrix (matrixT: Matrix) =
-        let matrix = transpose matrixT
-        for line in matrix do
-            let prettyLine = line |> List.map (fun x -> match x with 
-                                                               | 1 -> '#'
-                                                               | 2 -> 'O'
-                                                               | 3 -> '.')
-            printfn "%A" (new string(prettyLine |> List.toArray ))
+    let prettyPrintMatrix (matrix: Matrix) =
+        DenseMatrix.ofRowArrays (matrix |> Array.map (Array.map float))
+         |> Matrix.transpose 
+         |> printfn "%A" 
+        //for line in matrix do
+        //    let prettyLine = line |> Array.map (fun x -> match x with 
+        //                                                       | 1 -> '#'
+        //                                                       | 2 -> 'O'
+        //                                                       | 3 -> '.')
+        //    printfn "%A" (new string(prettyLine |> List.toArray ))
 
     let rotateAndSortCycle (input: Matrix): Matrix =
         let north = splitAndSortMatrixN input
@@ -112,18 +112,18 @@ module Program =
         Assert.Equal<Matrix>(cycle3, cycle3 |> rotateAndSortN 7) 
         Assert.NotEqual<Matrix>(cycle3, cycle3 |> rotateAndSortN 8) 
  
-    let calcLoad (input: int list): int =
-        input |> List.rev
-              |> List.mapi (fun i elem -> if elem = round then i + 1 else 0)
-              |> List.sum
+    let calcLoad (input: int []): int =
+        input |> Array.rev
+              |> Array.mapi (fun i elem -> if elem = round then i + 1 else 0)
+              |> Array.sum
 
     [<Fact>]
     let testcycletestdata () = 
         let input = readMatrix "testinput.txt" 
         let sum = input |> splitAndSortMatrixN 
                         |> rotateAndSortN 1000000000
-                        |> List.map calcLoad 
-                        |> List.sum
+                        |> Array.map calcLoad 
+                        |> Array.sum
         Assert.Equal(64, sum) 
 
     [<Fact>]
@@ -131,8 +131,8 @@ module Program =
         let input = readMatrix "input.txt" 
         let sum = input |> splitAndSortMatrixN 
                         |> rotateAndSortN 1000000000
-                        |> List.map calcLoad 
-                        |> List.sum
+                        |> Array.map calcLoad 
+                        |> Array.sum
         Assert.Equal(102657, sum) 
 
     [<Fact>]
@@ -140,16 +140,16 @@ module Program =
         let input = readMatrix "testinput.txt" 
         prettyPrintMatrix (input |> transpose)
         let sum = input |> splitAndSortMatrixN 
-                        |> List.map calcLoad 
-                        |> List.sum
+                        |> Array.map calcLoad 
+                        |> Array.sum
         Assert.Equal(136, sum) 
 
     [<Fact>]
     let testprod () = 
         let input = readMatrix "input.txt" 
         let sum = input |> splitAndSortMatrixN
-                        |> List.map calcLoad
-                        |> List.sum
+                        |> Array.map calcLoad
+                        |> Array.sum
         Assert.Equal(109638, sum) 
 
     let [<EntryPoint>] main _ = Console.ReadKey() |> ignore
