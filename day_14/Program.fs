@@ -1,3 +1,6 @@
+open MathNet.Numerics.LinearAlgebra
+open System
+
 module Program =
     open System.IO
     open Xunit 
@@ -6,7 +9,7 @@ module Program =
     let round = 2
     let space = 3
 
-    type Matrix = int array list
+    type Matrix = int list list 
 
     let readMatrix (filePath: string): Matrix = 
         let lines = File.ReadAllLines filePath
@@ -18,14 +21,14 @@ module Program =
                                                        else if c = '#' then square
                                                        else if c = 'O' then round
                                                        else failwith "whoopsy")
-                yield col 
+                yield col |> Array.toList
         ]
 
-    let splitRowAtRocks (input: int[]) : int list list =
+    let splitRowAtRocks (input: int list) : int list list =
         let mutable tmpGroup: int list = []
         let mutable readingGroup = false
 
-        [ for i = 0 to Array.length input - 1 do
+        [ for i = 0 to List.length input - 1 do
               let current = input[i]
               if (not readingGroup) then
                 tmpGroup <- [current] 
@@ -35,18 +38,17 @@ module Program =
                 tmpGroup <- [square] 
               else if (readingGroup && current <> square) then
                 tmpGroup <- tmpGroup @ [current]
-              if i = Array.length input - 1 then
+              if i = List.length input - 1 then
                 yield tmpGroup
         ] 
 
-    let sortRowAndJoin (splitRow: int list list) =
+    let sortRowAndJoin (splitRow: Matrix ) =
         splitRow |> List.map List.sort
                  |> List.collect id
     
     let splitAndSort input =  
         splitRowAtRocks input
             |> sortRowAndJoin
-            |> List.toArray
  
     let splitAndSortMatrixN (input: Matrix) : Matrix = 
        input |> List.map splitAndSort
@@ -54,23 +56,23 @@ module Program =
     let transpose (input: Matrix): Matrix = 
         [
             for i in 0 .. input[0].Length - 1 do
-                yield input |> List.map (fun x -> x.[i]) |> List.toArray
+                yield input |> List.map (fun x -> x.[i]) 
         ]
 
     // rotate 90 degrees clockwise
     let rotate90C(matrix: Matrix) =
-        matrix |> List.map Array.rev  |> transpose
+        matrix |> List.map List.rev |> transpose
 
     let rotate90CM = rotate90C
 
     let prettyPrintMatrix (matrixT: Matrix) =
         let matrix = transpose matrixT
         for line in matrix do
-            let prettyLine = line |> Array.map (fun x -> match x with 
-                                                                   | 1 -> '#'
-                                                                   | 2 -> 'O'
-                                                                   | 3 -> '.')
-            printfn "%A" (new string(prettyLine ))
+            let prettyLine = line |> List.map (fun x -> match x with 
+                                                               | 1 -> '#'
+                                                               | 2 -> 'O'
+                                                               | 3 -> '.')
+            printfn "%A" (new string(prettyLine |> List.toArray ))
 
     let rotateAndSortCycle (input: Matrix): Matrix =
         let north = splitAndSortMatrixN input
@@ -110,10 +112,10 @@ module Program =
         Assert.Equal<Matrix>(cycle3, cycle3 |> rotateAndSortN 7) 
         Assert.NotEqual<Matrix>(cycle3, cycle3 |> rotateAndSortN 8) 
  
-    let calcLoad (input: int []): int =
-        input |> Array.rev
-              |> Array.mapi (fun i elem -> if elem = round then i + 1 else 0)
-              |> Array.sum
+    let calcLoad (input: int list): int =
+        input |> List.rev
+              |> List.mapi (fun i elem -> if elem = round then i + 1 else 0)
+              |> List.sum
 
     [<Fact>]
     let testcycletestdata () = 
@@ -150,4 +152,5 @@ module Program =
                         |> List.sum
         Assert.Equal(109638, sum) 
 
-    let [<EntryPoint>] main _ = 0
+    let [<EntryPoint>] main _ = Console.ReadKey() |> ignore
+                                0
