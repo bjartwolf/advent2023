@@ -5,32 +5,26 @@ module Program =
     open System.IO
     open Xunit 
 
-    let square = 1
-    let round = 2
-    let space = 3
+    let square = 1.0
+    let round = 2.0
+    let space = 3.0
 
-    let squaref = 1.0
-    let roundf = 2.0
-    let spacef = 3.0
-
-
-    type Matrix = int [] [] 
+    type Matrix = float [] [] 
 
     let readMatrix (filePath: string): Matrix = 
         let lines = File.ReadAllLines filePath 
-        let parseChar c = if c = '.' then spacef 
-                          else if c = '#' then squaref
-                          else if c = 'O' then roundf
+        let parseChar c = if c = '.' then space 
+                          else if c = '#' then square
+                          else if c = 'O' then round
                           else failwith "whoopsy"
 
         lines |> Array.map (fun l -> l.ToCharArray()) 
               |> Array.map (Array.map parseChar)
               |> DenseMatrix.ofColumnArrays
               |> Matrix.toRowArrays
-              |> Array.map (Array.map int)
 
-    let splitRowAtRocks (input: int []) : Matrix =
-        let mutable tmpGroup: int list = []
+    let splitRowAtRocks (input: float []) : Matrix =
+        let mutable tmpGroup: float list = []
         let mutable readingGroup = false
 
         [| for i = 0 to Array.length input - 1 do
@@ -62,7 +56,6 @@ module Program =
         DenseMatrix.ofRowArrays (input |> Array.map (Array.map float))
             |> Matrix.transpose
             |> Matrix.toRowArrays
-            |> Array.map (Array.map int) 
 
     // rotate 90 degrees clockwise
     let rotate90C(matrix: Matrix) =
@@ -120,9 +113,9 @@ module Program =
         Assert.Equal<Matrix>(cycle3, cycle3 |> rotateAndSortN 7) 
         Assert.NotEqual<Matrix>(cycle3, cycle3 |> rotateAndSortN 8) 
  
-    let calcLoad (input: int []): int =
+    let calcLoad (input: float []): float =
         input |> Array.rev
-              |> Array.mapi (fun i elem -> if elem = round then i + 1 else 0)
+              |> Array.mapi (fun i elem -> if elem = round then float i + 1.0 else 0.0)
               |> Array.sum
 
     [<Fact>]
@@ -132,7 +125,7 @@ module Program =
                         |> rotateAndSortN 1000000000
                         |> Array.map calcLoad 
                         |> Array.sum
-        Assert.Equal(64, sum) 
+        Assert.Equal(64, int sum) 
 
     [<Fact>]
     let testcycledata () = 
@@ -141,7 +134,7 @@ module Program =
                         |> rotateAndSortN 1000000000
                         |> Array.map calcLoad 
                         |> Array.sum
-        Assert.Equal(102657, sum) 
+        Assert.Equal(102657, int sum) 
 
     [<Fact>]
     let test2 () = 
@@ -150,7 +143,7 @@ module Program =
         let sum = input |> splitAndSortMatrixN 
                         |> Array.map calcLoad 
                         |> Array.sum
-        Assert.Equal(136, sum) 
+        Assert.Equal(136, int sum) 
 
     [<Fact>]
     let testprod () = 
@@ -158,7 +151,7 @@ module Program =
         let sum = input |> splitAndSortMatrixN
                         |> Array.map calcLoad
                         |> Array.sum
-        Assert.Equal(109638, sum) 
+        Assert.Equal(109638, int sum) 
 
     let [<EntryPoint>] main _ = Console.ReadKey() |> ignore
                                 0
