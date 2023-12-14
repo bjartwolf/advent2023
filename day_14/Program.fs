@@ -12,16 +12,16 @@ module Program =
     type Matrix = int list list 
 
     let readMatrix (filePath: string): Matrix = 
-        let lines = File.ReadAllLines filePath
+        let lines = File.ReadAllLines filePath |> Array.toList
         let lengthOfLine = lines[0].Length
         [
             for i in 0 .. lengthOfLine - 1 do
-                let col = lines |> Array.map (fun x -> x.[i])
-                                |> Array.map (fun c -> if c = '.' then space 
+                let col = lines |> List.map (fun x -> x.[i])
+                                |> List.map (fun c -> if c = '.' then space 
                                                        else if c = '#' then square
                                                        else if c = 'O' then round
                                                        else failwith "whoopsy")
-                yield col |> Array.toList
+                yield col 
         ]
 
     let splitRowAtRocks (input: int list) : int list list =
