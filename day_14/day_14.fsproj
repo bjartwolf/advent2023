@@ -11,6 +11,18 @@
   <ItemGroup>
 
     <Compile Include="Program.fs" />
+
+    <Content Include="cycle3.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+
+    <Content Include="cycle2.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+
+    <Content Include="cycle1.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="testinput.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
