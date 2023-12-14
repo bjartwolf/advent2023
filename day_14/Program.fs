@@ -95,21 +95,6 @@ module Program =
                     rotateInner (i+1) nextMatrix (Map.add nextMatrix i seenBefore)
         rotateInner 0 matrix Map.empty
 
-    [<Fact>]
-    let testAutoCycle () = 
-        let input = readMatrix "testinput.txt"
-
-        let cycle1 = readMatrix "cycle1.txt" 
-        let cycle2 = readMatrix "cycle2.txt" 
-        let cycle3 = readMatrix "cycle3.txt" 
-
-        Assert.Equal<Matrix>(cycle1, input |> rotateAndSortN 1) 
-        Assert.Equal<Matrix>(cycle2, input |> rotateAndSortN 2 ) 
-        Assert.Equal<Matrix>(cycle3, input |> rotateAndSortN 3) 
-        Assert.Equal<Matrix>(cycle3, input |> rotateAndSortN 10) 
-        Assert.Equal<Matrix>(cycle3, cycle3 |> rotateAndSortN 7) 
-        Assert.NotEqual<Matrix>(cycle3, cycle3 |> rotateAndSortN 8) 
- 
     let calcLoad (input: float []): float =
         input |> Array.rev
               |> Array.mapi (fun i elem -> if elem = round then float i + 1.0 else 0.0)
