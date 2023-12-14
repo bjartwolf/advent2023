@@ -73,14 +73,11 @@ module Program =
             printfn "" 
 
     let rotateAndSortCycle (input: Matrix): Matrix =
-        input |> splitAndSortMatrixN 
-              |> rotate90C    
-              |> splitAndSortMatrixN 
-              |> rotate90C    
-              |> splitAndSortMatrixN 
-              |> rotate90C    
-              |> splitAndSortMatrixN 
-              |> rotate90C    
+        let sortAndRotate = splitAndSortMatrixN >> rotate90C
+        input |> sortAndRotate 
+              |> sortAndRotate 
+              |> sortAndRotate 
+              |> sortAndRotate 
 
     let rotateAndSortN (max: int) (matrix: Matrix)  =
         let rec rotateInner (i: int) (mtrx: Matrix) (seenBefore: Map<Matrix,int>) =
