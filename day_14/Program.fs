@@ -64,7 +64,7 @@ module Input =
     [<Fact>]
     let test2 () = 
         let input = readInit "testinput.txt" 
-        let sum = input |> List.map splitAndSort
+        let sum = input |> splitAndSortMatrix 
                         |> List.map calcLoad 
                         |> List.sum
         Assert.Equal(136, sum) 
@@ -72,7 +72,7 @@ module Input =
     [<Fact>]
     let testprod () = 
         let input = readInit "input.txt" 
-        let sum = input |> List.map splitAndSort
+        let sum = input |> splitAndSortMatrix 
                         |> List.map calcLoad
                         |> List.sum
         Assert.Equal(109638, sum) 
