@@ -33,13 +33,26 @@ module Input =
                 yield tmpGroup
        ] // få med siste og...
 
+    let sortRowAndJoin (splitRow: int list list) =
+        splitRow |> List.map List.sort
+                 |> List.collect id
+    
+    let splitAndSort (input: int[]) : int list =
+        splitRowAtRocks input
+            |> sortRowAndJoin 
        
     [<Fact>]
     let splitTest() = 
         Assert.Equal<int list list>([ [1;3;3;2;2]; [1;3;3;2;2;3;2 ]], splitRowAtRocks row1)
         Assert.Equal<int list list>([ [1]; [1]], splitRowAtRocks [|1;1|])
         Assert.Equal<int list list>([ [3]; [1]], splitRowAtRocks [|3;1|])
-         
+
+    [<Fact>]
+    let splitAndSortTest() = 
+        Assert.Equal<int list>([1;2;2;3;3;1;2;2;2;3;3;3], splitAndSort row1)
+        Assert.Equal<int list>([1;1], splitAndSort [|1;1|])
+        Assert.Equal<int list>([3;1], splitAndSort [|3;1|])
+          
 
     // får evt bli float array
     let sortRow (row: int array): int array =
