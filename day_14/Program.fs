@@ -9,20 +9,25 @@ module Program =
     let round = 2
     let space = 3
 
+    let squaref = 1.0
+    let roundf = 2.0
+    let spacef = 3.0
+
+
     type Matrix = int [] [] 
 
     let readMatrix (filePath: string): Matrix = 
         let lines = File.ReadAllLines filePath 
-        let lengthOfLine = lines[0].Length
-        [|
-            for i in 0 .. lengthOfLine - 1 do
-                let col = lines |> Array.map (fun x -> x.[i])
-                                |> Array.map (fun c -> if c = '.' then space 
-                                                       else if c = '#' then square
-                                                       else if c = 'O' then round
-                                                       else failwith "whoopsy")
-                yield col 
-        |]
+        let parseChar c = if c = '.' then spacef 
+                          else if c = '#' then squaref
+                          else if c = 'O' then roundf
+                          else failwith "whoopsy"
+
+        lines |> Array.map (fun l -> l.ToCharArray()) 
+              |> Array.map (Array.map parseChar)
+              |> DenseMatrix.ofColumnArrays
+              |> Matrix.toRowArrays
+              |> Array.map (Array.map int)
 
     let splitRowAtRocks (input: int []) : Matrix =
         let mutable tmpGroup: int list = []
