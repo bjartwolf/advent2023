@@ -64,15 +64,15 @@ module Program =
         matrix |> Array.map Array.rev |> transpose
 
     let prettyPrintMatrix (matrix: Matrix) =
-        DenseMatrix.ofRowArrays (matrix |> Array.map (Array.map float))
-         |> Matrix.transpose 
-         |> printfn "%A" 
-        //for line in matrix do
-        //    let prettyLine = line |> Array.map (fun x -> match x with 
-        //                                                       | 1 -> '#'
-        //                                                       | 2 -> 'O'
-        //                                                       | 3 -> '.')
-        //    printfn "%A" (new string(prettyLine |> List.toArray ))
+        let matrix = DenseMatrix.ofRowArrays (matrix |> Array.map (Array.map float))
+                         |> Matrix.transpose 
+        for row in matrix.EnumerateRows() do
+            for char in row do
+                printf (match char with 
+                         | 1.0 -> "#"
+                         | 2.0 -> "O"
+                         | 3.0 -> ".")
+            printfn "" 
 
     let rotateAndSortCycle (input: Matrix): Matrix =
         let north = splitAndSortMatrixN input
