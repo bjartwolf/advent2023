@@ -1,4 +1,5 @@
 open System.Collections.Specialized
+open System.Collections
 
 
 module Input =
@@ -41,7 +42,7 @@ module Input =
         let hash = hashLabel label
         let findLenses = Map.tryFind hash boxes 
         match findLenses with
-              | Some lenses -> lenses.Remove(hash) 
+              | Some lenses -> lenses.Remove(label) 
                                boxes 
               | None -> boxes 
 
@@ -50,9 +51,20 @@ module Input =
         let findLenses = Map.tryFind hash boxes 
         match findLenses with
             | None ->   let orderedDict = OrderedDictionary() 
-                        orderedDict.Add(hash, (label, focalLength))
+                        orderedDict.Add(label, (label, focalLength))
                         Map.add hash orderedDict boxes
-            | Some lenses -> lenses.Add(hash, (label, focalLength))
+            | Some lenses -> if lenses.Contains(label) then
+                                let mutable count = 0
+                                let mutable i = 0
+                                for de in (lenses |> Seq.cast<DictionaryEntry>) do
+                                    if (de.Key = label) then
+                                        i <- count 
+                                    count  <- count + 1  
+                                lenses.RemoveAt(i)
+                                lenses.Insert(i, label, (label,focalLength))
+                                //lenses[i] <- (label, focalLength)
+                             else 
+                                lenses.Add(label, (label,focalLength)) 
                              boxes
 
     let parseCommands (fileName: string): Command list = 
@@ -69,14 +81,16 @@ module Input =
         processCommandsInner commands Map.empty 
 
     let focusPowerForLens (lenses: LabeledLenses): int =
-        [for i in lenses.Keys do
-            yield lenses[i] :?> LabeledLens 
+        let mutable i = 0;
+        [ for de in (lenses |> Seq.cast<DictionaryEntry>) do
+            i <- i + 1 
+            yield (i,de.Value :?> LabeledLens)
         ]
-            |> List.mapi (fun i (_,num) -> num*(i+1)) 
+            |> List.map (fun (i, (_,num)) -> num*(i) )
             |> List.sum
 
     let findFocusPower (boxes: Boxes) : int =
-        boxes |> Map.map (fun i lenses -> (i+1)* focusPowerForLens lenses) 
+        boxes |> Map.map (fun i lenses -> (i + 1)* focusPowerForLens lenses) 
               |> Map.values
               |> Seq.sum
     [<Fact>]
