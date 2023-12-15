@@ -8,8 +8,6 @@ module Input =
         line.Split(",")
             |> Array.toList
         
-    let testInput = readInit "testinput.txt"
-
     let wordToNumbers (word:string): int list =
         word.ToCharArray() |> Array.map int |> Array.toList
 
