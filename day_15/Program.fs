@@ -81,9 +81,10 @@ module Input =
     let testAddingBoxes() = 
         let boxes: Boxes = Map.ofList [0, [("rn",1)] ]
         let newBox = addToBoxes boxes ("qp",3)
-
         Assert.Equal<Boxes>(Map.ofList [0, [("rn",1)]; 1, [("qp",3)]], newBox)
-
+        let nextBox = removeFromBoxes boxes ("qp",3)
+        Assert.Equal<Boxes>(Map.ofList [0, [("rn",1)]], nextBox)
+        Assert.Equal<Boxes>(Map.ofList [0,[]], removeFromBoxes nextBox ("rn",1))
 
     [<Fact>]
     let calcSumForReal () = 
