@@ -47,36 +47,36 @@ module Input =
         let input = readInit "testinput.txt" 
         Assert.Equal(1320, input |> calcWordList |> List.sum) 
 
-        // focal lenth fra 1 - 9
     let focalLengths = [1 .. 9]
     type LabeledLens = string*int
     type Command = Remove of string | Add of LabeledLens 
     type LabeledLenses = LabeledLens list
     type Boxes = Map<int,LabeledLenses> 
     let boxes: Boxes = Map.empty
+    
+    // can maybe just do this with a custom hash function... But there is some
+    // weirdness with the list and ordering and focal length stuff
 
-    let removeFromBoxes (boxes: Boxes) ((label,focalLength): LabeledLens): Boxes =
+    let removeFromBoxes (boxes: Boxes) ((label,_): LabeledLens): Boxes =
         let hash = hashLabel label
         let findLenses = Map.tryFind hash boxes 
         match findLenses with
-              | Some lenses -> let updated  = lenses |> List.filter (fun (l,focalLength) -> l <> label)
+              | Some lenses -> let updated  = lenses |> List.filter (fun (l,_) -> l <> label)
                                Map.add hash updated boxes
               | None -> boxes 
 
     let addToBoxes (boxes: Boxes) ((label,focalLength): LabeledLens): Boxes =
         let hash = hashLabel label
-        let existsSameLabel = Map.exists (fun x y -> x = hash && y |> List.contains (label,focalLength)) boxes
-        if existsSameLabel then 
-            boxes 
-        else
-            boxes 
-
-    (* 
-        REMOVE LABEL | ADD LABEL FOCALLENGTH
-        KEY = HASH(LABEL)
-        VALUE = LABEL,FOCALLENGTH
-        
-    *)
+        let findLenses = Map.tryFind hash boxes 
+        match findLenses with
+            | None -> Map.add hash [(label,focalLength)] boxes
+            | Some lenses -> if (lenses |> List.exists (fun (l,_) -> l = label))  then
+                                // there is one with same label, replace it 
+                                let updatedLenses = lenses |> List.map (fun (l,f) -> if l = label then (label,focalLength) else (l,f)) 
+                                Map.add hash updatedLenses boxes
+                             else
+                                // nothing in the same box, add to end
+                                Map.add hash (lenses @ [(label,focalLength)]) boxes
 
     [<Fact>]
     let calcSumForReal () = 
