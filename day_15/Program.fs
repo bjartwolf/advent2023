@@ -81,12 +81,10 @@ module Input =
 
     let focusPowerForLens (lenses: LabeledLenses): int =
         let mutable i = 0;
-        [ for de in (lenses |> Seq.cast<DictionaryEntry>) do
-            i <- i + 1 
-            yield (i,de.Value :?> int)
-        ]
-            |> List.map (fun (i, num) -> num*i )
-            |> List.sum
+        lenses |> Seq.cast<DictionaryEntry>
+               |> Seq.mapi (fun i x -> (i+1, x.Value :?> int))
+               |> Seq.map (fun (i, num) -> num*i )
+               |> Seq.sum
 
     let findFocusPower (boxes: Boxes) : int =
         boxes |> Map.map (fun i lenses -> (i + 1)* focusPowerForLens lenses) 
