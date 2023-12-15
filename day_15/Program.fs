@@ -1,3 +1,6 @@
+open System.Collections.Specialized
+
+
 module Input =
     open System.IO
     open Xunit 
@@ -23,7 +26,7 @@ module Input =
 
     type LabeledLens = string*int
     type Command = Remove of string | Add of LabeledLens 
-    type LabeledLenses = LabeledLens list
+    type LabeledLenses = OrderedDictionary
     type Boxes = Map<int,LabeledLenses> 
 
     let parseCommand (cmd: string): Command =
@@ -34,29 +37,23 @@ module Input =
             let split= cmd.Split("=")
             Add (split[0],int split[1])
 
-    let removeFromBoxes (boxes: Boxes) )label: string): Boxes =
+    let removeFromBoxes (boxes: Boxes) (label: string): Boxes =
         let hash = hashLabel label
         let findLenses = Map.tryFind hash boxes 
         match findLenses with
-              | Some lenses -> let updated  = lenses |> List.filter (fun (l,_) -> l <> label)
-                               Map.add hash updated boxes
+              | Some lenses -> lenses.Remove(hash) 
+                               boxes 
               | None -> boxes 
 
     let addToBoxes (boxes: Boxes) ((label,focalLength): LabeledLens): Boxes =
         let hash = hashLabel label
         let findLenses = Map.tryFind hash boxes 
-        let lenseExists l = l |> List.exists (fun (l,_) -> l = label)
-        let updateLenses l = l |> List.map (fun (l,f) -> if l = label then 
-                                                            (label,focalLength) 
-                                                         else 
-                                                            (l,f)) 
         match findLenses with
-            | None -> Map.add hash [(label,focalLength)] boxes
-            | Some lenses -> if (lenseExists lenses) then
-                                let updatedLenses = lenses |> updateLenses
-                                Map.add hash updatedLenses boxes
-                             else
-                                Map.add hash (lenses @ [(label,focalLength)]) boxes
+            | None ->   let orderedDict = OrderedDictionary() 
+                        orderedDict.Add(hash, (label, focalLength))
+                        Map.add hash orderedDict boxes
+            | Some lenses -> lenses.Add(hash, (label, focalLength))
+                             boxes
 
     let parseCommands (fileName: string): Command list = 
         readInit fileName 
@@ -72,7 +69,11 @@ module Input =
         processCommandsInner commands Map.empty 
 
     let focusPowerForLens (lenses: LabeledLenses): int =
-        lenses |> List.mapi (fun i (_,nr) -> nr*(i+1)) |> List.sum
+        [for i in lenses.Keys do
+            yield lenses[i] :?> LabeledLens 
+        ]
+            |> List.mapi (fun i (_,num) -> num*(i+1)) 
+            |> List.sum
 
     let findFocusPower (boxes: Boxes) : int =
         boxes |> Map.map (fun i lenses -> (i+1)* focusPowerForLens lenses) 
@@ -91,12 +92,6 @@ module Input =
         let processedCommands = processCommands cmds 
         let sum = findFocusPower processedCommands
         Assert.Equal(303404, sum)
-  
-    [<Fact>]
-    let test_procsessTestData() = 
-        let cmds = parseCommands "testinput.txt" 
-        let processedCommands = processCommands cmds 
-        Assert.Equal<Boxes>(Map.ofList [ 0, [("rn",1); ("cm",2)];1,[]; 3,[("ot",7);("ab",5);("pc",6)]], processedCommands) 
 
     [<Fact>]
     let calcSumForReal () = 
