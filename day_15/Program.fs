@@ -24,7 +24,9 @@ module Input =
     let calcWordList (words: string list) : int list =
         words |> List.map hashLabel 
 
-    type LabeledLens = string*int
+    type Label = string
+    type FocalLength = int
+    type LabeledLens = Label*FocalLength
     type Command = Remove of string | Add of LabeledLens 
     type LabeledLenses = OrderedDictionary
     type Boxes = Map<int,LabeledLenses> 
@@ -45,7 +47,8 @@ module Input =
               | None -> boxes 
 
     let addToBoxes (boxes: Boxes) ((label,focalLength): LabeledLens): Boxes =
-        let findLenses = Map.tryFind (hashlabel label) boxes 
+        let hash = hashLabel label
+        let findLenses = Map.tryFind hash boxes 
         match findLenses with
             | None ->   let orderedDict = OrderedDictionary() 
                         orderedDict.Add(label, focalLength)
@@ -74,8 +77,7 @@ module Input =
 
     let focusPowerForLens (lenses: LabeledLenses): int =
         lenses |> Seq.cast<DictionaryEntry>
-               |> Seq.mapi (fun i x -> (i+1, x.Value :?> int))
-               |> Seq.map (fun (i, num) -> num*i )
+               |> Seq.mapi (fun i x -> (i + 1) *  (x.Value :?> int))
                |> Seq.sum
 
     let findFocusPower (boxes: Boxes) : int =
