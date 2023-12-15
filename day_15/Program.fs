@@ -8,10 +8,10 @@ module Input =
         line.Split(",")
             |> Array.toList
         
-    let wordToNumbers (word:string): int list =
+    let wordToNumbers (word:string) =
         word.ToCharArray() |> Array.map int |> Array.toList
 
-    let hashLabel (word: string) : int =
+    let hashLabel (word: string) = 
         let rec calcWordNrInner (wordDigits: int list) (current: int): int =
             match wordDigits with
                 | [] -> current
@@ -26,7 +26,7 @@ module Input =
     type LabeledLenses = LabeledLens list
     type Boxes = Map<int,LabeledLenses> 
 
-    let parseCommand (cmd: string): Command =
+    let parseCommand (cmd: string) =
         if cmd.Contains('-') then
             let label = cmd.Replace("-","")
             Remove label 
@@ -34,7 +34,7 @@ module Input =
             let split= cmd.Split("=")
             Add (split[0],int split[1])
 
-    let removeFromBoxes (boxes: Boxes) )label: string): Boxes =
+    let removeFromBoxes boxes label =  
         let hash = hashLabel label
         let findLenses = Map.tryFind hash boxes 
         match findLenses with
@@ -42,7 +42,7 @@ module Input =
                                Map.add hash updated boxes
               | None -> boxes 
 
-    let addToBoxes (boxes: Boxes) ((label,focalLength): LabeledLens): Boxes =
+    let addToBoxes boxes (label,focalLength) = 
         let hash = hashLabel label
         let findLenses = Map.tryFind hash boxes 
         match findLenses with
@@ -53,12 +53,12 @@ module Input =
                              else
                                 Map.add hash (lenses @ [(label,focalLength)]) boxes
 
-    let parseCommands (fileName: string): Command list = 
+    let parseCommands fileName =  
         readInit fileName 
             |> List.map parseCommand
 
-    let processCommands (commands: Command list): Boxes = 
-        let rec processCommandsInner (commands: Command list) (box: Boxes) =
+    let processCommands commands = 
+        let rec processCommandsInner commands box = 
            match commands with
                 | [] -> box
                 | h ::t -> match h with
@@ -66,7 +66,7 @@ module Input =
                                 | Add (label,lense) -> processCommandsInner t (addToBoxes box (label, lense) )
         processCommandsInner commands Map.empty 
 
-    let focusPowerForLens (lenses: LabeledLenses): int =
+    let focusPowerForLens lenses = 
         lenses |> List.mapi (fun i (_,nr) -> nr*(i+1)) |> List.sum
 
     let findFocusPower (boxes: Boxes) : int =
