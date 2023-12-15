@@ -52,7 +52,6 @@ module Input =
     type Command = Remove of string | Add of LabeledLens 
     type LabeledLenses = LabeledLens list
     type Boxes = Map<int,LabeledLenses> 
-    let boxes: Boxes = Map.empty
     
     // can maybe just do this with a custom hash function... But there is some
     // weirdness with the list and ordering and focal length stuff
@@ -77,6 +76,14 @@ module Input =
                              else
                                 // nothing in the same box, add to end
                                 Map.add hash (lenses @ [(label,focalLength)]) boxes
+
+    [<Fact>]
+    let testAddingBoxes() = 
+        let boxes: Boxes = Map.ofList [0, [("rn",1)] ]
+        let newBox = addToBoxes boxes ("qp",3)
+
+        Assert.Equal<Boxes>(Map.ofList [0, [("rn",1)]; 1, [("qp",3)]], newBox)
+
 
     [<Fact>]
     let calcSumForReal () = 
