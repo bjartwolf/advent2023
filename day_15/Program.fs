@@ -38,16 +38,14 @@ module Input =
             Add (split[0],int split[1])
 
     let removeFromBoxes (boxes: Boxes) (label: string): Boxes =
-        let hash = hashLabel label
-        let findLenses = Map.tryFind hash boxes 
+        let findLenses = Map.tryFind (hashLabel label) boxes 
         match findLenses with
               | Some lenses -> lenses.Remove(label) 
                                boxes 
               | None -> boxes 
 
     let addToBoxes (boxes: Boxes) ((label,focalLength): LabeledLens): Boxes =
-        let hash = hashLabel label
-        let findLenses = Map.tryFind hash boxes 
+        let findLenses = Map.tryFind (hashlabel label) boxes 
         match findLenses with
             | None ->   let orderedDict = OrderedDictionary() 
                         orderedDict.Add(label, focalLength)
