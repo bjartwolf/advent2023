@@ -27,7 +27,7 @@ module Input =
     type Label = string
     type FocalLength = int
     type LabeledLens = Label*FocalLength
-    type Command = Remove of string | Add of LabeledLens 
+    type Command = Remove of Label | Add of LabeledLens 
     type LabeledLenses = OrderedDictionary
     type Boxes = Map<int,LabeledLenses> 
 
