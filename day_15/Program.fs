@@ -51,7 +51,7 @@ module Input =
         let findLenses = Map.tryFind hash boxes 
         match findLenses with
             | None ->   let orderedDict = OrderedDictionary() 
-                        orderedDict.Add(label, (label, focalLength))
+                        orderedDict.Add(label, focalLength)
                         Map.add hash orderedDict boxes
             | Some lenses -> if lenses.Contains(label) then
                                 let mutable count = 0
@@ -61,10 +61,9 @@ module Input =
                                         i <- count 
                                     count  <- count + 1  
                                 lenses.RemoveAt(i)
-                                lenses.Insert(i, label, (label,focalLength))
-                                //lenses[i] <- (label, focalLength)
+                                lenses.Insert(i, label, focalLength)
                              else 
-                                lenses.Add(label, (label,focalLength)) 
+                                lenses.Add(label, focalLength) 
                              boxes
 
     let parseCommands (fileName: string): Command list = 
@@ -84,9 +83,9 @@ module Input =
         let mutable i = 0;
         [ for de in (lenses |> Seq.cast<DictionaryEntry>) do
             i <- i + 1 
-            yield (i,de.Value :?> LabeledLens)
+            yield (i,de.Value :?> int)
         ]
-            |> List.map (fun (i, (_,num)) -> num*(i) )
+            |> List.map (fun (i, num) -> num*i )
             |> List.sum
 
     let findFocusPower (boxes: Boxes) : int =
