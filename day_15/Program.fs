@@ -76,6 +76,12 @@ module Input =
                              else
                                 // nothing in the same box, add to end
                                 Map.add hash (lenses @ [(label,focalLength)]) boxes
+    [<Fact>]
+    let testAddingBoxes2() = 
+        let boxes: Boxes = Map.ofList [0, [("rn",1);("cm",2)] ]
+        let newBox = addToBoxes boxes ("rn",3)
+        Assert.Equal<Boxes>(Map.ofList [0, [("rn",3);("cm",2))];], newBox)
+
 
     [<Fact>]
     let testAddingBoxes() = 
