@@ -45,10 +45,15 @@ module Input =
     let addToBoxes boxes (label,focalLength) = 
         let hash = hashLabel label
         let findLenses = Map.tryFind hash boxes 
+        let lenseExists l = l |> List.exists (fun (l,_) -> l = label)
+        let updateLenses l = l |> List.map (fun (l,f) -> if l = label then 
+                                                            (label,focalLength) 
+                                                         else 
+                                                            (l,f)) 
         match findLenses with
             | None -> Map.add hash [(label,focalLength)] boxes
-            | Some lenses -> if (lenses |> List.exists (fun (l,_) -> l = label))  then
-                                let updatedLenses = lenses |> List.map (fun (l,f) -> if l = label then (label,focalLength) else (l,f)) 
+            | Some lenses -> if (lenseExists lenses) then
+                                let updatedLenses = lenses |> updateLenses
                                 Map.add hash updatedLenses boxes
                              else
                                 Map.add hash (lenses @ [(label,focalLength)]) boxes
