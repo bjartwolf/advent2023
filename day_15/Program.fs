@@ -34,7 +34,7 @@ module Input =
             let split= cmd.Split("=")
             Add (split[0],int split[1])
 
-    let removeFromBoxes (boxes: Boxes) ((label,_): LabeledLens): Boxes =
+    let removeFromBoxes (boxes: Boxes) )label: string): Boxes =
         let hash = hashLabel label
         let findLenses = Map.tryFind hash boxes 
         match findLenses with
@@ -62,7 +62,7 @@ module Input =
            match commands with
                 | [] -> box
                 | h ::t -> match h with
-                                | Remove label -> processCommandsInner t (removeFromBoxes box (label,0)) // can simplify this
+                                | Remove label -> processCommandsInner t (removeFromBoxes box label)
                                 | Add (label,lense) -> processCommandsInner t (addToBoxes box (label, lense) )
         processCommandsInner commands Map.empty 
 
