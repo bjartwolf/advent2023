@@ -54,12 +54,8 @@ module Input =
                         orderedDict.Add(label, focalLength)
                         Map.add hash orderedDict boxes
             | Some lenses -> if lenses.Contains(label) then
-                                let mutable count = 0
-                                let mutable i = 0
-                                for de in (lenses |> Seq.cast<DictionaryEntry>) do
-                                    if (de.Key = label) then
-                                        i <- count 
-                                    count  <- count + 1  
+                                let i = lenses |> Seq.cast<DictionaryEntry>
+                                               |> Seq.findIndex (fun de -> de.Key = label) 
                                 lenses.RemoveAt(i)
                                 lenses.Insert(i, label, focalLength)
                              else 
@@ -80,7 +76,6 @@ module Input =
         processCommandsInner commands Map.empty 
 
     let focusPowerForLens (lenses: LabeledLenses): int =
-        let mutable i = 0;
         lenses |> Seq.cast<DictionaryEntry>
                |> Seq.mapi (fun i x -> (i+1, x.Value :?> int))
                |> Seq.map (fun (i, num) -> num*i )
