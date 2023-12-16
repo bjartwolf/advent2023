@@ -20,6 +20,7 @@ module Input =
             line |> String.Concat |> printfn "%A"
         ]
 
+
     
     let (+) (a1, b1) (a2, b2) = (a1 + a2, b1 + b2)
     // alle posisjoner i y, der y er negativ akse og x
@@ -33,6 +34,17 @@ module Input =
     type Beam = Position * Direction 
     type Beams = Beam list
 
+    let prettyPrintPositions (m: Map) (positions: Positions) =
+        printfn "***"
+        [for y in 0 .. m.Length - 1 do
+            for x in 0 .. m[0].Length - 1 do
+                if List.exists (fun p -> p = (y,x)) positions then
+                    printf "X"
+                else
+                    printf "."
+            printfn ""
+        ]
+
     let move ((p,d): Beam): Beam =
         match d with 
             | N -> (p+North, d) 
@@ -42,7 +54,7 @@ module Input =
 
     let lookup (m:Map) ((y,x): Position) : Char option =
         if (y < 0 || y > m.Length - 1 || x < 0 || x > m[0].Length - 1) then
-            None
+           None
         else
            Some (m[y][x])
 
@@ -57,33 +69,49 @@ module Input =
                                 | '-' when d = S || d = N -> [(p,E);(p,W)]
                                 | '|' when d = S || d = N -> [beam]
                                 | '|' when d = E || d = W -> [(p,S);(p,N)]
-                                | '/' when d = E -> [(p,S)]
-                                | '/' when d = N -> [(p,W)]
-                                | '/' when d = W -> [(p,N)]
-                                | '/' when d = S -> [(p,E)]
-                                | '\\' when d = S -> [(p,W)]
-                                | '\\' when d = N -> [(p,E)]
-                                | '\\' when d = W -> [(p,S)]
-                                | '\\' when d = E -> [(p,N)]
+                                | '/' when d = E -> [(p,N)]
+                                | '/' when d = N -> [(p,E)]
+                                | '/' when d = W -> [(p,S)]
+                                | '/' when d = S -> [(p,W)]
+                                | '\\' when d = S -> [(p,E)]
+                                | '\\' when d = N -> [(p,W)]
+                                | '\\' when d = W -> [(p,N)]
+                                | '\\' when d = E -> [(p,S)]
                                 | _ -> failwith "No such position"
 
     let runSim (map: Map) : Positions =
+        // missing cycle detection 
+        // hvis vi har sett alle beamene før er det vel en sykel...
         let mapEval = eval map
         let initialBeam = ((0,0),E)
-        let rec innerSim (beams: Beams) (positions: Positions) : Beams*Positions =
+        let rec innerSim (beams: Beams) (positions: Positions) (cycleMap: Set<Position> list): Beams*Positions =
             match beams with
                 | [] -> beams, positions 
-                | beams -> let nextBeams = beams |> List.collect mapEval 
-                                                 |> List.map move      
-                           let nextPositions = nextBeams |> List.map (fun (b,_) -> b)  // when did i filter these
-                           innerSim nextBeams (positions @ nextPositions)
-        innerSim [initialBeam] [] |> snd 
+                | beams -> 
+                           let movedBeams = beams |> List.map move      
+                           let evaledBeams = movedBeams |> List.collect mapEval 
+                           printfn "%A" evaledBeams.Length
+                           //if evaledBeams.IsEmpty then (beams, positions)
+                           let prevPositions = beams |> List.map (fun (b,_) -> b)  // eval eats the empty ones. 
+
+                           let currentBeamSet = prevPositions |> Set.ofList
+                           // check if in cyclemap
+                           if (List.contains currentBeamSet cycleMap) then  
+                                beams, positions 
+                           else 
+                               prettyPrintPositions map positions |> ignore 
+                               printfn "%A" evaledBeams
+                               innerSim evaledBeams (positions @ prevPositions) (cycleMap @ [currentBeamSet]) 
+        innerSim [initialBeam] [] [Set.empty] |> snd 
 
     [<Fact>]
     let testRunMap () = 
         let map = readInit "testinput.txt" 
         let positions = runSim map  
+        prettyPrint map |> ignore
+        prettyPrintPositions map positions |> ignore
         printfn "%A" positions
+        printfn "%A" positions.Length
         Assert.Equal(10, map.Length) 
 
 
