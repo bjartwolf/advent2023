@@ -30,15 +30,15 @@ module Input =
     let West = (0,-1)
     type Direction = N|S|E|W
     type Position = int*int // kan lage record 
-    type Positions = Position list
+    type Positions = Set<Position>
     type Beam = Position * Direction 
-    type Beams = Beam list
+    type Beams = Set<Beam>
 
     let prettyPrintPositions (m: Map) (positions: Positions) =
         printfn "***"
         [for y in 0 .. m.Length - 1 do
             for x in 0 .. m[0].Length - 1 do
-                if List.exists (fun p -> p = (y,x)) positions then
+                if Set.contains (y,x) positions then
                     printf "X"
                 else
                     printf "."
@@ -82,42 +82,43 @@ module Input =
     let runSim (map: Map) : Positions =
         // missing cycle detection 
         // hvis vi har sett alle beamene før er det vel en sykel...
-        let mapEval = eval map
+        let mapEval = eval map 
+        let mapEvalSet (b: Beam): (Set<Beam>) = mapEval b |> Set.ofList
+        
         let initialBeam = ((0,0),E)
-        let rec innerSim (beams: Beams) (positions: Positions) (cycleMap: Set<Position> list): Beams*Positions =
-            match beams with
-                | [] -> beams, positions 
-                | beams -> 
-                           let movedBeams = beams |> List.map move      
-                           let evaledBeams = movedBeams |> List.collect mapEval |> List.distinct
-                           printfn "%A" evaledBeams
-                           //if evaledBeams.IsEmpty then (beams, positions)
-                           let prevPositions = beams |> List.map (fun (b,_) -> b)  // eval eats the empty ones. 
+        let rec innerSim (beams: Beams) (positions: Positions) (cycleMap: Set<Beam> list): Beams*Positions =
+            if Set.isEmpty beams then 
+                beams, positions 
+            else 
+               let movedBeams = beams |> Set.map move      
+               let evaledBeams = movedBeams |> Set.map mapEvalSet  |> Set.unionMany
+               printfn "%A" evaledBeams
+               //if evaledBeams.IsEmpty then (beams, positions)
+               let prevPositions = beams |> Set.map (fun (b,_) -> b)  // eval eats the empty ones. 
 
-                           let currentBeamSet = prevPositions |> Set.ofList
-                           // check if in cyclemap
-                           if (List.contains currentBeamSet cycleMap) then  
-                                beams, positions @ prevPositions
-                           else 
-                               //prettyPrintPositions map positions |> ignore 
-                               //printfn "%A" evaledBeams
-                               innerSim evaledBeams (positions @ prevPositions) (cycleMap @ [currentBeamSet]) 
-        let firstEval = mapEval initialBeam
-        innerSim firstEval [] [Set.empty] |> snd 
+               // check if in cyclemap
+               if (List.contains evaledBeams cycleMap) then  
+                    beams, Set.union positions prevPositions
+               else 
+                   //prettyPrintPositions map positions |> ignore 
+                   //printfn "%A" evaledBeams
+                   innerSim evaledBeams (Set.union positions prevPositions) (cycleMap @ [evaledBeams]) 
+        let firstEval = mapEval initialBeam |> Set.ofList
+        innerSim firstEval Set.empty [Set.empty] |> snd 
 
     [<Fact>]
     let testRunMap () = 
         let map = readInit "testinput.txt" 
         let positions = runSim map  
-        printfn "%A" (positions |> List.distinct |> List.length)
-        Assert.Equal(46, positions |> List.distinct |> List.length)
+        printfn "%A" (positions |> Set.count)
+        Assert.Equal(46, positions |> Set.count)
         Assert.Equal(10, map.Length) 
 
     [<Fact>]
     let testRunMapReal () = 
         let map = readInit "input.txt" 
         let positions = runSim map  
-        printfn "%A" (positions |> List.distinct |> List.length)
+        printfn "%A" (positions |> Set.count) 
         Assert.Equal(110, map.Length) 
 
 
