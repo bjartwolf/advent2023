@@ -86,7 +86,7 @@ module Program =
         let mapEval = eval map 
         let mapEvalSet (b: Beam): (Set<Beam>) = mapEval b |> Set.ofList
         
-        let rec innerSim (beams: Beams) (positions: Positions) (cycleMap: Set<Beam> list): Beams*Positions =
+        let rec innerSim (beams: Beams) (positions: Positions) (cycleMap: Set<Beam> ): Beams*Positions =
             if Set.isEmpty beams then 
                 beams, positions 
             else 
@@ -96,12 +96,13 @@ module Program =
                let prevPositions = beams |> Set.map (fun (b,_) -> b)  // eval eats the empty ones. 
 
                //prettyPrintPositions map positions 
-               if (List.contains evaledBeams cycleMap) then  
+               // check if all beams have been in this position before
+               if (evaledBeams |> Set.forall (fun beam -> Set.contains beam cycleMap)) then  
                     evaledBeams, Set.union positions prevPositions
                else 
-                   innerSim evaledBeams (Set.union positions prevPositions) (cycleMap @ [evaledBeams]) 
+                   innerSim evaledBeams (Set.union positions prevPositions) (Set.union cycleMap evaledBeams) 
         let firstEval = mapEval initialBeam |> Set.ofList
-        innerSim firstEval Set.empty [Set.empty] |> snd 
+        innerSim firstEval Set.empty Set.empty |> snd 
 
     let findCombos (map: Map): Beam list =
         let max = map.Length - 1
@@ -153,6 +154,7 @@ module Program =
         Assert.Equal(10, map.Length) 
 
     let [<EntryPoint>] main _ = 
+        //let map = readInit "input.txt" 
         let map = readInit "input.txt" 
         let max = findMaxCombo map 
         printfn "%A" max 
