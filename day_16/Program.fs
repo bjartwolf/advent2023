@@ -48,30 +48,28 @@ module Program =
             | Some tile -> match tile with 
                                 | '.' -> [beam]
                                 | '-' when d = 1 || d = 3 -> [beam]
-                                | '-' when d = 2 || d = 0 -> [(x,y,1);(x,y,3)]
                                 | '|' when d = 2 || d = 0 -> [beam]
+                                | '/' when d = 2 || d = 0 -> [(x,y,d+1)]
+                                | '/' -> [(x,y,d-1)]
+                                | '\\'  -> [(x,y,(3 - d) % 4)]
+                                | '-' when d = 2 || d = 0 -> [(x,y,1);(x,y,3)]
                                 | '|' when d = 1 || d = 3 -> [(x,y,2);(x,y,0)]
-                                | '/' when d = 1 -> [(x,y,0)]
-                                | '/' when d = 0 -> [(x,y,1)]
-                                | '/' when d = 3 -> [(x,y,2)]
-                                | '/' when d = 2 -> [(x,y,3)]
-                                | '\\' when d = 2 -> [(x,y,1)]
-                                | '\\' when d = 0 -> [(x,y,3)]
-                                | '\\' when d = 3 -> [(x,y,0)]
-                                | '\\' when d = 1 -> [(x,y,2)]
                                 | _ -> failwith "No such position"
 
     let runSim (map: Map) (initialBeam: Beam)  : int=
         let mapEval = eval map 
-        
+        let mutable i = 0 
         let rec innerSim (beams: Set<Beam>) (history: Set<Beam>): Set<Beam> =
             if Set.isEmpty beams then 
                 history 
             else 
+               i <- i + 1
                let movedBeams = beams |> Set.map move 
                let evaledBeams = movedBeams |> Set.map mapEval |> Seq.collect id |> Set.ofSeq
-               printfn "Evaled %A history %A" evaledBeams.Count history.Count
-               let newBeams = Set.difference evaledBeams history 
+               let newBeams = if (i % 50 = 0) then 
+                                     Set.difference evaledBeams history 
+                              else 
+                                     evaledBeams 
                innerSim newBeams (Set.union history newBeams) 
         let firstEval = mapEval initialBeam |> Set.ofList
         let beams = innerSim firstEval firstEval 
