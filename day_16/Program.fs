@@ -149,13 +149,9 @@ module Program =
         Assert.Equal(10, map.Length) 
 
     let [<EntryPoint>] main _ = 
-        //let map = readInit "input.txt" 
         let map = readInit "input.txt" 
-        let positions = runSim map ((0,0),E) 
-        printfn "%A" (positions |> List.length) 
-        //let map = readInit "input.txt" 
-        //let max = findMaxCombo map 
-        //printfn "%A" max 
+        let max = findMaxCombo map 
+        printfn "%A" max 
         Console.ReadKey()
         //let map = readInit "input.txt" 
         //let positions = runSim map ((0,0),E)  
