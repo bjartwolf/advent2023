@@ -29,6 +29,7 @@ module Input =
     let West = (0,-1)
     type Direction = N|S|E|W
     type Position = int*int // kan lage record 
+    type Positions = Position list
     type Beam = Position * Direction 
     type Beams = Beam list
 
@@ -47,7 +48,6 @@ module Input =
 
     let eval (map:Map) (beam: Beam): Beam list =
         let p,d = beam
-        let (y,x) = p
         let tile = lookup map p 
         match tile with
             | None -> []
@@ -55,6 +55,37 @@ module Input =
                                 | '.' -> [beam]
                                 | '-' when d = E || d = W -> [beam]
                                 | '-' when d = S || d = N -> [(p,E);(p,W)]
+                                | '|' when d = S || d = N -> [beam]
+                                | '|' when d = E || d = W -> [(p,S);(p,N)]
+                                | '/' when d = E -> [(p,S)]
+                                | '/' when d = N -> [(p,W)]
+                                | '/' when d = W -> [(p,N)]
+                                | '/' when d = S -> [(p,E)]
+                                | '\\' when d = S -> [(p,W)]
+                                | '\\' when d = N -> [(p,E)]
+                                | '\\' when d = W -> [(p,S)]
+                                | '\\' when d = E -> [(p,N)]
+                                | _ -> failwith "No such position"
+
+    let runSim (map: Map) : Positions =
+        let mapEval = eval map
+        let initialBeam = ((0,0),E)
+        let rec innerSim (beams: Beams) (positions: Positions) : Beams*Positions =
+            match beams with
+                | [] -> beams, positions 
+                | beams -> let nextBeams = beams |> List.collect mapEval 
+                                                 |> List.map move      
+                           let nextPositions = nextBeams |> List.map (fun (b,_) -> b)  // when did i filter these
+                           innerSim nextBeams (positions @ nextPositions)
+        innerSim [initialBeam] [] |> snd 
+
+    [<Fact>]
+    let testRunMap () = 
+        let map = readInit "testinput.txt" 
+        let positions = runSim map  
+        printfn "%A" positions
+        Assert.Equal(10, map.Length) 
+
 
     [<Fact>]
     let testMove() = 
