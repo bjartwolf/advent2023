@@ -68,18 +68,17 @@ module Program =
     let runSim (map: Map) (initialBeam: Beam)  : Positions =
         let mapEval = eval map 
         
-        let rec innerSim (beams: Beams) (cycleMap: Beams): Beams =
-            if List.isEmpty beams then 
+        let rec innerSim (beams: Set<Beam>) (cycleMap: Set<Beam>): Set<Beam> =
+            if Set.isEmpty beams then 
                 cycleMap 
             else 
-               let movedBeams = beams |> List.map move      
-               let evaledBeams = movedBeams |> List.collect mapEval |> List.distinct 
-               let newBeams = evaledBeams |> List.filter (fun beam -> not (List.contains beam cycleMap)) 
-
-               innerSim newBeams (cycleMap @ newBeams) 
-        let firstEval = mapEval initialBeam 
+               let movedBeams = beams |> Set.map move 
+               let evaledBeams = movedBeams |> Set.map mapEval |> Seq.collect id |> Set.ofSeq
+               let newBeams = Set.difference evaledBeams cycleMap
+               innerSim newBeams (Set.union cycleMap newBeams) 
+        let firstEval = mapEval initialBeam |> Set.ofList
         let beams = innerSim firstEval firstEval 
-        beams |> List.map (fun (b,d) -> b) |> List.distinct 
+        beams |> Seq.map (fun (b,d) -> b) |> Seq.distinct  |> List.ofSeq
 
 
     let findCombos (map: Map): Beam list =
