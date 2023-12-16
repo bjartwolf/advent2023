@@ -19,8 +19,9 @@ module Input =
         [for line in m do
             line |> String.Concat |> printfn "%A"
         ]
+
     
-    let (+) (x1, y1) (x2, y2) = (x1 + x2, y1 + y2)
+    let (+) (a1, b1) (a2, b2) = (a1 + a2, b1 + b2)
     // alle posisjoner i y, der y er negativ akse og x
     let North = (-1,0)
     let South = (1,0)
@@ -37,6 +38,23 @@ module Input =
             | E -> (p+East, d) 
             | W -> (p+West, d) 
             | S -> (p+South, d) 
+
+    let lookup (m:Map) ((y,x): Position) : Char option =
+        if (y < 0 || y > m.Length - 1 || x < 0 || x > m[0].Length - 1) then
+            None
+        else
+           Some (m[y][x])
+
+    let eval (map:Map) (beam: Beam): Beam list =
+        let p,d = beam
+        let (y,x) = p
+        let tile = lookup map p 
+        match tile with
+            | None -> []
+            | Some tile -> match tile with 
+                                | '.' -> [beam]
+                                | '-' when d = E || d = W -> [beam]
+                                | '-' when d = S || d = N -> [(p,E);(p,W)]
 
     [<Fact>]
     let testMove() = 
