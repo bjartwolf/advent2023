@@ -89,30 +89,36 @@ module Input =
                 | [] -> beams, positions 
                 | beams -> 
                            let movedBeams = beams |> List.map move      
-                           let evaledBeams = movedBeams |> List.collect mapEval 
-                           printfn "%A" evaledBeams.Length
+                           let evaledBeams = movedBeams |> List.collect mapEval |> List.distinct
+                           printfn "%A" evaledBeams
                            //if evaledBeams.IsEmpty then (beams, positions)
                            let prevPositions = beams |> List.map (fun (b,_) -> b)  // eval eats the empty ones. 
 
                            let currentBeamSet = prevPositions |> Set.ofList
                            // check if in cyclemap
                            if (List.contains currentBeamSet cycleMap) then  
-                                beams, positions 
+                                beams, positions @ prevPositions
                            else 
-                               prettyPrintPositions map positions |> ignore 
-                               printfn "%A" evaledBeams
+                               //prettyPrintPositions map positions |> ignore 
+                               //printfn "%A" evaledBeams
                                innerSim evaledBeams (positions @ prevPositions) (cycleMap @ [currentBeamSet]) 
-        innerSim [initialBeam] [] [Set.empty] |> snd 
+        let firstEval = mapEval initialBeam
+        innerSim firstEval [] [Set.empty] |> snd 
 
     [<Fact>]
     let testRunMap () = 
         let map = readInit "testinput.txt" 
         let positions = runSim map  
-        prettyPrint map |> ignore
-        prettyPrintPositions map positions |> ignore
-        printfn "%A" positions
-        printfn "%A" positions.Length
+        printfn "%A" (positions |> List.distinct |> List.length)
+        Assert.Equal(46, positions |> List.distinct |> List.length)
         Assert.Equal(10, map.Length) 
+
+    [<Fact>]
+    let testRunMapReal () = 
+        let map = readInit "input.txt" 
+        let positions = runSim map  
+        printfn "%A" (positions |> List.distinct |> List.length)
+        Assert.Equal(110, map.Length) 
 
 
     [<Fact>]
