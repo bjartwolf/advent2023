@@ -31,15 +31,15 @@ module Program =
     let West = (0,-1)
     type Direction = N|S|E|W
     type Position = int*int // kan lage record 
-    type Positions = Set<Position>
+    type Positions = Position list
     type Beam = Position * Direction 
-    type Beams = Set<Beam>
+    type Beams = Beam list
 
     let prettyPrintPositions (m: Map) (positions: Positions) =
         printfn "***"
         [for y in 0 .. m.Length - 1 do
             for x in 0 .. m[0].Length - 1 do
-                if Set.contains (y,x) positions then
+                if List.contains (y,x) positions then
                     printf "X"
                 else
                     printf "."
@@ -84,25 +84,26 @@ module Program =
         // missing cycle detection 
         // hvis vi har sett alle beamene før er det vel en sykel...
         let mapEval = eval map 
-        let mapEvalSet (b: Beam): (Set<Beam>) = mapEval b |> Set.ofList
         
-        let rec innerSim (beams: Beams) (positions: Positions) (cycleMap: Set<Beam> ): Beams*Positions =
-            if Set.isEmpty beams then 
-                beams, positions 
+        let rec innerSim (beams: Beams) (cycleMap: Beams): Beams =
+            if List.isEmpty beams then 
+                cycleMap 
             else 
-               let movedBeams = beams |> Set.map move      
-               let evaledBeams = movedBeams |> Set.map mapEvalSet |> Set.unionMany
+               let movedBeams = beams |> List.map move      
+               let evaledBeams = movedBeams |> List.collect mapEval |> List.distinct 
                //printfn "%A" evaledBeams
-               let prevPositions = beams |> Set.map (fun (b,_) -> b)  // eval eats the empty ones. 
+               let prevPositions = beams |> List.map (fun (b,_) -> b)  // eval eats the empty ones. 
 
                //prettyPrintPositions map positions 
                // check if all beams have been in this position before
-               if (evaledBeams |> Set.forall (fun beam -> Set.contains beam cycleMap)) then  
-                    evaledBeams, Set.union positions prevPositions
+               if (evaledBeams |> List.forall (fun beam -> List.contains beam cycleMap)) then  
+                    cycleMap 
                else 
-                   innerSim evaledBeams (Set.union positions prevPositions) (Set.union cycleMap evaledBeams) 
-        let firstEval = mapEval initialBeam |> Set.ofList
-        innerSim firstEval Set.empty Set.empty |> snd 
+                   innerSim evaledBeams (List.distinct (cycleMap @ evaledBeams)) 
+        let firstEval = mapEval initialBeam 
+        let beams = innerSim firstEval firstEval 
+        beams |> List.map (fun (b,d) -> b) |> List.distinct 
+
 
     let findCombos (map: Map): Beam list =
         let max = map.Length - 1
@@ -117,7 +118,7 @@ module Program =
 
     let findMaxCombo (map: Map) : int = 
         let combos = findCombos map |> List.toArray 
-        let sim (x:Beam) = runSim map x |> Set.count
+        let sim (x:Beam) = runSim map x |> List.length
         combos |> PSeq.map sim |> Seq.toList |>Seq.max
 
     [<Fact>]
@@ -130,16 +131,16 @@ module Program =
     let testRunMap () = 
         let map = readInit "testinput.txt" 
         let positions = runSim map ((0,0),E) 
-        printfn "%A" (positions |> Set.count)
-        Assert.Equal(46, positions |> Set.count)
+        printfn "%A" (positions |> List.length)
+        Assert.Equal(46, positions |> List.length)
         Assert.Equal(10, map.Length) 
 
     [<Fact>]
     let testRunMapReal () = 
         let map = readInit "input.txt" 
         let positions = runSim map ((0,0),E) 
-        printfn "%A" (positions |> Set.count) 
-        Assert.Equal(110, map.Length) 
+        printfn "%A" (positions |> List.length) 
+        Assert.Equal(7623, map.Length) 
 
 
     [<Fact>]
@@ -156,8 +157,11 @@ module Program =
     let [<EntryPoint>] main _ = 
         //let map = readInit "input.txt" 
         let map = readInit "input.txt" 
-        let max = findMaxCombo map 
-        printfn "%A" max 
+        let positions = runSim map ((0,0),E) 
+        printfn "%A" (positions |> List.length) 
+        //let map = readInit "input.txt" 
+        //let max = findMaxCombo map 
+        //printfn "%A" max 
         Console.ReadKey()
         //let map = readInit "input.txt" 
         //let positions = runSim map ((0,0),E)  
