@@ -1,3 +1,6 @@
+open FSharp.Collections.ParallelSeq
+
+
 module Program =
     open System
     open System.IO
@@ -77,13 +80,12 @@ module Program =
                                 | '\\' when d = E -> [(p,S)]
                                 | _ -> failwith "No such position"
 
-    let runSim (map: Map) : Positions =
+    let runSim (map: Map) (initialBeam: Beam)  : Positions =
         // missing cycle detection 
         // hvis vi har sett alle beamene før er det vel en sykel...
         let mapEval = eval map 
         let mapEvalSet (b: Beam): (Set<Beam>) = mapEval b |> Set.ofList
         
-        let initialBeam = ((0,0),E)
         let rec innerSim (beams: Beams) (positions: Positions) (cycleMap: Set<Beam> list): Beams*Positions =
             if Set.isEmpty beams then 
                 beams, positions 
@@ -101,10 +103,32 @@ module Program =
         let firstEval = mapEval initialBeam |> Set.ofList
         innerSim firstEval Set.empty [Set.empty] |> snd 
 
+    let findCombos (map: Map): Beam list =
+        let max = map.Length - 1
+        let size = [0 .. max]
+        [
+            for x in size do
+                yield (0,x),S
+                yield (max,x),N
+                yield (x,0),E 
+                yield (x,max),W  
+        ]
+
+    let findMaxCombo (map: Map) : int = 
+        let combos = findCombos map |> List.toArray 
+        let sim (x:Beam) = runSim map x |> Set.count
+        combos |> PSeq.map sim |> Seq.toList |>Seq.max
+
+    [<Fact>]
+    let testMapMax () = 
+        let map = readInit "testinput.txt" 
+        let max = findMaxCombo map
+        Assert.Equal(51, max)
+
     [<Fact>]
     let testRunMap () = 
         let map = readInit "testinput.txt" 
-        let positions = runSim map  
+        let positions = runSim map ((0,0),E) 
         printfn "%A" (positions |> Set.count)
         Assert.Equal(46, positions |> Set.count)
         Assert.Equal(10, map.Length) 
@@ -112,7 +136,7 @@ module Program =
     [<Fact>]
     let testRunMapReal () = 
         let map = readInit "input.txt" 
-        let positions = runSim map  
+        let positions = runSim map ((0,0),E) 
         printfn "%A" (positions |> Set.count) 
         Assert.Equal(110, map.Length) 
 
@@ -130,8 +154,11 @@ module Program =
 
     let [<EntryPoint>] main _ = 
         let map = readInit "input.txt" 
-        let positions = runSim map  
-        printfn "%A" (positions |> Set.count) 
+        let max = findMaxCombo map 
+        printfn "%A" max 
         Console.ReadKey()
+        //let map = readInit "input.txt" 
+        //let positions = runSim map ((0,0),E)  
+        //printfn "%A" (positions |> Set.count) 
         0
 
