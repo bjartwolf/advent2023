@@ -65,7 +65,7 @@ module Program =
                                 | '\\' when d = E -> [(p,S)]
                                 | _ -> failwith "No such position"
 
-    let runSim (map: Map) (initialBeam: Beam)  : Positions =
+    let runSim (map: Map) (initialBeam: Beam)  : int=
         let mapEval = eval map 
         
         let rec innerSim (beams: Set<Beam>) (cycleMap: Set<Beam>): Set<Beam> =
@@ -78,7 +78,7 @@ module Program =
                innerSim newBeams (Set.union cycleMap newBeams) 
         let firstEval = mapEval initialBeam |> Set.ofList
         let beams = innerSim firstEval firstEval 
-        beams |> Seq.map (fun (b,d) -> b) |> Seq.distinct  |> List.ofSeq
+        beams |> Set.map (fun (b,d) -> b) |> Set.count
 
 
     let findCombos (map: Map): Beam list =
@@ -96,7 +96,7 @@ module Program =
         let combos = findCombos map 
         [
             for combo in combos do
-                let count = runSim map combo |> List.length
+                let count = runSim map combo
                 printfn "%A %A" count combo
                 yield count
         ] |> List.max
@@ -111,16 +111,16 @@ module Program =
     let testRunMap () = 
         let map = readInit "testinput.txt" 
         let positions = runSim map ((0,0),E) 
-        printfn "%A" (positions |> List.length)
-        Assert.Equal(46, positions |> List.length)
+        printfn "%A" (positions )
+        Assert.Equal(46, positions )
         Assert.Equal(10, map.Length) 
 
     [<Fact>]
     let testRunMapReal () = 
         let map = readInit "input.txt" 
         let positions = runSim map ((0,0),E) 
-        printfn "%A" (positions |> List.length) 
-        Assert.Equal(7623, positions.Length) 
+        printfn "%A" (positions ) 
+        Assert.Equal(7623, positions) 
 
 
     [<Fact>]
