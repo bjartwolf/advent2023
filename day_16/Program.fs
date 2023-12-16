@@ -18,10 +18,6 @@ module Program =
             |> Array.toList
             |> List.map (fun x -> x.ToCharArray() |> Array.toList)
 
-    let prettyPrint (m: Map) =
-        [for line in m do
-            line |> String.Concat |> printfn "%A"
-        ]
     
     let (+) (a1, b1) (a2, b2) = (a1 + a2, b1 + b2)
     // alle posisjoner i y, der y er negativ akse og x
@@ -34,17 +30,6 @@ module Program =
     type Positions = Position list
     type Beam = Position * Direction 
     type Beams = Beam list
-
-    let prettyPrintPositions (m: Map) (positions: Positions) =
-        printfn "***"
-        [for y in 0 .. m.Length - 1 do
-            for x in 0 .. m[0].Length - 1 do
-                if List.contains (y,x) positions then
-                    printf "X"
-                else
-                    printf "."
-            printfn ""
-        ]
 
     let move ((p,d): Beam): Beam =
         match d with 
@@ -81,8 +66,6 @@ module Program =
                                 | _ -> failwith "No such position"
 
     let runSim (map: Map) (initialBeam: Beam)  : Positions =
-        // missing cycle detection 
-        // hvis vi har sett alle beamene før er det vel en sykel...
         let mapEval = eval map 
         
         let rec innerSim (beams: Beams) (cycleMap: Beams): Beams =
@@ -93,7 +76,7 @@ module Program =
                let evaledBeams = movedBeams |> List.collect mapEval |> List.distinct 
                let newBeams = evaledBeams |> List.filter (fun beam -> not (List.contains beam cycleMap)) 
 
-               innerSim newBeams (List.distinct (cycleMap @ evaledBeams)) 
+               innerSim newBeams (cycleMap @ newBeams) 
         let firstEval = mapEval initialBeam 
         let beams = innerSim firstEval firstEval 
         beams |> List.map (fun (b,d) -> b) |> List.distinct 
@@ -145,7 +128,6 @@ module Program =
     [<Fact>]
     let test2 () = 
         let map = readInit "testinput.txt" 
-        prettyPrint map |> ignore 
         Assert.Equal(10, map.Length) 
 
     let [<EntryPoint>] main _ = 
