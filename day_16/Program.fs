@@ -1,4 +1,4 @@
-module Input =
+module Program =
     open System
     open System.IO
     open Xunit 
@@ -19,8 +19,6 @@ module Input =
         [for line in m do
             line |> String.Concat |> printfn "%A"
         ]
-
-
     
     let (+) (a1, b1) (a2, b2) = (a1 + a2, b1 + b2)
     // alle posisjoner i y, der y er negativ akse og x
@@ -91,17 +89,14 @@ module Input =
                 beams, positions 
             else 
                let movedBeams = beams |> Set.map move      
-               let evaledBeams = movedBeams |> Set.map mapEvalSet  |> Set.unionMany
-               printfn "%A" evaledBeams
-               //if evaledBeams.IsEmpty then (beams, positions)
+               let evaledBeams = movedBeams |> Set.map mapEvalSet |> Set.unionMany
+               //printfn "%A" evaledBeams
                let prevPositions = beams |> Set.map (fun (b,_) -> b)  // eval eats the empty ones. 
 
-               // check if in cyclemap
+               //prettyPrintPositions map positions 
                if (List.contains evaledBeams cycleMap) then  
-                    beams, Set.union positions prevPositions
+                    evaledBeams, Set.union positions prevPositions
                else 
-                   //prettyPrintPositions map positions |> ignore 
-                   //printfn "%A" evaledBeams
                    innerSim evaledBeams (Set.union positions prevPositions) (cycleMap @ [evaledBeams]) 
         let firstEval = mapEval initialBeam |> Set.ofList
         innerSim firstEval Set.empty [Set.empty] |> snd 
@@ -133,4 +128,10 @@ module Input =
         prettyPrint map |> ignore 
         Assert.Equal(10, map.Length) 
 
-module Program = let [<EntryPoint>] main _ = 0
+    let [<EntryPoint>] main _ = 
+        let map = readInit "input.txt" 
+        let positions = runSim map  
+        printfn "%A" (positions |> Set.count) 
+        Console.ReadKey()
+        0
+
