@@ -94,9 +94,13 @@ module Program =
         ]
 
     let findMaxCombo (map: Map) : int = 
-        let combos = findCombos map |> List.toArray 
-        let sim (x:Beam) = runSim map x |> List.length
-        combos |> PSeq.map sim |> Seq.toList |>Seq.max
+        let combos = findCombos map 
+        [
+            for combo in combos do
+                let count = runSim map combo |> List.length
+                printfn "%A %A" count combo
+                yield count
+        ] |> List.max
 
     [<Fact>]
     let testMapMax () = 
