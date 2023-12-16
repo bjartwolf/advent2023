@@ -91,15 +91,9 @@ module Program =
             else 
                let movedBeams = beams |> List.map move      
                let evaledBeams = movedBeams |> List.collect mapEval |> List.distinct 
-               //printfn "%A" evaledBeams
-               let prevPositions = beams |> List.map (fun (b,_) -> b)  // eval eats the empty ones. 
+               let newBeams = evaledBeams |> List.filter (fun beam -> not (List.contains beam cycleMap)) 
 
-               //prettyPrintPositions map positions 
-               // check if all beams have been in this position before
-               if (evaledBeams |> List.forall (fun beam -> List.contains beam cycleMap)) then  
-                    cycleMap 
-               else 
-                   innerSim evaledBeams (List.distinct (cycleMap @ evaledBeams)) 
+               innerSim newBeams (List.distinct (cycleMap @ evaledBeams)) 
         let firstEval = mapEval initialBeam 
         let beams = innerSim firstEval firstEval 
         beams |> List.map (fun (b,d) -> b) |> List.distinct 
@@ -140,7 +134,7 @@ module Program =
         let map = readInit "input.txt" 
         let positions = runSim map ((0,0),E) 
         printfn "%A" (positions |> List.length) 
-        Assert.Equal(7623, map.Length) 
+        Assert.Equal(7623, positions.Length) 
 
 
     [<Fact>]
