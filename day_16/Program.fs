@@ -3,15 +3,27 @@ module Input =
     open System.IO
     open Xunit 
 
-    let readInit (filePath: string): int list = 
-        use sr = new StreamReader (filePath) 
-        let line = sr.ReadLine()
-        let numbers = line.Split(",")
-        numbers |> Array.map(fun f -> Int32.Parse(f)) |> Array.toList
+    let Empty = '.'
+    let VerticalSplit = '|'
+    let HorizontalSplit = '-'
+    let Mirror1 = '/'
+    let Mirror2 = '\\'
+
+    type Map = char list list
+    let readInit (filePath: string): Map =  
+        File.ReadAllLines filePath
+            |> Array.toList
+            |> List.map (fun x -> x.ToCharArray() |> Array.toList)
+
+    let prettyPrint (m: Map) =
+        [for line in m do
+            line |> String.Concat |> printfn "%A"
+        ]
 
     [<Fact>]
     let test2 () = 
-        let input = readInit "input1.txt" 
-        Assert.Equal(1, input.Length) 
+        let map = readInit "testinput.txt" 
+        prettyPrint map |> ignore 
+        Assert.Equal(10, map.Length) 
 
 module Program = let [<EntryPoint>] main _ = 0
