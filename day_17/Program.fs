@@ -70,7 +70,6 @@ module Program =
             seq {
                 while (visitStack.Count > 0) do
                     let _, cruc, priority = visitStack.TryDequeue()
-                    printfn "%A %A %A " visitStack.Count cruc priority
                     match cruc with 
                         | (col, row, _, _) when col = maxMapCol && row = maxMapRow -> 
                                 yield priority 
@@ -95,7 +94,7 @@ module Program =
     [<Fact>]
     let pathTestReal () = 
         let map = readInit "input2.txt" 
-        Assert.Equal(102, calcMinimalPaths map)
+        Assert.Equal(924, calcMinimalPaths map)
 
 
     [<Fact>]
@@ -114,6 +113,7 @@ module Program =
         Assert.Equal(4, input[0][1]) 
 
     let [<EntryPoint>] main _ =
+ //       let map = readInit "input2.txt" 
         let map = readInit "input2.txt" 
         
         printfn "%A cost" (calcMinimalPaths map)
