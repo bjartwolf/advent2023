@@ -30,11 +30,11 @@ module Program =
         int minsum
 
     type Visit = { NrLeft: int; Cost: int } 
-    type VisitedMap = Dictionary<int*int,Visit list>
+    type VisitedMap = Dictionary<int*int*Dir*int,Visit list>
 
     let hasVisitedCheaper (currentCost: int) (cruc: CrucState) (visited: VisitedMap):bool = 
         let (col,row,dir,m) = cruc 
-        let (found, value) = visited.TryGetValue((col,row))
+        let (found, value) = visited.TryGetValue((col,row,dir,m))
         if (found) then
             value |> List.exists (fun c -> c.Cost < currentCost && c.NrLeft >= m) // if something exists that is cheaper with as many steps left
         else
@@ -46,7 +46,6 @@ module Program =
                                     // left right straigth
                                     | S -> [(col,  row+1,E,3);(col,  row-1,W,3); (col+1,row,S,m-1)] 
                                     | E -> [(col-1,row,N,3)  ;(col+1,row,S,3)  ; (col,  row+1,E,m-1)] 
-                                    //| _ -> [] 
                                     | N -> [(col,  row-1,W,3);(col,  row+1,E,3); (col-1,row,N,m-1)]
                                     | W -> [(col+1,row,S,3)  ;(col-1,row,N,3)  ; (col,  row-1,W,m-1)]
         let maxMapCol, maxMapRow  = map.Length, map[0].Length
@@ -54,12 +53,12 @@ module Program =
 
     let updateVisitMap (c: CrucState) (thisVisit: Visit) (visits: VisitedMap) =
         let (col,row,dir,m) = c
-        let (found, value) = visits.TryGetValue((col,row))
+        let (found, value) = visits.TryGetValue((col,row,dir,m))
         if found then
             let cheaperButFewerStepsLeft = value |> List.filter (fun l -> l.Cost < thisVisit.Cost && l.NrLeft > thisVisit.NrLeft)
-            visits[(col,row)] <- (cheaperButFewerStepsLeft @ [thisVisit]) 
+            visits[(col,row,dir,m)] <- (cheaperButFewerStepsLeft @ [thisVisit]) 
         else
-            visits.Add((col,row), [thisVisit]) 
+            visits.Add((col,row,dir,m), [thisVisit]) 
 
 
     let calcMinimalPaths (map: Map) : int =
@@ -70,22 +69,21 @@ module Program =
         let findMinPathInner () : int =
             seq {
                 while (visitStack.Count > 0) do
-                    let found, cruc, priority = visitStack.TryDequeue()
+                    let _, cruc, priority = visitStack.TryDequeue()
                     printfn "%A %A %A " visitStack.Count cruc priority
                     match cruc with 
                         | (col, row, _, _) when col = maxMapCol && row = maxMapRow -> 
                                 yield priority 
                         | _ -> 
-                            let (col, row, dir,m) = cruc
-                            let visit = { NrLeft = m; Cost = priority }
-                            updateVisitMap cruc visit visited
-                            let nextDirs = nextDirs cruc map 
-                            for next in nextDirs do
-                                 let (nextCol, nextRow,_,_) = next 
+                            let neighbors = nextDirs cruc map 
+                            for next in neighbors do
+                                 let (nextCol, nextRow,_,nextM) = next 
                                  let costOfNext = map[nextCol][nextRow] 
                                  let nextCost = costOfNext + priority 
                                  if not (hasVisitedCheaper nextCost next visited) then 
-                                     visitStack.Enqueue(next, nextCost)
+                                    let visit = { NrLeft = nextM; Cost = nextCost}
+                                    updateVisitMap next visit visited
+                                    visitStack.Enqueue(next, nextCost)
             } |> Seq.head
         visitStack.Enqueue( (0,0,E,3),0 )
         findMinPathInner () 
