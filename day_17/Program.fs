@@ -50,9 +50,12 @@ module Input =
                         // check if this location is in map, then yield nothing, has been seen before. 
                         // or cutoff
                         if (currentCost < cutoff) && (not (hasVisited cruc visited)) then    
-                           yield! findMinPathInner (currentCost + 11) cutoff visited cruc 
-                        else
-                           yield currentCost 
+                           let (col, row, dir,m) = cruc
+                           let nextCol = col + 1
+                           let nextRow = row + 1
+                           let next = (nextCol, nextRow, dir,m)
+                           let costOfNext = map[nextCol][nextRow]
+                           yield! findMinPathInner (currentCost + costOfNext) cutoff visited next 
                         // if not in map, then check its legal directions, only straight if
                         // not moved three can be added later...
             }
@@ -63,7 +66,7 @@ module Input =
     let pathTest () = 
         let map = readInit "testinput.txt" 
         let initialCutoff = initialMinCost map 
-        Assert.Equal(133, calcMinimalPaths initialCutoff map)
+        Assert.Equal(68, calcMinimalPaths initialCutoff map)
 
 
     [<Fact>]
