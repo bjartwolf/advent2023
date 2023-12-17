@@ -69,8 +69,8 @@ module Program =
         let (col,row,dir,m) = c
         let visitedEntry = Map.tryFind (col,row,dir) visits
         match visitedEntry with
-            | Some entry -> let filtered = (entry@ [thisVisit]) |> List.filter (fun l -> l.Cost <= thisVisit.Cost && l.NrLeft >= thisVisit.NrLeft)
-                            Map.add (col,row,dir) filtered visits
+            | Some entry -> let cheaperButHigherCost = entry|> List.filter (fun l -> l.Cost <= thisVisit.Cost && l.NrLeft > thisVisit.NrLeft)
+                            Map.add (col,row,dir) (cheaperButHigherCost @ [thisVisit]) visits
             | None      ->  Map.add (col,row,dir) [thisVisit] visits
 
 
