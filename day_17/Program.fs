@@ -58,14 +58,15 @@ module Program =
     let nextDirs (cruc: CrucState) (map: Map) : CrucState list  =
         let (col, row, dir,m) = cruc
         let allDirs = match dir with
-                                    //| E -> [(col+1,row,S,3)]
-                                    //| S -> [(col,row+1,E,3)]
-                                    | N -> [(col-1, row-1,W,3);(col-1,row+1,E,3);(col-1,row,N,m-1)]
-                                    | E -> [(col-1, row+1,N,3); (col+1,row+1,S,3); (col, row+1,E,m-1)] 
-                                    | S -> [(col+1,row-1,E,3);(col+1,row+1,W,3);(col+1, row,S,m-1)] 
-                                    | W -> [(col-1,row+1,N,3);(col+1,row+1,S,3);(col,row-1,W,m-1)]
+                                    // left right straigth
+                                    | S -> [(col,  row+1,E,3);(col,  row-1,W,3); (col+1,row,S,m-1)] 
+                                    | E -> [(col-1,row,N,3)  ;(col+1,row,S,3)  ; (col,  row+1,E,m-1)] 
+                                    | _ -> []
+                                    //| N -> [(col,  row-1,W,3);(col,  row+1,E,3); (col-1,row,N,m-1)]
+                                    //| W -> [(col+1,row,S,3)  ;(col-1,row,N,3)  ; (col,  row-1,W,m-1)]
         let maxMapCol, maxMapRow  = map.Length, map[0].Length
-        allDirs |> List.filter (fun (col, row,_,m) -> col >= 0 && col < maxMapCol && row >= 0 && row < maxMapRow && m > 0 )
+        //allDirs |> List.filter (fun (col, row,_,m) -> col >= 0 && col < maxMapCol && row >= 0 && row < maxMapRow && m >=0 ) // should make it go left and right
+        allDirs |> List.filter (fun (col, row,_,m) -> col >= 0 && col < maxMapCol && row >= 0 && row < maxMapRow && m >=3 ) // should make it go left and right
 
     let updateVisitMap (c: CrucState) (thisVisit: Visit) (visits: VisitedMap) : VisitedMap =
         let (col,row,dir,m) = c
@@ -96,13 +97,14 @@ module Program =
                         if not (hasVisitedCheaper currentCost cruc visited) then  // må sammenligne med kosten å gå dit? eller spilller det ingen rolle for den er samme for alle
                             let (col, row, dir,m) = cruc
                             // must update the entire list too...
+                            printfn "%A %d" cruc currentCost
                             let visit = { NrLeft = m; Cost = currentCost}
                             let visited' = updateVisitMap cruc visit visited
                             if (currentCost < cutAt ) then 
                                let nextDirs = nextDirs cruc map 
                                for next in nextDirs do
-                                    let (nextCol, nextRow,d,m) = next 
-                                    let costOfNext = map[nextCol][nextRow]
+                                    let (nextCol, nextRow,_,_) = next 
+                                    let costOfNext = map[nextCol][nextRow] // cost of walking to next list
                                     yield! findMinPathInner (currentCost + costOfNext) visited' next 
             }
         findMinPathInner 0 Map.empty (0,0,E,3) 
@@ -110,9 +112,9 @@ module Program =
     [<Fact>]
     let pathTest () = 
         let map = readInit "testinput.txt" 
-        let initialCutoff = initialMinCost map 
-        //Assert.Equal(134, calcMinimalPaths initialCutoff map |> Seq.min)
-        Assert.Equal(102, calcMinimalPaths initialCutoff map |> Seq.min)
+        let initialCutoff = initialMinCost map
+        Assert.Equal(134, calcMinimalPaths 140 map |> Seq.min)
+        //Assert.Equal(102, calcMinimalPaths initialCutoff map |> Seq.min)
 
 
     [<Fact>]
@@ -132,8 +134,12 @@ module Program =
 
     let [<EntryPoint>] main _ =
         let map = readInit "testinput.txt" 
-        let initialCutoff = initialMinCost map 
-        for cost in calcMinimalPaths initialCutoff map do
-            printfn "%A cost" cost
+        let initialCutoff = initialMinCost map
+        Assert.Equal(134, calcMinimalPaths 140 map |> Seq.min)
         0
+        //let map = readInit "testinput.txt" 
+        //let initialCutoff = initialMinCost map 
+        //for cost in calcMinimalPaths initialCutoff map do
+        //    printfn "%A cost" cost
+        //0
 
