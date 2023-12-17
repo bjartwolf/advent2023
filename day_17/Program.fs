@@ -33,17 +33,25 @@ module Program =
         int minsum
 
     // need to add cost and m to this
-    type VisitedMap = Map<(int*int),Dir>
+    // the direction, the number of straight moves left and the totalCost (should return the totalcost and just
+    // not visit it if the cost is higher_
+    // store the location, direction and number of moves left
+    // only cheaper if there are more moves left or some combination with cost...
         
 
     // shouldCutOff (can make a smart cutoff, that counts how many steps ther are as well, to make
     // make sure we cut searches early
 
-    let hasVisited (cruc: CrucState) (visited: VisitedMap):bool = 
-        let (col, row, dir, m) = cruc
-        let visits = Map.tryFind (col,row) visited
+    // billigere OG med færre steg er billigere, så bør kanskje sjekke alle
+    // oppslag og kost med antall flytt 
+    type Visit = { NrLeft: int; Cost: int } 
+    type VisitedMap = Map<int*int*Dir,Visit list>
+
+    let hasVisitedCheaper (currentCost: int) (cruc: CrucState) (visited: VisitedMap):bool = 
+        let (col,row,Dir,m) = cruc 
+        let visits = Map.tryFind (col,row,Dir) visited
         match visits with 
-            | Some visit -> true 
+            | Some costs -> costs |> List.exists (fun c -> c.Cost < currentCost && c.NrLeft >= m)
             | None -> false
 
         // this must calculate the directions left etc later
@@ -57,6 +65,12 @@ module Program =
         let maxMapCol, maxMapRow  = map.Length, map[0].Length
         allDirs |> List.filter (fun (col, row,_,m) -> col >= 0 && col < maxMapCol && row >= 0 && row < maxMapRow && m > 0 )
 
+    let updateVisitMap (c: CrucState) (thisVisit: Visit) (visits: VisitedMap) : VisitedMap =
+        let (col,row,dir,m) = c
+        let visitedEntry = Map.find (col,row,dir) visits
+        let filtered = (visitedEntry@ [thisVisit]) |> List.filter (fun l -> l.Cost <= thisVisit.Cost && l.NrLeft >= thisVisit.NrLeft)
+        Map.add (col,row,dir) filtered visits
+
     [<Fact>]
     let nextDirText () = 
         let map = readInit "testinput.txt" 
@@ -66,7 +80,7 @@ module Program =
     let calcMinimalPaths (initialCutOff: int) (map: Map) : int seq =
         let maxMapCol, maxMapRow  = map.Length - 1, map[0].Length - 1
         let mutable cutAt = initialCutOff 
-        let rec findMinPathInner (currentCost: int) (cutoff: int) (visited:VisitedMap) (cruc: CrucState) : int seq=
+        let rec findMinPathInner (currentCost: int) (visited:VisitedMap) (cruc: CrucState) : int seq=
             seq {
                 match cruc with 
                     | (col, row, _, m) when col = maxMapCol && row = maxMapRow && m <= 3 -> 
@@ -74,18 +88,19 @@ module Program =
                             cutAt <- currentCost
                             yield currentCost 
                     | _ -> 
-                        if not (hasVisited cruc visited) then 
+                        if not (hasVisitedCheaper currentCost cruc visited) then  // må sammenligne med kosten å gå dit? eller spilller det ingen rolle for den er samme for alle
                             let (col, row, dir,m) = cruc
-                            let visited' = Map.add (col,row) dir visited 
-                            if (currentCost < cutoff) then 
+                            // must update the entire list too...
+                            let visit = { NrLeft = m; Cost = currentCost}
+                            let visited' = updateVisitMap cruc visit visited
+                            if (currentCost < cutAt ) then 
                                let nextDirs = nextDirs cruc map 
                                for next in nextDirs do
                                     let (nextCol, nextRow,d,m) = next 
                                     let costOfNext = map[nextCol][nextRow]
-                                    yield! findMinPathInner (currentCost + costOfNext) cutoff visited' next 
+                                    yield! findMinPathInner (currentCost + costOfNext) visited' next 
             }
-
-        findMinPathInner 0 initialCutOff Map.empty (0,0,E,0) 
+        findMinPathInner 0 Map.empty (0,0,E,3) 
 
     [<Fact>]
     let pathTest () = 
