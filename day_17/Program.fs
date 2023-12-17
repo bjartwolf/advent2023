@@ -68,19 +68,15 @@ module Program =
                 match cruc with 
                     | (col, row, _, m) when col = maxMapCol && row = maxMapRow && m <= 3 -> yield currentCost 
                     | _ -> 
-                        // check if this location is in map, then yield nothing, has been seen before. 
-                        // or cutoff
                         if not (hasVisited cruc visited) then 
                             let (col, row, dir,m) = cruc
-                            let visited' = Map.add (col,row) dir visited // any point in updated visited for those we do not visit?
+                            let visited' = Map.add (col,row) dir visited 
                             if (currentCost < cutoff) then 
                                let nextDirs = nextDirs cruc map 
                                for next in nextDirs do
                                     let (nextCol, nextRow,d,m) = next 
                                     let costOfNext = map[nextCol][nextRow]
                                     yield! findMinPathInner (currentCost + costOfNext) cutoff visited' next 
-                            // if not in map, then check its legal directions, only straight if
-                            // not moved three can be added later...
             }
 
         findMinPathInner 0 initialCutOff Map.empty (0,0,E,0) 
