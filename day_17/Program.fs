@@ -61,19 +61,8 @@ module Program =
         else
             visits.Add((col,row), [thisVisit]) 
 
-    let memoize f =
-        let dict = Dictionary<_, _>();
-        fun c ->
-            let exist, value = dict.TryGetValue c
-            match exist with
-            | true -> value
-            | _ -> 
-                let value = f c
-                dict.Add(c, value)
-                value
 
     let calcMinimalPaths (map: Map) : int =
-        let updateVisitMapM = memoize updateVisitMap
         let maxMapCol, maxMapRow  = map.Length - 1, map[0].Length - 1
         let visited = Dictionary()
         let visitStack = new PriorityQueue<CrucState, int>()
@@ -82,17 +71,18 @@ module Program =
             seq {
                 while (visitStack.Count > 0) do
                     let found, cruc, priority = visitStack.TryDequeue()
+                    printfn "%A %A %A " visitStack.Count cruc priority
                     match cruc with 
                         | (col, row, _, _) when col = maxMapCol && row = maxMapRow -> 
                                 yield priority 
                         | _ -> 
                             let (col, row, dir,m) = cruc
                             let visit = { NrLeft = m; Cost = priority }
-                            updateVisitMapM cruc visit visited
+                            updateVisitMap cruc visit visited
                             let nextDirs = nextDirs cruc map 
                             for next in nextDirs do
                                  let (nextCol, nextRow,_,_) = next 
-                                 let costOfNext = map[nextCol][nextRow] // cost of walking to next list
+                                 let costOfNext = map[nextCol][nextRow] 
                                  let nextCost = costOfNext + priority 
                                  if not (hasVisitedCheaper nextCost next visited) then 
                                      visitStack.Enqueue(next, nextCost)
@@ -127,8 +117,7 @@ module Program =
         Assert.Equal(4, input[0][1]) 
 
     let [<EntryPoint>] main _ =
-        //let map = readInit "input2.txt" 
-        let map = readInit "testinput.txt" 
+        let map = readInit "input2.txt" 
         
         printfn "%A cost" (calcMinimalPaths map)
         Console.ReadKey()
