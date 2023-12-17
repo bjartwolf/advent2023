@@ -67,9 +67,12 @@ module Program =
 
     let updateVisitMap (c: CrucState) (thisVisit: Visit) (visits: VisitedMap) : VisitedMap =
         let (col,row,dir,m) = c
-        let visitedEntry = Map.find (col,row,dir) visits
-        let filtered = (visitedEntry@ [thisVisit]) |> List.filter (fun l -> l.Cost <= thisVisit.Cost && l.NrLeft >= thisVisit.NrLeft)
-        Map.add (col,row,dir) filtered visits
+        let visitedEntry = Map.tryFind (col,row,dir) visits
+        match visitedEntry with
+            | Some entry -> let filtered = (entry@ [thisVisit]) |> List.filter (fun l -> l.Cost <= thisVisit.Cost && l.NrLeft >= thisVisit.NrLeft)
+                            Map.add (col,row,dir) filtered visits
+            | None      ->  Map.add (col,row,dir) [thisVisit] visits
+
 
     [<Fact>]
     let nextDirText () = 
@@ -106,7 +109,7 @@ module Program =
     let pathTest () = 
         let map = readInit "testinput.txt" 
         let initialCutoff = initialMinCost map 
-        Assert.Equal(68, calcMinimalPaths initialCutoff map |> Seq.min)
+        Assert.Equal(102, calcMinimalPaths initialCutoff map |> Seq.min)
 
 
     [<Fact>]
