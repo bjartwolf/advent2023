@@ -62,8 +62,8 @@ module Program =
                                     | S -> [(col,  row+1,E,3);(col,  row-1,W,3); (col+1,row,S,m-1)] 
                                     | E -> [(col-1,row,N,3)  ;(col+1,row,S,3)  ; (col,  row+1,E,m-1)] 
                                     | _ -> []
-                                    //| N -> [(col,  row-1,W,3);(col,  row+1,E,3); (col-1,row,N,m-1)]
-                                    //| W -> [(col+1,row,S,3)  ;(col-1,row,N,3)  ; (col,  row-1,W,m-1)]
+//                                    | N -> [(col,  row-1,W,3);(col,  row+1,E,3); (col-1,row,N,m-1)]
+//                                    | W -> [(col+1,row,S,3)  ;(col-1,row,N,3)  ; (col,  row-1,W,m-1)]
         let maxMapCol, maxMapRow  = map.Length, map[0].Length
         //allDirs |> List.filter (fun (col, row,_,m) -> col >= 0 && col < maxMapCol && row >= 0 && row < maxMapRow && m >=0 ) // should make it go left and right
         allDirs |> List.filter (fun (col, row,_,m) -> col >= 0 && col < maxMapCol && row >= 0 && row < maxMapRow && m >=3 ) // should make it go left and right
@@ -97,7 +97,7 @@ module Program =
                         if not (hasVisitedCheaper currentCost cruc visited) then  // må sammenligne med kosten å gå dit? eller spilller det ingen rolle for den er samme for alle
                             let (col, row, dir,m) = cruc
                             // must update the entire list too...
-                            printfn "%A %d" cruc currentCost
+                            //printfn "%A %d" cruc currentCost
                             let visit = { NrLeft = m; Cost = currentCost}
                             let visited' = updateVisitMap cruc visit visited
                             if (currentCost < cutAt ) then 
@@ -134,12 +134,12 @@ module Program =
 
     let [<EntryPoint>] main _ =
         let map = readInit "testinput.txt" 
-        let initialCutoff = initialMinCost map
-        Assert.Equal(134, calcMinimalPaths 140 map |> Seq.min)
+        let initialCutoff = initialMinCost map 
+        for cost in calcMinimalPaths initialCutoff map do
+            printfn "%A cost" cost
         0
         //let map = readInit "testinput.txt" 
         //let initialCutoff = initialMinCost map 
-        //for cost in calcMinimalPaths initialCutoff map do
         //    printfn "%A cost" cost
         //0
 
