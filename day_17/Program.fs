@@ -33,7 +33,7 @@ module Program =
     type VisitedMap = Dictionary<int*int*int,Visit list>
 
     let hasVisitedCheaper (currentCost: int) (cruc: CrucState) (visited: VisitedMap):bool = 
-        let (col,row,dir,m) = cruc 
+        let (col,row,_,m) = cruc 
         let (found, value) = visited.TryGetValue((col,row,m))
         if (found) then
             value |> List.exists (fun c -> c.Cost < currentCost && c.NrLeft >= m) // if something exists that is cheaper with as many steps left
@@ -41,7 +41,7 @@ module Program =
             false
 
     let nextDirs (cruc: CrucState) (map: Map) : CrucState list  =
-        let (col, row, dir,m) = cruc
+        let (col, row,dir, m) = cruc
         let allDirs = match dir with
                                     // left right straigth
                                     | S -> [(col,  row+1,E,3);(col,  row-1,W,3); (col+1,row,S,m-1)] 
@@ -69,19 +69,19 @@ module Program =
         let findMinPathInner () : int =
             seq {
                 while (visitStack.Count > 0) do
-                    let _, cruc, priority = visitStack.TryDequeue()
-                    match cruc with 
-                        | (col, row, _, _) when col = maxMapCol && row = maxMapRow -> 
-                                yield priority 
-                        | _ -> 
-                            let neighbors = nextDirs cruc map 
-                            let cheapestNeighbors = neighbors |> List.filter (fun (col,row,d,m) -> not (hasVisitedCheaper (priority+map[col][row]) (col,row,d,m) visited) )
-                            for neighbor in cheapestNeighbors do
-                                let (col,row,d,m)  = neighbor
-                                let nextCost = map[col][row] + priority 
-                                let visit = { NrLeft = m; Cost = nextCost}
-                                updateVisitMap (col,row,d,m) visit visited 
-                                visitStack.Enqueue((col,row,d,m), nextCost)
+                    let _, current, priority = visitStack.TryDequeue()
+                    let col, row, d , m = current 
+                    if col = maxMapCol && row = maxMapRow then 
+                       yield priority 
+                    else
+                        let neighbors = nextDirs current map 
+                        let cheapestNeighbors = neighbors |> List.filter (fun (col,row,d,m) -> not (hasVisitedCheaper (priority+map[col][row]) (col,row,d,m) visited) )
+                        for neighbor in cheapestNeighbors do
+                            let (col,row,d,m)  = neighbor
+                            let nextCost = map[col][row] + priority 
+                            let visit = { NrLeft = m; Cost = nextCost}
+                            visitStack.Enqueue((col,row,d,m), nextCost)
+                            updateVisitMap current visit visited 
             } |> Seq.head
         visitStack.Enqueue( (0,0,E,3),0 )
         findMinPathInner () 
