@@ -64,8 +64,7 @@ module Program =
                                     | N -> [(col,  row-1,W,3);(col,  row+1,E,3); (col-1,row,N,m-1)]
                                     | W -> [(col+1,row,S,3)  ;(col-1,row,N,3)  ; (col,  row-1,W,m-1)]
         let maxMapCol, maxMapRow  = map.Length, map[0].Length
-        allDirs |> List.filter (fun (col, row,_,m) -> col >= 0 && col < maxMapCol && row >= 0 && row < maxMapRow && m >=0 ) // should make it go left and right
-        //allDirs |> List.filter (fun (col, row,_,m) -> col >= 0 && col < maxMapCol && row >= 0 && row < maxMapRow && m >=3 ) // should make it go left and right
+        allDirs |> List.filter (fun (col, row,_,m) -> col >= 0 && col < maxMapCol && row >= 0 && row < maxMapRow && m >=1 ) // should make it go left and right
 
     let updateVisitMap (c: CrucState) (thisVisit: Visit) (visits: VisitedMap) : VisitedMap =
         let (col,row,dir,m) = c
@@ -115,8 +114,14 @@ module Program =
     let pathTest () = 
         let map = readInit "testinput.txt" 
         let initialCutoff = initialMinCost map
-        //Assert.Equal(134, calcMinimalPaths 140 map |> Seq.min)
         Assert.Equal(102, calcMinimalPaths initialCutoff map |> Seq.min)
+
+    //[<Fact>]
+    //let pathTestReal () = 
+    //    let map = readInit "input2.txt" 
+    //    let initialCutoff = initialMinCost map
+    //    Assert.Equal(102, calcMinimalPaths initialCutoff map |> Seq.min)
+
 
 
     [<Fact>]
@@ -135,10 +140,11 @@ module Program =
         Assert.Equal(4, input[0][1]) 
 
     let [<EntryPoint>] main _ =
-        let map = readInit "testinput.txt" 
+        let map = readInit "input2.txt" 
         let initialCutoff = initialMinCost map 
         for cost in calcMinimalPaths initialCutoff map do
             printfn "%A cost" cost
+        Console.ReadKey()
         0
         //let map = readInit "testinput.txt" 
         //let initialCutoff = initialMinCost map 
