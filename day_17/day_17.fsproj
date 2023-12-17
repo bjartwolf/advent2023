@@ -11,7 +11,7 @@
   <ItemGroup>
 
     <Compile Include="Program.fs" />
-    <Content Include="input1.txt">
+    <Content Include="testinput.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="input2.txt">
