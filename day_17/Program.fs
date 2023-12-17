@@ -12,8 +12,14 @@ module Input =
         File.ReadAllLines filePath
             |> Array.map (fun l -> l.ToCharArray() |> Array.map (fun c -> int (c.ToString())))
 
-    type Dir = Left | Straight | Right
+    type Dir = N | S | E | W 
 
+    // y, x, Direction and turns forward
+    // skip turns forward first and see if it easier and then add that logic
+    // should find a cheaper way, that should terminate faster as everything should become expensive? Or not.
+
+    type CrucState = int*int*Dir*int
+    
     // low startofcost initially to avoid deep searches
     let initialMinCost (map: Map): int =
         let matrix = map |> Array.map (fun r -> r |> Array.map float)
@@ -24,7 +30,41 @@ module Input =
         let sum1 = diag.Sum() + diag2.Sum()
         let sum2 = diag.Sum() + diag3.Sum()
         let minsum = min sum1 sum2
-        int minsum 
+        int minsum
+
+    type VisitedMap = Map<(int*int),Dir>
+        
+    let hasVisited (cruc: CrucState) (visited: VisitedMap):bool = 
+        false
+
+    // naive visited to begin with, can add that logic too
+    let calcMinimalPaths (initialCutOff: int) (map: Map) : int =
+        let maxMapCol = map.Length - 1
+        let maxMapRow = map[0].Length - 1
+        
+        let rec findMinPathInner (currentCost: int) (cutoff: int) (visited:VisitedMap) (cruc: CrucState) : int seq=
+            seq {
+                match cruc with 
+                    | (col, row, _, m) when col = maxMapCol && row = maxMapRow && m <= 3 -> yield currentCost 
+                    | _ -> 
+                        // check if this location is in map, then yield nothing, has been seen before. 
+                        // or cutoff
+                        if (currentCost < cutoff) && (not (hasVisited cruc visited)) then    
+                           yield! findMinPathInner (currentCost + 11) cutoff visited cruc 
+                        else
+                           yield currentCost 
+                        // if not in map, then check its legal directions, only straight if
+                        // not moved three can be added later...
+            }
+
+        findMinPathInner 0 initialCutOff Map.empty (0,0,E,0) |> Seq.min
+
+    [<Fact>]
+    let pathTest () = 
+        let map = readInit "testinput.txt" 
+        let initialCutoff = initialMinCost map 
+        Assert.Equal(133, calcMinimalPaths initialCutoff map)
+
 
     [<Fact>]
     let sumsTest () = 
