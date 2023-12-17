@@ -32,6 +32,7 @@ module Program =
         let minsum = min sum1 sum2
         int minsum
 
+    // need to add cost and m to this
     type VisitedMap = Map<(int*int),Dir>
         
 
@@ -40,8 +41,10 @@ module Program =
 
     let hasVisited (cruc: CrucState) (visited: VisitedMap):bool = 
         let (col, row, dir, m) = cruc
-        if Map.containsKey (col,row) visited then true
-        else false
+        let visits = Map.tryFind (col,row) visited
+        match visits with 
+            | Some visit -> true 
+            | None -> false
 
         // this must calculate the directions left etc later
     let nextDirs (cruc: CrucState) (map: Map) : CrucState list  =
