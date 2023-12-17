@@ -14,21 +14,8 @@ module Program =
 
     type Dir = N | S | E | W 
 
-
     type CrucState = int*int*Dir*int
     
-    // low startofcost initially to avoid deep searches
-    let initialMinCost (map: Map): int =
-        let matrix = map |> Array.map (fun r -> r |> Array.map float)
-                         |> DenseMatrix.OfRowArrays 
-        let diag = matrix.Diagonal().MapIndexed(fun i n -> if i = 0 then 0.0 else n)
-        let diag2 = matrix.RemoveColumn(0).Diagonal()
-        let diag3 = matrix.RemoveRow(0).Diagonal()
-        let sum1 = diag.Sum() + diag2.Sum()
-        let sum2 = diag.Sum() + diag3.Sum()
-        let minsum = min sum1 sum2
-        int minsum
-
     type Visit = { NrLeft: int; Cost: int } 
     type VisitedMap = Dictionary<int*int*int,Visit list>
 
@@ -60,7 +47,6 @@ module Program =
         else
             visits.Add((col,row,m), [thisVisit]) 
 
-
     let calcMinimalPaths (map: Map) : int =
         let maxMapCol, maxMapRow  = map.Length - 1, map[0].Length - 1
         let visited = Dictionary()
@@ -75,8 +61,8 @@ module Program =
                        yield priority 
                     else
                         let neighbors = nextDirs current map 
-                        let cheapestNeighbors = neighbors |> List.filter (fun (col,row,d,m) -> not (hasVisitedCheaper (priority+map[col][row]) (col,row,d,m) visited) )
-                        for neighbor in cheapestNeighbors do
+                        let notSeenCheaper = neighbors |> List.filter (fun (col,row,d,m) -> not (hasVisitedCheaper (priority+map[col][row]) (col,row,d,m) visited) )
+                        for neighbor in notSeenCheaper do
                             let (col,row,d,m)  = neighbor
                             let nextCost = map[col][row] + priority 
                             let visit = { NrLeft = m; Cost = nextCost}
@@ -95,13 +81,6 @@ module Program =
     let pathTestReal () = 
         let map = readInit "input2.txt" 
         Assert.Equal(924, calcMinimalPaths map)
-
-
-    [<Fact>]
-    let sumsTest () = 
-        let input = readInit "testinput.txt" 
-        Assert.Equal(133, initialMinCost input)
-
 
     [<Fact>]
     let test2 () = 
