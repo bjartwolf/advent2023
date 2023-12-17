@@ -34,13 +34,30 @@ module Input =
 
     type VisitedMap = Map<(int*int),Dir>
         
+
+    // shouldCutOff (can make a smart cutoff, that counts how many steps ther are as well, to make
+    // make sure we cut searches early
+
     let hasVisited (cruc: CrucState) (visited: VisitedMap):bool = 
-        false
+        let (col, row, dir, m) = cruc
+        if Map.containsKey (col,row) visited then true
+        else false
+
+        // this must calculate the directions left etc later
+    let nextDirs (cruc: CrucState) (map: Map) : CrucState list  =
+        let (col, row, dir,m) = cruc
+        let allDirs = match dir with
+                                    | N -> [(col, row-1,W,3);(col,row+1,E,3);(col-1,row,N,m-1)]
+                                    | E -> [(col-1, row,N,3); (col+1,row,S,3); (col, row+1,E,m-1)] 
+                                    | S -> [(col,row-1,E,3);(col,row+1,W,3);(col+1, row,S,m-1)] 
+                                    | W -> [(col-1,row,N,3);(col+1,row,S,3);(col,row-1,W,m-1)]
+        let maxMapCol, maxMapRow  = map.Length, map[0].Length
+        allDirs |> List.filter (fun (col, row,_,m) -> col > 0 && col < maxMapCol && row > 0 && row < maxMapRow && m > 0 )
+
 
     // naive visited to begin with, can add that logic too
     let calcMinimalPaths (initialCutOff: int) (map: Map) : int =
-        let maxMapCol = map.Length - 1
-        let maxMapRow = map[0].Length - 1
+        let maxMapCol, maxMapRow  = map.Length - 1, map[0].Length - 1
         
         let rec findMinPathInner (currentCost: int) (cutoff: int) (visited:VisitedMap) (cruc: CrucState) : int seq=
             seq {
@@ -49,15 +66,17 @@ module Input =
                     | _ -> 
                         // check if this location is in map, then yield nothing, has been seen before. 
                         // or cutoff
-                        if (currentCost < cutoff) && (not (hasVisited cruc visited)) then    
-                           let (col, row, dir,m) = cruc
-                           let nextCol = col + 1
-                           let nextRow = row + 1
-                           let next = (nextCol, nextRow, dir,m)
-                           let costOfNext = map[nextCol][nextRow]
-                           yield! findMinPathInner (currentCost + costOfNext) cutoff visited next 
-                        // if not in map, then check its legal directions, only straight if
-                        // not moved three can be added later...
+                        if not (hasVisited cruc visited) then 
+                            let (col, row, dir,m) = cruc
+                            let visited' = Map.add (col,row) dir visited // any point in updated visited for those we do not visit?
+                            if (currentCost < cutoff) then 
+                               let nextDirs = nextDirs cruc map 
+                               for next in nextDirs do
+                                    let (nextCol, nextRow,d,m) = next 
+                                    let costOfNext = map[nextCol][nextRow]
+                                    yield! findMinPathInner (currentCost + costOfNext) cutoff visited' next 
+                            // if not in map, then check its legal directions, only straight if
+                            // not moved three can be added later...
             }
 
         findMinPathInner 0 initialCutOff Map.empty (0,0,E,0) |> Seq.min
