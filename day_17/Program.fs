@@ -2,7 +2,7 @@ open MathNet.Numerics.LinearAlgebra
 open MathNet.Numerics.LinearAlgebra.Double
 
 
-module Input =
+module Program =
     open System
     open System.IO
     open Xunit 
@@ -60,7 +60,7 @@ module Input =
         Assert.Equal<CrucState list>([(1,0,S,3);(0,1,E,2)], nextDirs (0,0,E,3) map)
 
     // naive visited to begin with, can add that logic too
-    let calcMinimalPaths (initialCutOff: int) (map: Map) : int =
+    let calcMinimalPaths (initialCutOff: int) (map: Map) : int seq =
         let maxMapCol, maxMapRow  = map.Length - 1, map[0].Length - 1
         
         let rec findMinPathInner (currentCost: int) (cutoff: int) (visited:VisitedMap) (cruc: CrucState) : int seq=
@@ -83,13 +83,13 @@ module Input =
                             // not moved three can be added later...
             }
 
-        findMinPathInner 0 initialCutOff Map.empty (0,0,E,0) |> Seq.min
+        findMinPathInner 0 initialCutOff Map.empty (0,0,E,0) 
 
     [<Fact>]
     let pathTest () = 
         let map = readInit "testinput.txt" 
         let initialCutoff = initialMinCost map 
-        Assert.Equal(68, calcMinimalPaths initialCutoff map)
+        Assert.Equal(68, calcMinimalPaths initialCutoff map |> Seq.min)
 
 
     [<Fact>]
@@ -107,4 +107,10 @@ module Input =
         Assert.Equal(3, input[12][12]) 
         Assert.Equal(4, input[0][1]) 
 
-module Program = let [<EntryPoint>] main _ = 0
+    let [<EntryPoint>] main _ =
+        let map = readInit "testinput.txt" 
+        let initialCutoff = initialMinCost map 
+        for cost in calcMinimalPaths initialCutoff map do
+            printfn "%A cost" cost
+        0
+
