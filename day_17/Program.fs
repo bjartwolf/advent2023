@@ -30,11 +30,11 @@ module Program =
         int minsum
 
     type Visit = { NrLeft: int; Cost: int } 
-    type VisitedMap = Dictionary<int*int*Dir*int,Visit list>
+    type VisitedMap = Dictionary<int*int*int,Visit list>
 
     let hasVisitedCheaper (currentCost: int) (cruc: CrucState) (visited: VisitedMap):bool = 
         let (col,row,dir,m) = cruc 
-        let (found, value) = visited.TryGetValue((col,row,dir,m))
+        let (found, value) = visited.TryGetValue((col,row,m))
         if (found) then
             value |> List.exists (fun c -> c.Cost < currentCost && c.NrLeft >= m) // if something exists that is cheaper with as many steps left
         else
@@ -53,12 +53,12 @@ module Program =
 
     let updateVisitMap (c: CrucState) (thisVisit: Visit) (visits: VisitedMap) =
         let (col,row,dir,m) = c
-        let (found, value) = visits.TryGetValue((col,row,dir,m))
+        let (found, value) = visits.TryGetValue((col,row,m))
         if found then
             let cheaperButFewerStepsLeft = value |> List.filter (fun l -> l.Cost < thisVisit.Cost && l.NrLeft > thisVisit.NrLeft)
-            visits[(col,row,dir,m)] <- (cheaperButFewerStepsLeft @ [thisVisit]) 
+            visits[(col,row,m)] <- (cheaperButFewerStepsLeft @ [thisVisit]) 
         else
-            visits.Add((col,row,dir,m), [thisVisit]) 
+            visits.Add((col,row,m), [thisVisit]) 
 
 
     let calcMinimalPaths (map: Map) : int =
@@ -76,14 +76,13 @@ module Program =
                                 yield priority 
                         | _ -> 
                             let neighbors = nextDirs cruc map 
-                            for next in neighbors do
-                                 let (nextCol, nextRow,_,nextM) = next 
-                                 let costOfNext = map[nextCol][nextRow] 
-                                 let nextCost = costOfNext + priority 
-                                 if not (hasVisitedCheaper nextCost next visited) then 
-                                    let visit = { NrLeft = nextM; Cost = nextCost}
-                                    updateVisitMap next visit visited
-                                    visitStack.Enqueue(next, nextCost)
+                            let cheapestNeighbors = neighbors |> List.filter (fun (col,row,d,m) -> not (hasVisitedCheaper (priority+map[col][row]) (col,row,d,m) visited) )
+                            for neighbor in cheapestNeighbors do
+                                let (col,row,d,m)  = neighbor
+                                let nextCost = map[col][row] + priority 
+                                let visit = { NrLeft = m; Cost = nextCost}
+                                updateVisitMap (col,row,d,m) visit visited 
+                                visitStack.Enqueue((col,row,d,m), nextCost)
             } |> Seq.head
         visitStack.Enqueue( (0,0,E,3),0 )
         findMinPathInner () 
