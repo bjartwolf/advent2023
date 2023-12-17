@@ -62,11 +62,14 @@ module Program =
     // naive visited to begin with, can add that logic too
     let calcMinimalPaths (initialCutOff: int) (map: Map) : int seq =
         let maxMapCol, maxMapRow  = map.Length - 1, map[0].Length - 1
-        
+        let mutable cutAt = initialCutOff 
         let rec findMinPathInner (currentCost: int) (cutoff: int) (visited:VisitedMap) (cruc: CrucState) : int seq=
             seq {
                 match cruc with 
-                    | (col, row, _, m) when col = maxMapCol && row = maxMapRow && m <= 3 -> yield currentCost 
+                    | (col, row, _, m) when col = maxMapCol && row = maxMapRow && m <= 3 -> 
+                        if currentCost < cutAt then
+                            cutAt <- currentCost
+                            yield currentCost 
                     | _ -> 
                         if not (hasVisited cruc visited) then 
                             let (col, row, dir,m) = cruc
