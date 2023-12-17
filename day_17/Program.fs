@@ -1,5 +1,6 @@
 open MathNet.Numerics.LinearAlgebra
 open MathNet.Numerics.LinearAlgebra.Double
+open System.Collections.Generic
 
 
 module Program =
@@ -45,14 +46,16 @@ module Program =
     // billigere OG med færre steg er billigere, så bør kanskje sjekke alle
     // oppslag og kost med antall flytt 
     type Visit = { NrLeft: int; Cost: int } 
-    type VisitedMap = Map<int*int*Dir,Visit list>
+    //type VisitedMap = Map<int*int*Dir,Visit list>
+    type VisitedMap = Dictionary<int*int*Dir,Visit list>
 
     let hasVisitedCheaper (currentCost: int) (cruc: CrucState) (visited: VisitedMap):bool = 
-        let (col,row,Dir,m) = cruc 
-        let visits = Map.tryFind (col,row,Dir) visited
-        match visits with 
-            | Some costs -> costs |> List.exists (fun c -> c.Cost < currentCost && c.NrLeft >= m) // if something exists that is cheaper with as many steps left
-            | None -> false
+        let (col,row,dir,m) = cruc 
+        let (found, value) = visited.TryGetValue((col,row,dir))
+        if (found) then
+            value |> List.exists (fun c -> c.Cost < currentCost && c.NrLeft >= m) // if something exists that is cheaper with as many steps left
+        else
+            false
 
         // this must calculate the directions left etc later
     let nextDirs (cruc: CrucState) (map: Map) : CrucState list  =
@@ -61,18 +64,21 @@ module Program =
                                     // left right straigth
                                     | S -> [(col,  row+1,E,3);(col,  row-1,W,3); (col+1,row,S,m-1)] 
                                     | E -> [(col-1,row,N,3)  ;(col+1,row,S,3)  ; (col,  row+1,E,m-1)] 
+                                    //| _ -> [] 
                                     | N -> [(col,  row-1,W,3);(col,  row+1,E,3); (col-1,row,N,m-1)]
                                     | W -> [(col+1,row,S,3)  ;(col-1,row,N,3)  ; (col,  row-1,W,m-1)]
         let maxMapCol, maxMapRow  = map.Length, map[0].Length
         allDirs |> List.filter (fun (col, row,_,m) -> col >= 0 && col < maxMapCol && row >= 0 && row < maxMapRow && m >=1 ) // should make it go left and right
+        //allDirs |> List.filter (fun (col, row,_,m) -> col >= 0 && col < maxMapCol && row >= 0 && row < maxMapRow && m >=3 ) // should make it go left and right
 
-    let updateVisitMap (c: CrucState) (thisVisit: Visit) (visits: VisitedMap) : VisitedMap =
+    let updateVisitMap (c: CrucState) (thisVisit: Visit) (visits: VisitedMap) =
         let (col,row,dir,m) = c
-        let visitedEntry = Map.tryFind (col,row,dir) visits
-        match visitedEntry with
-            | Some entry -> let cheaperButFewerStepsLeft = entry|> List.filter (fun l -> l.Cost < thisVisit.Cost && l.NrLeft > thisVisit.NrLeft)
-                            Map.add (col,row,dir) (cheaperButFewerStepsLeft @ [thisVisit]) visits
-            | None      ->  Map.add (col,row,dir) [thisVisit] visits
+        let (found, value) = visits.TryGetValue((col,row,dir))
+        if found then
+            let cheaperButFewerStepsLeft = value |> List.filter (fun l -> l.Cost < thisVisit.Cost && l.NrLeft > thisVisit.NrLeft)
+            visits[(col,row,dir)] <- (cheaperButFewerStepsLeft @ [thisVisit]) 
+        else
+            visits.Add((col,row,dir), [thisVisit]) 
 
 
     //[<Fact>]
@@ -84,7 +90,13 @@ module Program =
     let calcMinimalPaths (initialCutOff: int) (map: Map) : int seq =
         let maxMapCol, maxMapRow  = map.Length - 1, map[0].Length - 1
         let mutable cutAt = initialCutOff 
-        let mutable visited = Map.empty 
+        //let mutable visited = Map.empty 
+        let visited = Dictionary()//Map.empty 
+        let stopSearch (current:int) (col: int) (row:int) : bool =
+            let colDist = maxMapCol - col
+            let rowDist = maxMapRow - row
+            current + colDist + rowDist > cutAt 
+
         let rec findMinPathInner (currentCost: int) (cruc: CrucState) : int seq=
             seq {
                 match cruc with 
@@ -93,15 +105,16 @@ module Program =
                             cutAt <- currentCost
                             yield currentCost 
                     | _ -> 
-                        if not (hasVisitedCheaper currentCost cruc visited) && currentCost < cutAt then  // må sammenligne med kosten å gå dit? eller spilller det ingen rolle for den er samme for alle
-                            let (col, row, dir,m) = cruc
+                        let (col, row, dir,m) = cruc
+                        let cont = not (stopSearch currentCost col row) 
+                        if not (hasVisitedCheaper currentCost cruc visited) && cont then  // må sammenligne med kosten å gå dit? eller spilller det ingen rolle for den er samme for alle
                             // must update the entire list too...
                             //printfn "****"
                             //printfn "%A %d" cruc currentCost
                             //printfn "history"
                             //printfn "%A" (visited  |> Map.count)
                             let visit = { NrLeft = m; Cost = currentCost}
-                            visited <-  updateVisitMap cruc visit visited
+                            updateVisitMap cruc visit visited
                             let nextDirs = nextDirs cruc map 
                             for next in nextDirs do
                                  let (nextCol, nextRow,_,_) = next 
@@ -116,12 +129,12 @@ module Program =
         let initialCutoff = initialMinCost map
         Assert.Equal(102, calcMinimalPaths initialCutoff map |> Seq.min)
 
-    //[<Fact>]
-    //let pathTestReal () = 
-    //    let map = readInit "input2.txt" 
-    //    let initialCutoff = initialMinCost map
-    //    Assert.Equal(102, calcMinimalPaths initialCutoff map |> Seq.min)
-
+    [<Fact>]
+    let pathTestReal () = 
+        let map = readInit "input2.txt" 
+        let initialCutoff = 99999999 
+        printfn "%A" initialCutoff
+        Assert.Equal(102, calcMinimalPaths initialCutoff map |> Seq.min)
 
 
     [<Fact>]
@@ -141,7 +154,9 @@ module Program =
 
     let [<EntryPoint>] main _ =
         let map = readInit "input2.txt" 
-        let initialCutoff = initialMinCost map 
+        let initialCutoff = 99999999 
+        printfn "%A" initialCutoff
+
         for cost in calcMinimalPaths initialCutoff map do
             printfn "%A cost" cost
         Console.ReadKey()
