@@ -47,11 +47,11 @@ module Program =
     // oppslag og kost med antall flytt 
     type Visit = { NrLeft: int; Cost: int } 
     //type VisitedMap = Map<int*int*Dir,Visit list>
-    type VisitedMap = Dictionary<int*int*Dir,Visit list>
+    type VisitedMap = Dictionary<int*int,Visit list>
 
     let hasVisitedCheaper (currentCost: int) (cruc: CrucState) (visited: VisitedMap):bool = 
         let (col,row,dir,m) = cruc 
-        let (found, value) = visited.TryGetValue((col,row,dir))
+        let (found, value) = visited.TryGetValue((col,row))
         if (found) then
             value |> List.exists (fun c -> c.Cost < currentCost && c.NrLeft >= m) // if something exists that is cheaper with as many steps left
         else
@@ -73,12 +73,12 @@ module Program =
 
     let updateVisitMap (c: CrucState) (thisVisit: Visit) (visits: VisitedMap) =
         let (col,row,dir,m) = c
-        let (found, value) = visits.TryGetValue((col,row,dir))
+        let (found, value) = visits.TryGetValue((col,row))
         if found then
             let cheaperButFewerStepsLeft = value |> List.filter (fun l -> l.Cost < thisVisit.Cost && l.NrLeft > thisVisit.NrLeft)
-            visits[(col,row,dir)] <- (cheaperButFewerStepsLeft @ [thisVisit]) 
+            visits[(col,row)] <- (cheaperButFewerStepsLeft @ [thisVisit]) 
         else
-            visits.Add((col,row,dir), [thisVisit]) 
+            visits.Add((col,row), [thisVisit]) 
 
 
     //[<Fact>]
