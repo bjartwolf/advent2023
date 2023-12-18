@@ -8,7 +8,9 @@ module Input =
     type Command = Dir * int * RGB 
     type Position = int*int
     type Wall = Position*RGB
-    type OutLine = Map<Position,RGB>
+    type Outline = Map<Position,RGB>
+    type Tile = Outside | Wall | Inner 
+    type Sitemap = Tile list list 
 
     let parseCommand (cmdString: string): Command = 
         let parts = cmdString.Split(" ")
@@ -26,7 +28,7 @@ module Input =
             |> Array.toList
             |> List.map parseCommand
 
-    let digOutline (commands: Command list): OutLine =
+    let digOutline (commands: Command list): Outline =
         let rec digger (commands: Command list) (current: Position) : Wall seq =
             seq {
                 match commands with
@@ -42,11 +44,14 @@ module Input =
             }
         let wall = digger commands (0,0)
         Map.ofSeq wall 
+
+    let outlineMap (outline:Outline): Sitemap =
+        [ [] ]
  
     [<Fact>]
     let testOutline () =
-        Assert.Equal<OutLine>(Map.empty, digOutline [])
-        Assert.Equal<OutLine>(Map.ofList[(0,0),"a";(1,0),"a";(2,0),"a"], digOutline [L, 2, "a"])
+        Assert.Equal<Outline>(Map.empty, digOutline [])
+        Assert.Equal<Outline>(Map.ofList[(0,0),"a";(1,0),"a";(2,0),"a"], digOutline [L, 2, "a"])
 
     [<Fact>]
     let parseCommandTest () =
