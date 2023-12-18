@@ -45,7 +45,6 @@ module Progam =
                                           let x',y'= nextPos
                                           if not t.IsEmpty then
                                               let nextDir,_,_ = t.Head
-                                              printfn "%A %A" nextPos (dir,nextDir)
                                               match (dir,nextDir) with
                                                     | (L,U) ->
                                                         yield (x'-0.5,y'-0.5)
@@ -69,7 +68,7 @@ module Progam =
             }
         let wall = digger (commands @ [commands.Head]) (0.5,-0.5)
         //List.ofSeq wall
-        [0,0]@(List.ofSeq wall)@[0,0]
+        (List.ofSeq wall)
 
     let positionToArray ((x,y): Position) = [|x; y|]
      
