@@ -35,12 +35,7 @@ module Progam =
                 match commands with
                     | [] -> () 
                     | (cmd,dist,_)::t -> let x,y = current
-                                         for d in 1 .. dist do 
-                                                match cmd with
-                                                | U -> yield (x,y+d)
-                                                | D -> yield (x,y-d)
-                                                | L -> yield (x-d,y)
-                                                | R -> yield (x+d,y)
+                                         yield current
                                          let nextPos = 
                                                 match cmd with
                                                 | U -> (x,y+dist) 
@@ -58,16 +53,45 @@ module Progam =
     let vectorsToMatrix (outline: Outline) = 
         let vectors = outline |> List.toArray |> Array.map positionToArray
         let mtrx = DenseMatrix.ofColumnArrays vectors
-        let firstCol = mtrx.SubMatrix(0,2,0,1)
-        mtrx.Append(firstCol) 
+        mtrx
+
+    let rec shoelace (m: Matrix<double>): double =
+        if m.ColumnCount = 0 then 0.0
+        else
+            let subM = m.SubMatrix(0,2,0,2)
+            let det = subM.Determinant()
+            //printfn "%A" subM 
+            if m.ColumnCount = 2 then det
+            else 
+                let rest = m.SubMatrix(0,2,2,(m.ColumnCount - 2))
+                //printfn "%A" rest
+                det + (shoelace rest)
+
+    let mirror matrix = matrix |> Matrix.mapRows (fun _ row -> row |> Vector.toArray |> Array.rev |> vector) 
+
 
     [<Fact>]
     let fooTest () =
         let cmds = readInit "testinput.txt" 
         let outline = digOutline cmds
         let mtrx = vectorsToMatrix outline
-        printfn "%A" mtrx
+        printfn "%A" mtrx 
+        let area = shoelace (mirror mtrx)
+        printfn "area %A" area 
+
         ()
+
+    [<Fact>]
+    let fooTestw () =
+        let cmds = readInit "input.txt" 
+        let outline = digOutline cmds
+        let mtrx = vectorsToMatrix outline
+        printfn "%A" mtrx 
+        let area = shoelace (mirror mtrx)
+        printfn "area %A" area 
+
+        ()
+
 
 
  
