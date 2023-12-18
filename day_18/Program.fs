@@ -80,6 +80,32 @@ module Input =
                    | Inner -> printf "."
             printfn ""
 
+    let countInner (tiles: Tile list) : int =
+        [ for x in 0 .. tiles.Length - 1 do
+            match tiles[x] with 
+                | Outside | Inner -> let passing = tiles.[0 .. x] |> List.distinct |> List.length// hope we cross distinct colored walls
+                                     if (passing % 2) = 0 then yield 0 
+                                     else yield 1 
+                | Wall _ -> yield 1 
+        ] |> List.sum
+        
+
+    let rec findArea (map: Sitemap) : int =
+        [
+            for line in map do
+               countInner line 
+        ] |> List.sum
+
+    [<Fact>]
+    let findAreaTest () =
+        let cmds = readInit "testinput.txt" 
+        let outline = digOutline cmds
+        let map = outlineMap outline
+        let cnt = findArea map
+        Assert.Equal(62, cnt) 
+                    
+                    
+ 
     [<Fact>]
     let getWallTest () =
         let cmds = readInit "testinput.txt" 
