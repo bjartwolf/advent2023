@@ -8,7 +8,7 @@ module Progam =
 
     type Dir = U | D | L | R
     type RGB = string
-    type Command = Dir * int * RGB 
+    type Command = Dir * int64 * RGB 
     type Position = double*double 
     type Wall = Position*RGB
     type Outline = Position list
@@ -21,13 +21,33 @@ module Progam =
                         |"U"-> U
                         |"D"-> D
                         | x -> failwithf "ouch %A %A" x parts[0]
-        let steps = int parts[1]
+        let steps = int64 parts[1]
         cmd,steps,parts[2]
+
+    let parseStupidCommand (cmdString: string): Command = 
+        let parts = cmdString.Split(" ")
+        let cmd = match parts[2][7] with 
+                        | '0' -> R
+                        | '1' -> D
+                        | '2' -> L
+                        | '3' -> U
+                        | x -> failwithf "ouch %A %A" x parts[0]
+        let steps = System.Convert.ToInt32(parts[2][2..6], 16)
+        cmd,steps,""
+
+    [<Fact>]
+    let parseStupidCommandTest () =
+        Assert.Equal<Command>((R, 461937L,""), parseStupidCommand "R 6 (#70c710)")
 
     let readInit (filePath: string): Command list = 
         File.ReadAllLines filePath
             |> Array.toList
             |> List.map parseCommand
+
+    let readStupid (filePath: string): Command list = 
+        File.ReadAllLines filePath
+            |> Array.toList
+            |> List.map parseStupidCommand
 
     let digOutline (commands: Command list): Outline =
         let rec digger (commands: Command list) (current: Position) : Position seq =
@@ -67,7 +87,6 @@ module Progam =
                     | _ -> yield (0.0,0.0)
             }
         let wall = digger (commands @ [commands.Head]) (0.5,-0.5)
-        //List.ofSeq wall
         (List.ofSeq wall)
 
     let positionToArray ((x,y): Position) = [|x; y|]
@@ -101,6 +120,27 @@ module Progam =
         Assert.Equal(62.0, area)
 
     [<Fact>]
+    let stupidTest () =
+        let cmds = readStupid "testinput.txt" 
+        let outline = digOutline cmds
+        let mtrx = vectorsToMatrix outline
+        printfn "%A" mtrx 
+        let area = shoelace (mirror mtrx)
+        printfn "area %A" area 
+        Assert.Equal(952408144115.0, area)
+
+    [<Fact>]
+    let stupidTest2 () =
+        let cmds = readStupid "input.txt" 
+        let outline = digOutline cmds
+        let mtrx = vectorsToMatrix outline
+        printfn "%A" mtrx 
+        let area = shoelace (mirror mtrx)
+        printfn "area %A" area 
+        Assert.Equal(104454050898330.98, area)
+
+
+    [<Fact>]
     let fooTestw () =
         let cmds = readInit "input.txt" 
         let outline = digOutline cmds
@@ -113,7 +153,7 @@ module Progam =
   
     [<Fact>]
     let parseCommandTest () =
-        Assert.Equal<Command>((R, 6,"(#70c710)"), parseCommand "R 6 (#70c710)")
+        Assert.Equal<Command>((R, 6L,"(#70c710)"), parseCommand "R 6 (#70c710)")
 
     let [<EntryPoint>] main _ =
         0 
