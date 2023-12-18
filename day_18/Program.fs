@@ -31,8 +31,14 @@ module Input =
             seq {
                 match commands with
                     | [] -> () 
-                    | (a,b,c)::t -> yield current,c
-                                    yield! digger t current 
+                    | (cmd,dist,color)::t -> let x,y = current
+                                             for d in 0 .. dist do 
+                                                    match cmd with
+                                                    | U -> yield (x,y+d), color 
+                                                    | D -> yield (x,y-d), color 
+                                                    | L -> yield (x+d,y), color 
+                                                    | R -> yield (x-d,y), color 
+                                             yield! digger t current 
             }
         let wall = digger commands (0,0)
         Map.ofSeq wall 
@@ -40,7 +46,7 @@ module Input =
     [<Fact>]
     let testOutline () =
         Assert.Equal<OutLine>(Map.empty, digOutline [])
-        Assert.Equal<OutLine>(Map.ofList[(0,0),"a";(1,0),"a";(2,0),"a"], digOutline [R 3 "a"])
+        Assert.Equal<OutLine>(Map.ofList[(0,0),"a";(1,0),"a";(2,0),"a"], digOutline [L, 2, "a"])
 
     [<Fact>]
     let parseCommandTest () =
