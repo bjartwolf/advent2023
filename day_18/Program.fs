@@ -1,8 +1,4 @@
-open System.Drawing
-
-
-module Proga=
-    open System
+module Progam =
     open System.IO
     open Xunit 
 
@@ -34,20 +30,20 @@ module Proga=
             seq {
                 match commands with
                     | [] -> () 
-                    | (cmd,dist,color)::t -> let x,y = current
-                                             for d in 1 .. dist do 
-                                                    match cmd with
-                                                    | U -> yield (x,y+d)
-                                                    | D -> yield (x,y-d)
-                                                    | L -> yield (x-d,y)
-                                                    | R -> yield (x+d,y)
-                                             let nextPos = 
-                                                    match cmd with
-                                                    | U -> (x,y+dist) 
-                                                    | D -> (x,y-dist) 
-                                                    | L -> (x-dist,y) 
-                                                    | R -> (x+dist,y) 
-                                             yield! digger t nextPos 
+                    | (cmd,dist,_)::t -> let x,y = current
+                                         for d in 1 .. dist do 
+                                                match cmd with
+                                                | U -> yield (x,y+d)
+                                                | D -> yield (x,y-d)
+                                                | L -> yield (x-d,y)
+                                                | R -> yield (x+d,y)
+                                         let nextPos = 
+                                                match cmd with
+                                                | U -> (x,y+dist) 
+                                                | D -> (x,y-dist) 
+                                                | L -> (x-dist,y) 
+                                                | R -> (x+dist,y) 
+                                         yield! digger t nextPos 
             }
         let wall = digger commands (0,0)
         List.ofSeq wall
