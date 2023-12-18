@@ -30,27 +30,46 @@ module Progam =
             |> List.map parseCommand
 
     let digOutline (commands: Command list): Outline =
-        let rec digger (prevDir: Dir) (commands: Command list) (current: Position) : Position seq =
+        let rec digger (commands: Command list) (current: Position) : Position seq =
             seq {
                 match commands with
                     | [] -> () 
-                    | (cmd,dist,_)::t ->   let x,y = current
-                                           match (prevDir, cmd) with
-                                                | (L,U) |(D,R)-> yield (x-0.5,y-0.5)
-                                                | (R,D) | (U,L) -> yield (x+0.5,y+0.5)
-                                                | (L,D) | (U,R) -> yield (x-0.5,y+0.5)
-                                                | (D,L) | (R,U) -> yield (x+0.5,y-0.5)
-                                                | dir1,dir2 -> failwithf "%A %A is not ok" dir1 dir2
-                                           let nextPos = 
-                                                  match cmd with
+                    | (dir,dist,_)::t->
+                                          let x,y = current
+                                          let nextPos = 
+                                                  match dir with
                                                   | U -> (x,y + (double dist)) 
                                                   | D -> (x,y-(double dist)) 
                                                   | L -> (x- (double dist),y) 
                                                   | R -> (x+ (double dist),y) 
-                                           yield! digger cmd t nextPos 
+                                          let x',y'= nextPos
+                                          if not t.IsEmpty then
+                                              let nextDir,_,_ = t.Head
+                                              printfn "%A %A" nextPos (dir,nextDir)
+                                              match (dir,nextDir) with
+                                                    | (L,U) ->
+                                                        yield (x'-0.5,y'-0.5)
+                                                    |(D,R)-> 
+                                                        yield (x'+0.5,y'+0.5)
+                                                    | (R,D)  ->
+                                                        yield (x'+0.5,y'+0.5)
+                                                    | (U,L) -> 
+                                                        yield (x'-0.5,y'-0.5)
+                                                    | (L,D) -> 
+                                                        yield (x'-0.5,y'+0.5)
+                                                    | (U,R) -> 
+                                                        yield (x'-0.5,y'+0.5)
+                                                    | (D,L)  ->
+                                                        yield (x'+0.5,y'-0.5)
+                                                    | (R,U) -> 
+                                                        yield (x'-0.5,y'+0.5)
+                                                    | dir1,dir2 -> failwithf "%A %A is not ok" dir1 dir2
+                                              yield! digger t nextPos 
+                    | _ -> yield (0.0,0.0)
             }
-        let wall = digger U commands (0.5,-0.5)
-        (List.ofSeq wall) 
+        let wall = digger (commands @ [commands.Head]) (0.5,-0.5)
+        //List.ofSeq wall
+        [0,0]@(List.ofSeq wall)@[0,0]
 
     let positionToArray ((x,y): Position) = [|x; y|]
      
