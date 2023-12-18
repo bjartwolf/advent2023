@@ -83,15 +83,15 @@ module Input =
     let countInner (tiles: Tile list) : int =
         [ for x in 0 .. tiles.Length - 1 do
             match tiles[x] with 
-                | Outside | Inner -> let before= tiles.[0 .. (x - 1)] 
-                                     let passing = before |> List.filter (fun x -> match x with 
+                | Outside | Inner -> let before= tiles.[0 .. x] 
+                                     let wallsPassed = before |> List.filter (fun x -> match x with 
                                                                                     | Wall _ -> true
                                                                                     | _ -> false ) 
-                                                          |> List.distinct 
-                                                          |> List.length// hope we cross distinct colored walls
-                                     printfn "%A before %A" passing before
-                                     if (passing % 2) = 0 then yield 1 
-                                     else yield 0
+                                     let wallCount = wallsPassed |> List.distinct
+                                                                 |> List.length// hope we cross distinct colored walls
+                                     printfn "%A WallCount: %A before %A" x wallCount wallsPassed
+                                     if (wallCount % 2) = 0 then yield 0 
+                                     else yield 1
                 | Wall _ -> yield 1 
         ] |> List.sum
         
@@ -99,7 +99,6 @@ module Input =
     let rec findArea (map: Sitemap) : int =
         [
             for line in map do
-               printfn "linecount %A " (countInner line )
                countInner line 
         ] |> List.sum
 
