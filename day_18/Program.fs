@@ -9,8 +9,8 @@ module Input =
     type Position = int*int
     type Wall = Position*RGB
     type Outline = (Position*RGB) list
-    type Tile = Outside | Wall | Inner 
-    type Sitemap = Tile list list 
+    type Tile = Outside | Wall of RGB | Inner 
+    type Sitemap = (Tile) list list 
 
     let parseCommand (cmdString: string): Command = 
         let parts = cmdString.Split(" ")
@@ -40,18 +40,56 @@ module Input =
                                                     | D -> yield (x,y-d), color 
                                                     | L -> yield (x+d,y), color 
                                                     | R -> yield (x-d,y), color 
-                                             yield! digger t current 
+                                             let nextPos = 
+                                                    match cmd with
+                                                    | U -> (x,y+dist) 
+                                                    | D -> (x,y-dist) 
+                                                    | L -> (x+dist,y) 
+                                                    | R -> (x-dist,y) 
+                                             yield! digger t nextPos 
             }
         let wall = digger commands (0,0)
         List.ofSeq wall
 
+    let getTile (walls: Wall list) x y =  
+        let a = walls |> List.tryFind (fun (pos,_) -> pos = (x,y))
+        match a with
+            | Some (_,c)-> Wall c
+            | None _ -> Outside 
+
     // bryr jeg meg om posisjonene er negative og sånt? kan normalisere alle til
     // 0 for enkelhetsskyld
     let outlineMap (outline:Outline): Sitemap =
-        let minX = outline |> List.maxBy (fun ((x,_),_) -> x)
-        let minY = outline |> List.maxBy (fun ((_,y),_) -> y)
-        [ [] ]
- 
+        let minX = outline |> List.map (fun ((x,_),_) -> x) |> List.min
+        let minY = outline |> List.map (fun ((_,y),_) -> y) |> List.min
+        let normalized = outline |> List.map (fun ((x,y),c) -> (x + abs minX, y + abs minY), c)
+        let maxX = normalized |> List.map (fun ((x,_),_) -> x) |> List.max
+        let maxY = normalized |> List.map (fun ((_,y),_) -> y) |> List.max
+        [
+            for y in 0 .. maxY  do
+                let xs = [0 .. maxX  ]
+                let xWall = xs |> List.map (fun x -> getTile normalized x y)
+                yield xWall
+        ]
+    let prettyPrint (map: Sitemap)  =
+        for line in (map |> List.rev) do
+            for tile in line do
+                match tile with
+                   | Outside -> printf "o" 
+                   | Inside -> printf "."
+                   | Wall _ -> printf "X"
+            printfn ""
+
+    [<Fact>]
+    let getWallTest () =
+        let cmds = readInit "testinput.txt" 
+        let outline = digOutline cmds
+        let map = outlineMap outline
+        prettyPrint map
+        Assert.Equal(10, map.Length)
+        Assert.Equal(7, map[0].Length)
+        //printfn "%A" map
+  
     [<Fact>]
     let testOutline () =
         Assert.Equal<Outline>([], digOutline [])
