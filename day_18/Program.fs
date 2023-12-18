@@ -74,41 +74,7 @@ module Proga=
                 let xWall = xs |> List.map (fun x -> getTile normalized x y)
                 yield xWall
         ]
-    let prettyPrint (map: Sitemap)  =
-        for line in (map |> List.rev) do
-            for tile in line do
-                match tile with
-                   | Outside -> printf "o" 
-                   | Wall _ -> printf "X"
-                   | Inner -> printf "."
-            printfn ""
 
-    let prettyPrintFile (map: Sitemap) (f:string)=
-        use sw = new StringWriter()
-        for line in (map |> List.rev) do
-            for tile in line do
-                match tile with
-                   | Outside -> sw.Write "o" 
-                   | Wall _ -> sw.Write "X"
-                   | Inner -> sw.Write "."
-            sw.Write(Environment.NewLine) 
-        File.WriteAllText(f, sw.ToString())
-
-    //let parseColor (colorString: string) : 
-    let prettyPrintBmp (map: Sitemap) (f:string)=
-        let width = map.Head.Length
-        let height = map.Length
-
-        use bitmap = new Bitmap(width, height)
-
-
-        for y in 0 .. height - 1 do
-            for x in 0 .. width - 1 do
-                let color = match map[y][x] with
-                                     | Wall (c:string) ->  ColorTranslator.FromHtml(c.Replace("(","").Replace(")","" ) )
-                                     | _ ->  ColorTranslator.FromHtml("#FFFFFF")
-                bitmap.SetPixel(x, y, color)
-        bitmap.Save(f)
       
     let rec simplifyWalls (str: string) : string =
         if (str.Contains("xx")) then
@@ -121,96 +87,13 @@ module Proga=
         Assert.Equal("x", simplifyWalls "xx" ) 
         Assert.Equal("x", simplifyWalls "x" ) 
 
-    let countWalls (str: string) : int =
-        simplifyWalls str
-            |> Seq.filter (fun c -> c = 'x')
-            |> Seq.length
-
-    [<Fact>]
-    let countWallsTest() =
-        Assert.Equal(3, countWalls "xxx00xx0x" ) 
-        Assert.Equal(1, countWalls "xx" ) 
-        Assert.Equal(1, countWalls "x" ) 
-        //Assert.Equal(3, countWalls "             xxx  xxxxx  0" ) vertical walls
-  
-    let countInner (tiles: Tile list) : int =
-        [ for x in 0 .. tiles.Length - 1  do
-            match tiles[x] with 
-                | Outside | Inner -> let before= tiles.[0 .. x - 1] 
-                                     let wallsPassed = before |> List.map (fun x -> match x with 
-                                                                                    | Wall _ -> 'x' 
-                                                                                    | _ -> '.')  
-                                                              |> List.map string 
-                                                              |> String.concat "" 
-                                                              |> countWalls
-                                     if (wallsPassed% 2) = 0 then 
-                                        yield 0 
-                                     else yield 1
-                                          
-                | Wall _ -> yield 1 
-        ] |> List.sum
-
-    let fillInner (tiles: Tile list) : Tile list=
-        [ for x in 0 .. tiles.Length - 1  do
-            match tiles[x] with 
-                | Outside | Inner -> let before= tiles.[0 .. x - 1] 
-                                     let wallsPassed = before |> List.map (fun x -> match x with 
-                                                                                    | Wall _ -> 'x' 
-                                                                                    | _ -> '.')  
-                                                              |> List.map string 
-                                                              |> String.concat "" 
-                                                              |> countWalls
-                                     if (wallsPassed% 2) = 0 then 
-                                        yield Outside 
-                                     else yield Inner 
-                                          
-                | Wall c -> yield Wall c 
-        ] 
-
-    let fillMap (map: Sitemap):Sitemap =
-        map |> List.map fillInner
-
-    [<Fact>]
-    let countInnerText() =
-        let cmds = readInit "testinput.txt" 
-        let outline = digOutline cmds
-        let map = outlineMap outline
-        Assert.Equal(7, countInner map[2]) 
-        Assert.Equal(6, countInner map[0]) 
-        Assert.Equal(6, countInner map[1]) 
-        Assert.Equal(5, countInner map[3]) 
-         
-
-    let rec findArea (map: Sitemap) : int =
-        [
-            for line in map do
-               countInner line 
-        ] |> List.sum
 
     [<Fact>]
     let findAreaTest () =
         let cmds = readInit "testinput.txt" 
         let outline = digOutline cmds
-        let map = outlineMap outline
-        let cnt = findArea map
-        Assert.Equal(62, cnt) 
- 
-    [<Fact>]
-    let findAreaLargeTest () =
-        let cmds = readInit "input.txt" 
-        let outline = digOutline cmds
-        let map = outlineMap outline
-//        prettyPrint map "map.out"
-        let cnt = findArea map
-        Assert.NotEqual(42970, cnt) 
+        ()
 
-    [<Fact>]
-    let getWallTestLarge () =
-        let cmds = readInit "input.txt" 
-        let outline = digOutline cmds
-        let map = outlineMap outline
-        prettyPrint map
- 
     [<Fact>]
     let getWallTest () =
         let cmds = readInit "testinput.txt" 
@@ -221,11 +104,6 @@ module Proga=
         Assert.Equal(7, map[0].Length)
         //printfn "%A" map
   
-    //[<Fact>]
-    //let testOutline () =
-    //    Assert.Equal<Outline>([], digOutline [])
-    //    Assert.Equal<Outline>([(0,0),"a";(1,0),"a";(2,0),"a"], digOutline [L, 2, "a"])
-
     [<Fact>]
     let parseCommandTest () =
         Assert.Equal<Command>((R, 6,"(#70c710)"), parseCommand "R 6 (#70c710)")
