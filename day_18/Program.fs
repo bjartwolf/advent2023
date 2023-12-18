@@ -9,7 +9,7 @@ module Progam =
     type Dir = U | D | L | R
     type RGB = string
     type Command = Dir * int * RGB 
-    type Position = int*int
+    type Position = double*double 
     type Wall = Position*RGB
     type Outline = Position list
 
@@ -30,25 +30,29 @@ module Progam =
             |> List.map parseCommand
 
     let digOutline (commands: Command list): Outline =
-        let rec digger (commands: Command list) (current: Position) : Position seq =
+        let rec digger (prevDir: Dir) (commands: Command list) (current: Position) : Position seq =
             seq {
                 match commands with
                     | [] -> () 
                     | (cmd,dist,_)::t ->   let x,y = current
-                                           yield current
+                                           match (prevDir, cmd) with
+                                                | (L,U) |(D,R)-> yield (x-0.5,y-0.5)
+                                                | (R,D) | (U,L) -> yield (x+0.5,y+0.5)
+                                                | (L,D) | (U,R) -> yield (x-0.5,y+0.5)
+                                                | (D,L) | (R,U) -> yield (x+0.5,y-0.5)
+                                                | dir1,dir2 -> failwithf "%A %A is not ok" dir1 dir2
                                            let nextPos = 
                                                   match cmd with
-                                                  | U -> (x,y+dist) 
-                                                  | D -> (x,y-dist) 
-                                                  | L -> (x-dist,y) 
-                                                  | R -> (x+dist,y) 
-                                           yield! digger t nextPos 
+                                                  | U -> (x,y + (double dist)) 
+                                                  | D -> (x,y-(double dist)) 
+                                                  | L -> (x- (double dist),y) 
+                                                  | R -> (x+ (double dist),y) 
+                                           yield! digger cmd t nextPos 
             }
-        let wall = digger commands (0,0)
-        (List.ofSeq wall) @ [(0,0)]
+        let wall = digger U commands (0.5,-0.5)
+        (List.ofSeq wall) 
 
-    let positionToArray ((x,y): int*int) =
-        [|double x; double y|]
+    let positionToArray ((x,y): Position) = [|x; y|]
      
     let vectorsToMatrix (outline: Outline) = 
         let vectors = outline |> List.toArray |> Array.map positionToArray
@@ -83,6 +87,7 @@ module Progam =
         let cmds = readInit "input.txt" 
         let outline = digOutline cmds
         let mtrx = vectorsToMatrix outline
+        printfn "%A" mtrx 
         let area = shoelace (mirror mtrx)
         Assert.Equal( 40131.0, area)
         ()
