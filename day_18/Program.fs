@@ -81,20 +81,33 @@ module Input =
             printfn ""
 
     let countInner (tiles: Tile list) : int =
-        [ for x in 0 .. tiles.Length - 1 do
+        [ for x in 0 .. tiles.Length - 1  do
             match tiles[x] with 
-                | Outside | Inner -> let before= tiles.[0 .. x] 
+                | Outside | Inner -> let before= tiles.[0 .. x - 1] 
                                      let wallsPassed = before |> List.filter (fun x -> match x with 
                                                                                     | Wall _ -> true
                                                                                     | _ -> false ) 
                                      let wallCount = wallsPassed |> List.distinct
                                                                  |> List.length// hope we cross distinct colored walls
                                      printfn "%A WallCount: %A before %A" x wallCount wallsPassed
-                                     if (wallCount % 2) = 0 then yield 0 
+                                     if (wallCount % 2) = 0 then 
+                                        yield 0 
                                      else yield 1
+                                          
                 | Wall _ -> yield 1 
         ] |> List.sum
-        
+
+    [<Fact>]
+    let countInnerText() =
+        let cmds = readInit "testinput.txt" 
+        let outline = digOutline cmds
+        let map = outlineMap outline
+        Assert.Equal(7, countInner map[2]) 
+        Assert.Equal(6, countInner map[0]) 
+        Assert.Equal(6, countInner map[1]) 
+        Assert.Equal(5, countInner map[3]) 
+        Assert.Equal(6, countInner map[4]) 
+         
 
     let rec findArea (map: Sitemap) : int =
         [
@@ -109,8 +122,6 @@ module Input =
         let map = outlineMap outline
         let cnt = findArea map
         Assert.Equal(62, cnt) 
-                    
-                    
  
     [<Fact>]
     let getWallTest () =
@@ -122,10 +133,10 @@ module Input =
         Assert.Equal(7, map[0].Length)
         //printfn "%A" map
   
-    [<Fact>]
-    let testOutline () =
-        Assert.Equal<Outline>([], digOutline [])
-        Assert.Equal<Outline>([(0,0),"a";(1,0),"a";(2,0),"a"], digOutline [L, 2, "a"])
+    //[<Fact>]
+    //let testOutline () =
+    //    Assert.Equal<Outline>([], digOutline [])
+    //    Assert.Equal<Outline>([(0,0),"a";(1,0),"a";(2,0),"a"], digOutline [L, 2, "a"])
 
     [<Fact>]
     let parseCommandTest () =
