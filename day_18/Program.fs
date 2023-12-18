@@ -34,18 +34,18 @@ module Progam =
             seq {
                 match commands with
                     | [] -> () 
-                    | (cmd,dist,_)::t -> let x,y = current
-                                         yield current
-                                         let nextPos = 
-                                                match cmd with
-                                                | U -> (x,y+dist) 
-                                                | D -> (x,y-dist) 
-                                                | L -> (x-dist,y) 
-                                                | R -> (x+dist,y) 
-                                         yield! digger t nextPos 
+                    | (cmd,dist,_)::t ->   let x,y = current
+                                           yield current
+                                           let nextPos = 
+                                                  match cmd with
+                                                  | U -> (x,y+dist) 
+                                                  | D -> (x,y-dist) 
+                                                  | L -> (x-dist,y) 
+                                                  | R -> (x+dist,y) 
+                                           yield! digger t nextPos 
             }
         let wall = digger commands (0,0)
-        List.ofSeq wall
+        (List.ofSeq wall) @ [(0,0)]
 
     let positionToArray ((x,y): int*int) =
         [|double x; double y|]
@@ -60,11 +60,9 @@ module Progam =
         else
             let subM = m.SubMatrix(0,2,0,2)
             let det = subM.Determinant()
-            //printfn "%A" subM 
             if m.ColumnCount = 2 then det
             else 
                 let rest = m.SubMatrix(0,2,2,(m.ColumnCount - 2))
-                //printfn "%A" rest
                 det + (shoelace rest)
 
     let mirror matrix = matrix |> Matrix.mapRows (fun _ row -> row |> Vector.toArray |> Array.rev |> vector) 
@@ -78,38 +76,21 @@ module Progam =
         printfn "%A" mtrx 
         let area = shoelace (mirror mtrx)
         printfn "area %A" area 
-
-        ()
+        Assert.Equal(62.0, area)
 
     [<Fact>]
     let fooTestw () =
         let cmds = readInit "input.txt" 
         let outline = digOutline cmds
         let mtrx = vectorsToMatrix outline
-        printfn "%A" mtrx 
         let area = shoelace (mirror mtrx)
-        printfn "area %A" area 
-
-        ()
-
-
-
- 
-    [<Fact>]
-    let findAreaTest () =
-        let cmds = readInit "testinput.txt" 
-        let outline = digOutline cmds
+        Assert.Equal( 40131.0, area)
         ()
 
   
     [<Fact>]
     let parseCommandTest () =
         Assert.Equal<Command>((R, 6,"(#70c710)"), parseCommand "R 6 (#70c710)")
-
-    [<Fact>]
-    let test2 () = 
-        let input = readInit "testinput.txt" 
-        Assert.Equal(14, input.Length) 
 
     let [<EntryPoint>] main _ =
         0 
