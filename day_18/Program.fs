@@ -56,7 +56,7 @@ module Progam =
                                                     | (U,L) -> 
                                                         yield (x'-0.5,y'-0.5)
                                                     | (L,D) -> 
-                                                        yield (x'-0.5,y'+0.5)
+                                                        yield (x'+0.5,y'-0.5)
                                                     | (U,R) -> 
                                                         yield (x'-0.5,y'+0.5)
                                                     | (D,L)  ->
