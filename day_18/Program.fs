@@ -1,5 +1,9 @@
+open MathNet.Numerics.LinearAlgebra
+
+
 module Progam =
     open System.IO
+    open MathNet.Numerics
     open Xunit 
 
     type Dir = U | D | L | R
@@ -48,8 +52,25 @@ module Progam =
         let wall = digger commands (0,0)
         List.ofSeq wall
 
-      
+    let positionToArray ((x,y): int*int) =
+        [|double x; double y|]
+     
+    let vectorsToMatrix (outline: Outline) = 
+        let vectors = outline |> List.toArray |> Array.map positionToArray
+        let mtrx = DenseMatrix.ofColumnArrays vectors
+        let firstCol = mtrx.SubMatrix(0,2,0,1)
+        mtrx.Append(firstCol) 
 
+    [<Fact>]
+    let fooTest () =
+        let cmds = readInit "testinput.txt" 
+        let outline = digOutline cmds
+        let mtrx = vectorsToMatrix outline
+        printfn "%A" mtrx
+        ()
+
+
+ 
     [<Fact>]
     let findAreaTest () =
         let cmds = readInit "testinput.txt" 
