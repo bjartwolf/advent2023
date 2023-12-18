@@ -34,18 +34,18 @@ module Input =
                 match commands with
                     | [] -> () 
                     | (cmd,dist,color)::t -> let x,y = current
-                                             for d in 0 .. dist do 
+                                             for d in 1 .. dist do 
                                                     match cmd with
                                                     | U -> yield (x,y+d), color 
                                                     | D -> yield (x,y-d), color 
-                                                    | L -> yield (x+d,y), color 
-                                                    | R -> yield (x-d,y), color 
+                                                    | L -> yield (x-d,y), color 
+                                                    | R -> yield (x+d,y), color 
                                              let nextPos = 
                                                     match cmd with
                                                     | U -> (x,y+dist) 
                                                     | D -> (x,y-dist) 
-                                                    | L -> (x+dist,y) 
-                                                    | R -> (x-dist,y) 
+                                                    | L -> (x-dist,y) 
+                                                    | R -> (x+dist,y) 
                                              yield! digger t nextPos 
             }
         let wall = digger commands (0,0)
@@ -76,8 +76,8 @@ module Input =
             for tile in line do
                 match tile with
                    | Outside -> printf "o" 
-                   | Inside -> printf "."
                    | Wall _ -> printf "X"
+                   | Inside -> printf "."
             printfn ""
 
     [<Fact>]
