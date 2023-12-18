@@ -77,7 +77,7 @@ module Input =
                 match tile with
                    | Outside -> printf "o" 
                    | Wall _ -> printf "X"
-                   | Inside -> printf "."
+                   | Inner -> printf "."
             printfn ""
 
     [<Fact>]
