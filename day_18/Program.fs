@@ -11,9 +11,7 @@ module Proga=
     type Command = Dir * int * RGB 
     type Position = int*int
     type Wall = Position*RGB
-    type Outline = (Position*RGB) list
-    type Tile = Outside | Wall of RGB | Inner 
-    type Sitemap = (Tile) list list 
+    type Outline = Position list
 
     let parseCommand (cmdString: string): Command = 
         let parts = cmdString.Split(" ")
@@ -32,17 +30,17 @@ module Proga=
             |> List.map parseCommand
 
     let digOutline (commands: Command list): Outline =
-        let rec digger (commands: Command list) (current: Position) : Wall seq =
+        let rec digger (commands: Command list) (current: Position) : Position seq =
             seq {
                 match commands with
                     | [] -> () 
                     | (cmd,dist,color)::t -> let x,y = current
                                              for d in 1 .. dist do 
                                                     match cmd with
-                                                    | U -> yield (x,y+d), color 
-                                                    | D -> yield (x,y-d), color 
-                                                    | L -> yield (x-d,y), color 
-                                                    | R -> yield (x+d,y), color 
+                                                    | U -> yield (x,y+d)
+                                                    | D -> yield (x,y-d)
+                                                    | L -> yield (x-d,y)
+                                                    | R -> yield (x+d,y)
                                              let nextPos = 
                                                     match cmd with
                                                     | U -> (x,y+dist) 
@@ -54,39 +52,7 @@ module Proga=
         let wall = digger commands (0,0)
         List.ofSeq wall
 
-    let getTile (walls: Wall list) x y =  
-        let a = walls |> List.tryFind (fun (pos,_) -> pos = (x,y))
-        match a with
-            | Some (_,c)-> Wall c
-            | None _ -> Outside 
-
-    // bryr jeg meg om posisjonene er negative og sånt? kan normalisere alle til
-    // 0 for enkelhetsskyld
-    let outlineMap (outline:Outline): Sitemap =
-        let minX = outline |> List.map (fun ((x,_),_) -> x) |> List.min
-        let minY = outline |> List.map (fun ((_,y),_) -> y) |> List.min
-        let normalized = outline |> List.map (fun ((x,y),c) -> (x + abs minX, y + abs minY), c)
-        let maxX = normalized |> List.map (fun ((x,_),_) -> x) |> List.max
-        let maxY = normalized |> List.map (fun ((_,y),_) -> y) |> List.max
-        [
-            for y in 0 .. maxY  do
-                let xs = [0 .. maxX  ]
-                let xWall = xs |> List.map (fun x -> getTile normalized x y)
-                yield xWall
-        ]
-
       
-    let rec simplifyWalls (str: string) : string =
-        if (str.Contains("xx")) then
-            simplifyWalls (str.Replace("xx","x"))
-        else str
-
-    [<Fact>]
-    let testSimplifyWalls() =
-        Assert.Equal("x00x0x", simplifyWalls "xxx00xx0x" ) 
-        Assert.Equal("x", simplifyWalls "xx" ) 
-        Assert.Equal("x", simplifyWalls "x" ) 
-
 
     [<Fact>]
     let findAreaTest () =
@@ -94,15 +60,6 @@ module Proga=
         let outline = digOutline cmds
         ()
 
-    [<Fact>]
-    let getWallTest () =
-        let cmds = readInit "testinput.txt" 
-        let outline = digOutline cmds
-        let map = outlineMap outline
-        prettyPrint map
-        Assert.Equal(10, map.Length)
-        Assert.Equal(7, map[0].Length)
-        //printfn "%A" map
   
     [<Fact>]
     let parseCommandTest () =
@@ -114,11 +71,4 @@ module Proga=
         Assert.Equal(14, input.Length) 
 
     let [<EntryPoint>] main _ =
-        let cmds = readInit "input.txt" 
-        let outline = digOutline cmds
-        let map = outlineMap outline
-        //prettyPrintFile map "map.out"
-        prettyPrintBmp map "map.bmp"
-        //let filledmap = fillMap map 
-        //prettyPrintFile filledmap "map_filled.out"
         0 
