@@ -12,6 +12,20 @@ module Input =
 
     let tn1: Node =  [ A, Lt, 2006, N "qkq"; M, Gt, 2090, Acc; X, Gt, 0, N "rfg"]
 
+    type Part = { x: int; m: int; a: int; s: int}
+    let parsePart (partLine:string) = 
+        let rawLine = partLine.Replace("{","").Replace("}","")
+        let rawParts = rawLine.Split(",") 
+        let x = int (rawParts[0].Split("=")[1])
+        let m = int (rawParts[1].Split("=")[1])
+        let a = int (rawParts[2].Split("=")[1])
+        let s = int (rawParts[3].Split("=")[1])
+        { x = int x; m = int m; a = int a; s = int s}
+
+    [<Fact>]
+    let testParsePart() = 
+        Assert.Equal<Part>({ x = 89; m = 520; a = 174; s = 541}, parsePart "{x=89,m=520,a=174,s=541}")
+ 
     let parseFirstPartLine (line: string): (string*Node) = 
         let foo = line.Split("{") 
         let id = foo[0]
