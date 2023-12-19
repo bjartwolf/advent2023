@@ -134,14 +134,24 @@ module Input =
         Assert.Equal<NodeTerminator>(Rej, evalNode parts[1] (Map.find "gd" map))
 
  
-    //let isAccepted (m:NodeMap) (p:Part): bool =
-        
-        
+    let evalAll (m:NodeMap) (p:Part): NodeTerminator=
+        let rec evalAllInner (nodeId: string) =
+            let node = Map.find nodeId m 
+            match evalNode p node with 
+                | Acc -> Acc
+                | Rej -> Rej
+                | N id -> evalAllInner id
+        evalAllInner "in"
 
-    //    // starter med å slå opp in
-    //    let firstNode = Map.find "in" m
-    //    true
-         
+    [<Fact>]
+    let testNodeEvalFull() = 
+        let (map,parts) = parseNodes "testinput.txt" 
+        Assert.Equal<NodeTerminator>(Acc, evalAll map parts[0] ) 
+        Assert.Equal<NodeTerminator>(Rej , evalAll map parts[1] ) 
+        Assert.Equal<NodeTerminator>(Acc, evalAll map parts[2] ) 
+        Assert.Equal<NodeTerminator>(Rej, evalAll map parts[3] ) 
+        Assert.Equal<NodeTerminator>(Acc, evalAll map parts[4] ) 
+          
 
     let partSum (p:Part) : int =
         p.x + p.a + p.m + p.s
