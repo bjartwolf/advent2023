@@ -8,11 +8,11 @@ module Input =
     type NodeTerminator = N of string | Acc| Rej
     type Rule = Cat * Operation * int * NodeTerminator
     type Node = Rule list 
-    type Map = Map<string, Node>
+    type NodeMap = Map<string, Node>
 
     let tn1: Node =  [ A, Lt, 2006, N "qkq"; M, Gt, 2090, Acc; X, Gt, 0, N "rfg"]
 
-    let parseLine (line: string): (string*Node) = 
+    let parseFirstPartLine (line: string): (string*Node) = 
         let foo = line.Split("{") 
         let id = foo[0]
         let rawRules = foo[1].Replace("}","").Split(",")
@@ -62,18 +62,27 @@ module Input =
     
     [<Fact>]
     let testParseLine() = 
-        Assert.Equal(("ax", [A,Gt,2006, N "qkq"; X, Gt, 0, Acc] ), parseLine "ax{a>2006:qkq,A}") 
-        Assert.Equal(("px", tn1), parseLine "px{a<2006:qkq,m>2090:A,rfg}") 
+        Assert.Equal(("ax", [A,Gt,2006, N "qkq"; X, Gt, 0, Acc] ), parseFirstPartLine "ax{a>2006:qkq,A}") 
+        Assert.Equal(("px", tn1), parseFirstPartLine "px{a<2006:qkq,m>2090:A,rfg}") 
 
-
-    let readInit (filePath: string): int list = 
-        [1]
-
+    let parseNodes(fileName: string): NodeMap =
+        let allTxt = File.ReadAllText fileName
+        let firstPart = allTxt.Split(Environment.NewLine+Environment.NewLine).[0]
+        let m: (string*Node) list = firstPart.Split(Environment.NewLine) 
+                                          |> Array.toList
+                                          |> List.map parseFirstPartLine
+        Map.ofList m
 
 
     [<Fact>]
-    let test2 () = 
-        let input = readInit "input1.txt" 
-        Assert.Equal(1, input.Length) 
+    let parseTest() = 
+        let map = parseNodes "testinput.txt" 
+        Assert.Equal(11, map.Count) 
+
+    [<Fact>]
+    let parseOther () = 
+        let map = parseNodes "input.txt" 
+        Assert.Equal(572, map.Count) 
+
 
 module Program = let [<EntryPoint>] main _ = 0
