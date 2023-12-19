@@ -120,22 +120,18 @@ module Input =
                                     | M -> if p.m < num then term else evalNode p t 
                                     | A -> if p.a < num then term else evalNode p t 
                                     | S -> if p.s < num then term else evalNode p t 
-//        {x=787,m=2655,a=1222,s=2876}: in -> qqz -> qs -> lnx -> A
-//{x=1679,m=44,a=2067,s=496}: in -> px -> rfg -> gd -> R
-//{x=2036,m=264,a=79,s=2244}: in -> qqz -> hdj -> pv -> A
-//{x=2461,m=1339,a=466,s=291}: in -> px -> qkq -> crn -> R
-//{x=2127,m=1623,a=2188,s=1013}: in -> px -> rfg -> A
-
 
     [<Fact>]
     let testNodeEval() = 
         let (map,parts) = parseNodes "testinput.txt" 
-        //let first = Map.find "in" map
         Assert.Equal<NodeTerminator>(N "qqz", evalNode parts[0] (Map.find "in" map))
         Assert.Equal<NodeTerminator>(N "px", evalNode parts[1] (Map.find "in" map))
         Assert.Equal<NodeTerminator>(N "qqz", evalNode parts[2] (Map.find "in" map))
         Assert.Equal<NodeTerminator>(N "px", evalNode parts[3] (Map.find "in" map))
         Assert.Equal<NodeTerminator>(N "px", evalNode parts[4] (Map.find "in" map))
+        Assert.Equal<NodeTerminator>(N "qs", evalNode parts[0] (Map.find "qqz" map))
+        Assert.Equal<NodeTerminator>(Acc, evalNode parts[0] (Map.find "lnx" map))
+        Assert.Equal<NodeTerminator>(Rej, evalNode parts[1] (Map.find "gd" map))
 
  
     //let isAccepted (m:NodeMap) (p:Part): bool =
