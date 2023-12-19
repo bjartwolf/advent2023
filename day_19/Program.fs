@@ -105,5 +105,49 @@ module Input =
         Assert.Equal(572, map.Count) 
         Assert.Equal(773-573, parts.Length) 
 
+    let rec evalNode (p: Part) (n: Node): NodeTerminator = 
+        match n with 
+            | [] -> failwith "cant happen, should have a happy rule" 
+            | (cat, op, num, term ):: t -> 
+                  match op with
+                    | Gt -> match cat with 
+                                    | X -> if p.x > num then term else evalNode p t 
+                                    | M -> if p.m > num then term else evalNode p t 
+                                    | A -> if p.a > num then term else evalNode p t 
+                                    | S -> if p.s > num then term else evalNode p t 
+                    | Lt -> match cat with
+                                    | X -> if p.x < num then term else evalNode p t 
+                                    | M -> if p.m < num then term else evalNode p t 
+                                    | A -> if p.a < num then term else evalNode p t 
+                                    | S -> if p.s < num then term else evalNode p t 
+//        {x=787,m=2655,a=1222,s=2876}: in -> qqz -> qs -> lnx -> A
+//{x=1679,m=44,a=2067,s=496}: in -> px -> rfg -> gd -> R
+//{x=2036,m=264,a=79,s=2244}: in -> qqz -> hdj -> pv -> A
+//{x=2461,m=1339,a=466,s=291}: in -> px -> qkq -> crn -> R
+//{x=2127,m=1623,a=2188,s=1013}: in -> px -> rfg -> A
+
+
+    [<Fact>]
+    let testNodeEval() = 
+        let (map,parts) = parseNodes "testinput.txt" 
+        //let first = Map.find "in" map
+        Assert.Equal<NodeTerminator>(N "qqz", evalNode parts[0] (Map.find "in" map))
+        Assert.Equal<NodeTerminator>(N "px", evalNode parts[1] (Map.find "in" map))
+        Assert.Equal<NodeTerminator>(N "qqz", evalNode parts[2] (Map.find "in" map))
+        Assert.Equal<NodeTerminator>(N "px", evalNode parts[3] (Map.find "in" map))
+        Assert.Equal<NodeTerminator>(N "px", evalNode parts[4] (Map.find "in" map))
+
+ 
+    //let isAccepted (m:NodeMap) (p:Part): bool =
+        
+        
+
+    //    // starter med å slå opp in
+    //    let firstNode = Map.find "in" m
+    //    true
+         
+
+    let partSum (p:Part) : int =
+        p.x + p.a + p.m + p.s
 
 module Program = let [<EntryPoint>] main _ = 0
