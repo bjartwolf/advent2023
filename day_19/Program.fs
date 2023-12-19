@@ -10,7 +10,7 @@ module Input =
     type Node = Rule list 
     type Map = Map<string, Node>
 
-    let tn1: Node =  [ A, Lt, 2006, N "qkq"; M, Gt, 2090, Acc; A, Gt, 0, N "rfg"]
+    let tn1: Node =  [ A, Lt, 2006, N "qkq"; M, Gt, 2090, Acc; X, Gt, 0, N "rfg"]
 
     let parseLine (line: string): (string*Node) = 
         let foo = line.Split("{") 
@@ -19,6 +19,7 @@ module Input =
         let rules = [
             for rawRule in rawRules do
                 let gt = rawRule.Contains(">")
+                let lt = rawRule.Contains("<")
                 if gt then
                     let parts = rawRule.Split(">")
                     if (parts[1].Contains(":")) then
@@ -34,12 +35,34 @@ module Input =
                             | "R" -> Rej
                             | str -> N str
                         yield bar,Gt,num,stop
+                else if lt then
+                    let parts = rawRule.Split("<")
+                    if (parts[1].Contains(":")) then
+                        let bar = match parts[0] with 
+                                                    | "x" -> X
+                                                    | "m" -> M 
+                                                    | "a" -> A
+                                                    | "s" -> S
+                        let baz = parts[1].Split(":")
+                        let num = int baz[0] 
+                        let stop = match baz[1] with
+                            | "A" -> Acc
+                            | "R" -> Rej
+                            | str -> N str
+                        yield bar,Lt,num,stop
+                else
+                    let stop = match rawRule with
+                        | "A" -> Acc
+                        | "R" -> Rej
+                        | str -> N str
+                    yield X,Gt,0,stop
+
         ]
         id, rules 
     
     [<Fact>]
     let testParseLine() = 
-        Assert.Equal(("ax", [A,Gt,2006, N "qkq"] ), parseLine "ax{a>2006:qkq}") 
+        Assert.Equal(("ax", [A,Gt,2006, N "qkq"; X, Gt, 0, Acc] ), parseLine "ax{a>2006:qkq,A}") 
         Assert.Equal(("px", tn1), parseLine "px{a<2006:qkq,m>2090:A,rfg}") 
 
 
