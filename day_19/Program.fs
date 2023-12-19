@@ -156,4 +156,16 @@ module Input =
     let partSum (p:Part) : int =
         p.x + p.a + p.m + p.s
 
+    [<Fact>]
+    let solveItTest() = 
+        let (map,parts) = parseNodes "testinput.txt" 
+        let partSum = parts |> List.filter (fun p -> (evalAll map p) = Acc) |> List.map partSum |> List.sum
+        Assert.Equal(19114, partSum)
+
+    [<Fact>]
+    let solveItReal() = 
+        let (map,parts) = parseNodes "input.txt" 
+        let partSum = parts |> List.filter (fun p -> (evalAll map p) = Acc) |> List.map partSum |> List.sum
+        Assert.Equal(449531, partSum)
+  
 module Program = let [<EntryPoint>] main _ = 0
