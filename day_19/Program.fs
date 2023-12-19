@@ -10,9 +10,12 @@ module Input =
     type Node = Rule list 
     type NodeMap = Map<string, Node>
 
+
     let tn1: Node =  [ A, Lt, 2006, N "qkq"; M, Gt, 2090, Acc; X, Gt, 0, N "rfg"]
 
     type Part = { x: int; m: int; a: int; s: int}
+    type Parts = Part list
+
     let parsePart (partLine:string) = 
         let rawLine = partLine.Replace("{","").Replace("}","")
         let rawParts = rawLine.Split(",") 
@@ -79,24 +82,28 @@ module Input =
         Assert.Equal(("ax", [A,Gt,2006, N "qkq"; X, Gt, 0, Acc] ), parseFirstPartLine "ax{a>2006:qkq,A}") 
         Assert.Equal(("px", tn1), parseFirstPartLine "px{a<2006:qkq,m>2090:A,rfg}") 
 
-    let parseNodes(fileName: string): NodeMap =
+    let parseNodes(fileName: string): NodeMap*Parts =
         let allTxt = File.ReadAllText fileName
-        let firstPart = allTxt.Split(Environment.NewLine+Environment.NewLine).[0]
+        let foo = allTxt.Split(Environment.NewLine+Environment.NewLine)
+        let firstPart = foo[0]
         let m: (string*Node) list = firstPart.Split(Environment.NewLine) 
                                           |> Array.toList
                                           |> List.map parseFirstPartLine
-        Map.ofList m
+        let secondPart = foo[1].Split(Environment.NewLine) |> Array.toList |> List.map parsePart
+        Map.ofList m, secondPart
 
 
     [<Fact>]
     let parseTest() = 
-        let map = parseNodes "testinput.txt" 
+        let (map,parts) = parseNodes "testinput.txt" 
         Assert.Equal(11, map.Count) 
+        Assert.Equal(5, parts.Length) 
 
     [<Fact>]
     let parseOther () = 
-        let map = parseNodes "input.txt" 
+        let (map,parts) = parseNodes "input.txt" 
         Assert.Equal(572, map.Count) 
+        Assert.Equal(773-573, parts.Length) 
 
 
 module Program = let [<EntryPoint>] main _ = 0
