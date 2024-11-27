@@ -1,6 +1,6 @@
 $rootDirectory = "C:\code\advent2023"
 
-1..24 | ForEach-Object {
+1..3 | ForEach-Object {
     $dayFolderName = "day_$_"
     New-Item -Path $rootDirectory -Name "${dayFolderName}" -ItemType Directory
     $srcFolderPath = Join-Path -Path $rootDirectory -ChildPath $dayFolderName
